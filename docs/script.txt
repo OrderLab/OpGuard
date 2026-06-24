@@ -1,0 +1,101 @@
+Back to Top
+Computer Science and Engineering
+Giving
+|
+Alumni
+Search
+About
+Community
+Academics
+Research
+People
+News
+Events
+News
+All News+
+News by Faculty
+In the Media
+Year in Review+
+Email subscriptions
+New way to catch errors early reduces LLM debugging time from days to minutes
+June 19, 2026
+A system developed by U-M researchers in collaboration with ByteDance pinpoints the first moment large-scale AI training runs go wrong.
+Workflow diagram illustrating the OpGuard system with three main steps (preflight, guarded execution, and alignment and prefix certification), showing how two training executions are compared to diagnose and localize errors.
+OpGuard uses bitwise alignment to diagnose and localize errors in LLM training runs.
+Training a large language model (LLM) requires a staggering amount of data and computing power. A single training job for a model like ChatGPT or Gemini can run for weeks across hundreds or thousands of GPUs, relying on a complex stack of code, compilers, libraries, distributed runtimes, and hardware accelerators. At that scale, even tiny errors can have major consequences.
+
+Small bugs, ranging from a one-bit hardware error to a subtle mismatch between training frameworks, can silently corrupt a small part of the computation. But the visible symptom may not appear until much later. By then, the original problem is buried under what can amount to millions of operations.
+
+Now, researchers at the University of Michigan, in collaboration with ByteDance, have developed a system to make those errors easier to catch and diagnose. Their system, called OpGuard, identifies the earliest point at which large-scale training runs diverge, turning vague warning signs into precise debugging evidence and saving developers days of debugging time. 
+
+Their paper, titled “OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training,” will be presented at the 2026 USENIX Symposium on Operating Systems Design and Implementation (OSDI) and was led by Ryan Huang, associate professor of Computer Science and Engineering (CSE) at U-M, along with CSE PhD students Ziming Zhou and Yinjie Zhao. Coauthors at ByteDance include Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang, Shuguang Wang, and Haibin Lin.
+
+LLM training is such a complex process that bugs are virtually a given. “Given the scale and complexity of training large-scale AI models, it’s inevitable to encounter problems, both in software and the underlying hardware,” said Huang.
+
+While bugs are common during LLM training, they are often difficult to locate. Engineers typically monitor high-level training signals such as loss curves, which measure how well the model is learning, or gradient norms, which summarize how model updates are behaving. These metrics can indicate that something has gone wrong, but they rarely reveal the cause.
+
+“These signals are aggregated over millions of operations,” said Huang. “With a job that is running on thousands of GPUs, it can take a long time for signals to show anomalies.”
+
+Even when developers know there is a problem, finding the source can require days of trial and error. They may rerun the training job with different settings, disable suspected features, swap kernels, or make other modifications. But each rerun is expensive, and comparisons based on high-level metrics can be noisy or misleading.
+
+OpGuard improves on this process by comparing two training executions much more precisely. The key idea is something the researchers call bitwise alignment.
+
+Given a suspicious training run and a reference run that should be performing the same computation, OpGuard compares intermediate results at carefully chosen points in the model. Rather than asking whether two runs have similar loss curves, for instance, it asks whether the tensors—the large numerical arrays passed through the model—match exactly, bit for bit, at corresponding points.
+
+If the tensors do not match at any point, OpGuard identifies that first divergence as the place where engineers can begin their investigation. “This makes it much easier for developers to localize where the problem is,” Zhou confirmed.
+
+Screenshot showing the user interface of OpGuard. Developers first compare the reference run and the buggy run in the global alignment trace. The first divergent op marks where the bug begins. By clicking that op, developers can inspect the exact tensor-level diff fields and jump from the captured Python call stack to the corresponding source code.
+OpGuard visualizer helps developers quickly localize training bugs.
+At first glance, exact bit-by-bit comparison may seem impractical for LLM training. Large training systems involve many sources of nondeterminism, meaning two runs may differ slightly even when nothing is wrong. Operations may execute in different orders, and training systems may fuse or reorder kernels, for instance. 
+
+OpGuard addresses this by controlling sources of harmless nondeterminism where possible, while preserving differences that may indicate real bugs. But it does not force the entire system into a fully deterministic execution mode, which would be too costly and could hide certain types of bugs.
+
+Another major challenge is deciding where to compare two runs. Comparing only once per training step would be too broad to locate the problem. Comparing every low-level operation would be too noisy and expensive.
+
+Instead, OpGuard identifies stable model-level boundaries, such as linear projections, layer normalization, or attention blocks, that correspond to meaningful pieces of computation. At each of these boundaries, OpGuard records a compact tensor fingerprint rather than saving the full tensor, which would be prohibitively expensive.
+
+“If you save the whole tensor, the overhead is uncontrollable,” described Zhou. “So we needed a method that was precise enough to reflect even a tiny bit of the tensor changing in the fingerprint.”
+
+Once OpGuard collects these fingerprints from two runs, it uses an alignment algorithm to match corresponding operations. The system then reports the first point where the fingerprints no longer match, along with contextual information, such as the operator, metadata, device, timing, and more.
+
+The result is a workflow that can dramatically reduce debugging time. In one production case described in the paper, expert developers spent five days trying to diagnose a large training failure caused by a tiny race condition in an embedding backward kernel. OpGuard is able to localize the same issue in minutes.
+
+Across its deployment at ByteDance, OpGuard diagnosed more than 20 production issues, including kernel races, framework mismatches, and silent data corruptions missed by existing checks. In multiple documented cases, debugging time dropped from days to as little as five minutes.
+
+“The bugs that OpGuard exposed were diverse and spanned different components in the training stack,” said Huang. “The tool was originally intended for software-related issues, but once it was built and deployed, it turned out to be very useful for identifying hardware and GPU problems as well.”
+
+As AI models continue to grow and evolve, tools like OpGuard highlight an increasingly important area of concern: ensuring that the infrastructure used to train frontier models is reliable, diagnosable, and trustworthy.
+
+Bugs in large-scale training systems may be tiny, but their effects can ripple across enormous computations. OpGuard gives engineers a way to trace those ripples back to the source.
+
+Explore:
+Research News; Ryan Huang
+Computer Science and Engineering
+Computer Science and Engineering
+Bob and Betty Beyster Building
+2260 Hayward Street
+Ann Arbor, MI 48109-2121
+x
+linkedin
+youtube
+Didn't find what you were looking for? Contact Us
+Faculty and Staff Resources: CSE Intranet
+Computer Science and Engineering is one of two divisions in the Department of Electrical Engineering and Computer Science. The other is Electrical and Computer Engineering. We are part of the College of Engineering at the University of Michigan.
+© 2026 The Regents of the University of Michigan
+Privacy Policy
+Campus Safety
+Non-Discrimination Policy
+About
+
+Community
+
+Academics
+
+Research
+
+People
+
+News
+Events
+Giving
+Alumni

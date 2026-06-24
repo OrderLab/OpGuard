@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpGuard — Bitwise Alignment for LLM Training Debug</title>
+  <meta name="description" content="OpGuard pinpoints the first moment large-scale AI training runs go wrong — reducing debugging time from days to minutes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/images/brand/logo-transparent.png" type="image/png">
+  <script>
+    (function () {
+      var saved = localStorage.getItem('opguard-theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--blue" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--green" aria-hidden="true"></div>
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#" class="nav__brand">
+        <img src="assets/images/brand/logo-transparent.png" alt="OpGuard" class="nav__logo">
+        <span>OpGuard</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#loss">Loss Evidence</a>
+        <a href="#bitwise-alignment">Bitwise Alignment</a>
+        <a href="#trace">Live Trace</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#impact">Impact</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme">
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <a href="#trace" class="nav__cta">View Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__content">
+        <div class="hero__badge">
+          <span class="hero__badge-dot"></span>
+          OSDI 2026
+        </div>
+        <div class="hero__partners" aria-label="Research collaboration">
+          <img src="assets/images/partners/umich.png" alt="University of Michigan" class="hero__partner-logo">
+          <img src="assets/images/partners/orderlab.png" alt="OrderLab" class="hero__partner-logo">
+          <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" class="hero__partner-logo hero__partner-logo--bytedance">
+        </div>
+        <h1 class="hero__title">
+          Catch LLM training bugs<br>
+          <span class="hero__title-accent">at the first divergent op</span>
+        </h1>
+        <p class="hero__subtitle">
+          OpGuard uses bitwise alignment to compare training runs at tensor boundaries,
+          turning vague loss-curve anomalies into precise, actionable evidence.
+        </p>
+        <div class="hero__actions">
+          <a href="#trace" class="btn btn--primary">Explore Live Trace</a>
+          <a href="#workflow" class="btn btn--ghost">How It Works</a>
+        </div>
+        <div class="hero__stats">
+          <div class="stat">
+            <span class="stat__value">5 min</span>
+            <span class="stat__label">vs. 5 days to localize</span>
+          </div>
+          <div class="stat__divider"></div>
+          <div class="stat">
+            <span class="stat__value">20+</span>
+            <span class="stat__label">production issues diagnosed</span>
+          </div>
+          <div class="stat__divider"></div>
+          <div class="stat">
+            <span class="stat__value">bit-exact</span>
+            <span class="stat__label">tensor fingerprint alignment</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero__visual">
+        <img src="assets/images/brand/logo-transparent.png" alt="OpGuard system overview" class="hero__logo">
+      </div>
+    </section>
+
+    <section class="loss-section" id="loss">
+      <div class="section-header">
+        <span class="section-tag">Loss Alignment Evidence</span>
+        <h2>The loss curve looks normal. The diff exposes the first mismatch.</h2>
+        <p>
+          Hover over any step to inspect the baseline loss, buggy loss, and exact
+          delta. Step 3080 is still bit-aligned; step 3081 is where the hidden bug appears.
+        </p>
+      </div>
+
+      <div class="loss-layout">
+        <aside class="loss-timeline" aria-label="Loss debugging timeline">
+          <div class="loss-timeline__rail"></div>
+          <article class="loss-timeline__item loss-timeline__item--ok">
+            <div class="loss-timeline__icon">✓</div>
+            <div class="loss-timeline__content">
+              <span class="loss-timeline__step">Step 3080</span>
+              <h3>Still aligned</h3>
+              <p>Δ = 0 (match bit-by-bit)</p>
+            </div>
+          </article>
+          <article class="loss-timeline__item loss-timeline__item--bug">
+            <div class="loss-timeline__icon">↯</div>
+            <div class="loss-timeline__content">
+              <span class="loss-timeline__step">Step 3081</span>
+              <h3>First hidden mismatch</h3>
+              <p>Δ ≠ 0 (bug appears)</p>
+            </div>
+          </article>
+          <article class="loss-timeline__item loss-timeline__item--manual">
+            <div class="loss-timeline__icon">▦</div>
+            <div class="loss-timeline__content">
+              <span class="loss-timeline__step">5 days</span>
+              <h3>Manual debugging</h3>
+              <p>No root cause found</p>
+            </div>
+          </article>
+        </aside>
+
+        <div class="loss-visuals">
+          <div class="loss-card">
+            <div class="loss-card__header">
+              <div>
+                <span class="section-tag">Interactive Curves</span>
+                <h3>Training loss with aligned diff</h3>
+              </div>
+              <div class="loss-legend">
+                <span class="loss-legend__item loss-legend__item--buggy">buggy</span>
+                <span class="loss-legend__item loss-legend__item--baseline">baseline</span>
+              </div>
+            </div>
+            <div class="loss-chart-stack">
+              <svg id="loss-chart" class="loss-chart loss-chart--main" role="img" aria-label="Training loss chart"></svg>
+              <svg id="loss-diff-mini-chart" class="loss-chart loss-chart--mini" role="img" aria-label="Training loss delta chart"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="loss-tooltip" id="loss-tooltip" hidden></div>
+    </section>
+
+    <section class="root-cause-section" id="root-cause">
+      <div class="root-cause-card">
+        <div class="root-cause-card__headline">
+          <span>Root cause:</span> a buggy kernel that only gets triggered by a
+          particular input and causes <span>data race</span>
+        </div>
+
+        <div class="root-cause-diagram" aria-label="Root cause localization diagram">
+          <svg class="root-cause-guides" id="root-cause-guides" aria-hidden="true">
+            <line class="root-cause-guides__line root-cause-guides__line--aligned"></line>
+            <line class="root-cause-guides__line root-cause-guides__line--diverges"></line>
+          </svg>
+
+          <div class="root-cause-diagram__labels">
+            <div class="root-cause-label root-cause-label--aligned">
+              Loss <span>aligned</span>
+            </div>
+            <div class="root-cause-label root-cause-label--diverges">
+              Loss <span>diverges</span>
+            </div>
+          </div>
+
+          <div class="op-lane">
+            <div class="op-lane__phase op-lane__phase--forward">forward</div>
+            <div class="op-lane__phase op-lane__phase--backward">backward</div>
+            <div class="op-lane__phase op-lane__phase--forward-right">forward</div>
+
+            <div class="op-lane__boundary op-lane__boundary--left"></div>
+            <div class="op-lane__boundary op-lane__boundary--forward-backward"></div>
+            <div class="op-lane__boundary op-lane__boundary--middle"></div>
+            <div class="op-lane__boundary op-lane__boundary--right"></div>
+
+            <div class="op-lane__marker op-lane__marker--aligned"></div>
+            <div class="op-lane__marker op-lane__marker--diverges"></div>
+
+            <div class="op-lane__ops op-lane__ops--forward">
+              <span></span><span></span><span></span><span></span>
+              <em>...</em>
+              <span></span><span></span>
+            </div>
+            <div class="op-lane__ops op-lane__ops--backward">
+              <span></span><span></span><span class="op-lane__op--hot"></span><span></span><span></span>
+              <em>...</em>
+            </div>
+            <div class="op-lane__ops op-lane__ops--forward-right">
+              <span></span><span></span><span></span><span></span>
+              <em>...</em>
+              <span></span><span></span>
+            </div>
+            <div class="op-lane__ellipsis">...</div>
+            <div class="bug-kernel">
+              <span class="bug-kernel__eyes"></span>
+              <span class="bug-kernel__mouth"></span>
+            </div>
+          </div>
+
+          <div class="op-zoom">
+            <div class="op-zoom__body">
+              <span class="op-chip op-chip--attention">Attention</span>
+              <span class="op-chip op-chip--feedforward">Feedforward</span>
+              <span class="op-chip op-chip--dots">...</span>
+              <span class="op-chip op-chip--softmax">softmax</span>
+            </div>
+          </div>
+
+          <p class="root-cause-caption"><strong>200+ ops</strong> in the forwarding pass</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="what-is-op-section" id="what-is-op">
+      <div class="section-header section-header--center">
+        <span class="section-tag">Concept</span>
+        <h2>What is <span class="what-is-op-accent">op</span>: fine-grained level of computation</h2>
+        <p>
+          High-level modules like Attention and Feedforward decompose into hundreds of
+          individual ops — each a concrete tensor operation at the finest debuggable granularity.
+        </p>
+      </div>
+
+      <div class="what-is-op-diagram" id="what-is-op-diagram">
+        <svg class="what-is-op-guides" id="what-is-op-guides" aria-hidden="true"></svg>
+
+        <div class="model-stack">
+          <div class="model-stack__io model-stack__io--input">Input</div>
+          <div class="model-stack__arrow" aria-hidden="true">⇊</div>
+
+          <div class="model-stack__node model-stack__node--embed" data-op-anchor="embed">Embedding</div>
+          <div class="model-stack__arrow" aria-hidden="true">⇊</div>
+
+          <div class="model-stack__block">
+            <span class="model-stack__repeat">×N</span>
+            <div class="model-stack__node model-stack__node--layer" data-op-anchor="attention">Attention</div>
+            <div class="model-stack__arrow model-stack__arrow--inner" aria-hidden="true">↓</div>
+            <div class="model-stack__node model-stack__node--layer" data-op-anchor="feedforward">Feedforward</div>
+          </div>
+
+          <div class="model-stack__arrow" aria-hidden="true">⇊</div>
+          <div class="model-stack__node model-stack__node--embed" data-op-anchor="softmax">softmax</div>
+          <div class="model-stack__arrow" aria-hidden="true">⇊</div>
+          <div class="model-stack__io model-stack__io--output">Output</div>
+        </div>
+
+        <div class="op-detail" id="op-detail">
+          <svg class="op-detail__connectors" id="op-detail-connectors" aria-hidden="true"></svg>
+
+          <div class="op-detail__inputs">
+            <div class="op-matrices op-matrices--stack">
+              <div class="op-matrix op-matrix--yellow">
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="op-matrix__cell" tabindex="0" role="gridcell">6</span><span class="op-matrix__cell" tabindex="0" role="gridcell">2</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="op-matrix__cell" tabindex="0" role="gridcell">3</span><span class="op-matrix__cell" tabindex="0" role="gridcell">5</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">7</span><span class="op-matrix__cell" tabindex="0" role="gridcell">8</span><span class="op-matrix__cell" tabindex="0" role="gridcell">9</span>
+              </div>
+              <div class="op-matrix op-matrix--green">
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="op-matrix__cell" tabindex="0" role="gridcell">2</span><span class="op-matrix__cell" tabindex="0" role="gridcell">3</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="op-matrix__cell" tabindex="0" role="gridcell">5</span><span class="op-matrix__cell" tabindex="0" role="gridcell">6</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">7</span><span class="op-matrix__cell" tabindex="0" role="gridcell">8</span><span class="op-matrix__cell" tabindex="0" role="gridcell">9</span>
+              </div>
+              <div class="op-matrix op-matrix--pink">
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">9</span><span class="op-matrix__cell" tabindex="0" role="gridcell">8</span><span class="op-matrix__cell" tabindex="0" role="gridcell">7</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">6</span><span class="op-matrix__cell" tabindex="0" role="gridcell">5</span><span class="op-matrix__cell" tabindex="0" role="gridcell">4</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">3</span><span class="op-matrix__cell" tabindex="0" role="gridcell">2</span><span class="op-matrix__cell" tabindex="0" role="gridcell">1</span>
+              </div>
+            </div>
+            <div class="op-matrices op-matrices--single">
+              <div class="op-matrix op-matrix--blue">
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">2</span><span class="op-matrix__cell" tabindex="0" role="gridcell">5</span>
+                <span class="op-matrix__cell" tabindex="0" role="gridcell">3</span><span class="op-matrix__cell" tabindex="0" role="gridcell">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="op-detail__op">op</div>
+
+          <div class="op-detail__arrow" aria-hidden="true">↓</div>
+
+          <div class="op-matrix op-matrix--out">
+            <span class="op-matrix__cell" tabindex="0" role="gridcell">3</span><span class="op-matrix__cell" tabindex="0" role="gridcell">4</span>
+            <span class="op-matrix__cell" tabindex="0" role="gridcell">7</span><span class="op-matrix__cell" tabindex="0" role="gridcell">1</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bitwise-section" id="bitwise-alignment">
+      <div class="section-header section-header--center">
+        <span class="section-tag">Key Abstraction</span>
+        <h2>Our key abstraction: bitwise alignment</h2>
+        <p>
+          OpGuard compares intermediate tensors between a buggy run and a reference run at
+          every checkpoint. Click a buggy-run tensor value to link it to the same reference
+          tensor position: green means bit-exact match, red marks divergence.
+        </p>
+      </div>
+
+      <div class="bitwise-diagram">
+        <div class="bitwise-diagram__head">
+          <span class="bitwise-diagram__run-label">Buggy run</span>
+        </div>
+
+        <div class="bitwise-flow">
+          <svg class="bitwise-link-layer" aria-hidden="true"></svg>
+          <div class="bitwise-track bitwise-track--buggy">
+            <div class="bitwise-devil" aria-hidden="true">
+              <span class="bitwise-devil__eyes"></span>
+              <span class="bitwise-devil__mouth"></span>
+            </div>
+            <div class="bitwise-lane">
+              <div class="bitwise-op">Embedding</div>
+              <div class="bitwise-tensor bitwise-tensor--col">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">5</span>
+              </div>
+              <div class="bitwise-dots">...</div>
+              <div class="bitwise-tensor">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">7</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">9</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">3</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span>
+              </div>
+              <div class="bitwise-op">Attention</div>
+              <div class="bitwise-tensor">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">2</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">8</span><span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">5</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">7</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">5</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">8</span>
+              </div>
+              <div class="bitwise-op">Feedforward</div>
+              <div class="bitwise-tensor">
+                <span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">3</span><span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">7</span>
+                <span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">2</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">5</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">3</span>
+                <span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">9</span><span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">7</span><span class="bitwise-tensor__cell op-matrix__cell bitwise-tensor__cell--mismatch" tabindex="0" role="gridcell">4</span>
+              </div>
+              <div class="bitwise-dots">...</div>
+            </div>
+          </div>
+
+          <div class="bitwise-shields">
+            <div class="bitwise-lane">
+              <div class="bitwise-slot bitwise-slot--op"></div>
+              <div class="bitwise-shield bitwise-shield--pass bitwise-shield--col" aria-label="Aligned">✓</div>
+              <div class="bitwise-slot bitwise-slot--dots"></div>
+              <div class="bitwise-shield bitwise-shield--pass" aria-label="Aligned">✓</div>
+              <div class="bitwise-slot bitwise-slot--op"></div>
+              <div class="bitwise-shield bitwise-shield--fail" aria-label="Mismatch">✕</div>
+              <div class="bitwise-slot bitwise-slot--op"></div>
+              <div class="bitwise-shield bitwise-shield--fail" aria-label="Mismatch">✕</div>
+              <div class="bitwise-slot bitwise-slot--dots"></div>
+            </div>
+          </div>
+
+          <div class="bitwise-track bitwise-track--ref">
+            <div class="bitwise-lane">
+              <div class="bitwise-op">Embedding'</div>
+              <div class="bitwise-tensor bitwise-tensor--col">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">5</span>
+              </div>
+              <div class="bitwise-dots">...</div>
+              <div class="bitwise-tensor">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">7</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">9</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">3</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span>
+              </div>
+              <div class="bitwise-op">Attention'</div>
+              <div class="bitwise-tensor">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">6</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">2</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">8</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">7</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">5</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">8</span>
+              </div>
+              <div class="bitwise-op">Feedforward'</div>
+              <div class="bitwise-tensor">
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">0</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">8</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">1</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">5</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">3</span>
+                <span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">4</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">7</span><span class="bitwise-tensor__cell op-matrix__cell" tabindex="0" role="gridcell">9</span>
+              </div>
+              <div class="bitwise-dots">...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bitwise-diagram__foot">
+          <span class="bitwise-diagram__run-label">Reference run</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="trace-section" id="trace">
+      <div class="section-header">
+        <span class="section-tag">Interactive Demo</span>
+        <h2>Global Alignment Trace</h2>
+        <p>
+          Inspect a real production debugging session. The first divergent operation marks
+          where the bug begins — click any op to inspect tensor-level diffs and jump to source.
+        </p>
+      </div>
+
+      <div class="trace-panel">
+        <div class="trace-panel__toolbar">
+          <div class="trace-panel__status" id="trace-status">
+            <span class="trace-panel__spinner"></span>
+            <span>Loading trace…</span>
+          </div>
+          <div class="trace-panel__meta">
+            <span class="trace-chip">demo_case5</span>
+            <span class="trace-chip trace-chip--muted">DeepSpeed · Production Case</span>
+          </div>
+        </div>
+        <div class="trace-panel__viewer">
+          <iframe
+            id="perfetto"
+            title="OpGuard Perfetto Trace Viewer"
+            src="https://ui.perfetto.dev/#!/?mode=embedded"
+            allow="clipboard-read; clipboard-write"
+          ></iframe>
+          <div class="trace-panel__overlay" id="trace-overlay">
+            <div class="trace-panel__overlay-inner">
+              <div class="trace-panel__overlay-ring"></div>
+              <p>Initializing trace viewer…</p>
+              <div class="trace-panel__progress">
+                <div class="trace-panel__progress-bar" id="trace-progress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workflow" id="workflow">
+      <div class="section-header section-header--center">
+        <span class="section-tag">How It Works</span>
+        <h2>Preflight, replay, and offline diagnosis</h2>
+        <p>
+          OpGuard profiles a short run, replays both traces under determinism control,
+          then aligns bitwise signatures offline to pinpoint the first divergent op.
+        </p>
+      </div>
+
+      <div class="workflow-diagram" id="workflow-diagram">
+        <div class="workflow-diagram__canvas">
+          <svg class="workflow-diagram__links" id="workflow-diagram-links" aria-hidden="true"></svg>
+
+          <div class="workflow-stage-title workflow-stage-title--preflight">① Preflight</div>
+          <div class="workflow-stage-title workflow-stage-title--replay">② Replay</div>
+          <div class="workflow-stage-title workflow-stage-title--diagnosis">③ Offline Diagnosis</div>
+
+          <div class="workflow-run workflow-run--buggy">Buggy<br>Run</div>
+          <div class="workflow-run workflow-run--ref">Reference<br>Run</div>
+
+          <div class="workflow-panel workflow-panel--preflight workflow-panel--dashed">
+            <div class="workflow-tag workflow-tag--yellow workflow-tag--run5">Run 5 iterations</div>
+            <img class="workflow-gadget workflow-gadget--profile" src="assets/images/workflow/gadgets/op-profile-blocks.png" alt="Op block profiles comparing buggy and reference runs">
+            <div class="workflow-tag workflow-tag--yellow workflow-tag--profile">Op profile</div>
+          </div>
+
+          <div class="workflow-control workflow-control--determinism">
+            <strong>Determinism<br>Control</strong>
+            <img src="assets/images/workflow/gadgets/gear.png" alt="" class="workflow-control__icon" aria-hidden="true">
+          </div>
+
+          <div class="workflow-panel workflow-panel--replay workflow-panel--dashed workflow-panel--grey">
+            <div class="workflow-tag workflow-tag--green workflow-tag--instrumented">Instrumented Runs</div>
+            <img class="workflow-gadget workflow-gadget--instrumented" src="assets/images/workflow/gadgets/instrumented-runs.png" alt="Instrumented op blocks with shield markers">
+            <div class="workflow-tag workflow-tag--green workflow-tag--runtime">Runtime Tracing</div>
+          </div>
+
+          <div class="workflow-output workflow-output--signature">
+            <img src="assets/images/workflow/gadgets/bitwise-signature.png" alt="" class="workflow-output__icon" aria-hidden="true">
+            <strong>Bitwise<br>Signature</strong>
+          </div>
+
+          <div class="workflow-panel workflow-panel--diagnosis workflow-panel--dashed workflow-panel--grey">
+            <div class="workflow-control workflow-control--align">
+              <img src="assets/images/workflow/gadgets/anchor.png" alt="" class="workflow-control__icon" aria-hidden="true">
+              <strong>Align two runs</strong>
+            </div>
+            <img class="workflow-gadget workflow-gadget--align" src="assets/images/workflow/gadgets/align-runs.png" alt="Aligned buggy and reference traces with pass and fail shields">
+          </div>
+
+          <div class="workflow-tag workflow-tag--yellow workflow-tag--ui">Visual debugging UI</div>
+        </div>
+      </div>
+
+      <div class="workflow__grid">
+        <article class="workflow-card workflow-card--blue">
+          <div class="workflow-card__body">
+            <span class="workflow-card__phase">Phase 01</span>
+            <h3>Preflight</h3>
+            <p>
+              Run a short iteration window on both the buggy and reference jobs, compare
+              execution structure, and build an op profile before full replay.
+            </p>
+          </div>
+          <img class="workflow-card__shield" src="assets/images/workflow/preflight.png" alt="Preflight shield illustration">
+        </article>
+
+        <article class="workflow-card workflow-card--green">
+          <div class="workflow-card__body">
+            <span class="workflow-card__phase">Phase 02</span>
+            <h3>Replay</h3>
+            <p>
+              Apply determinism control, rerun with instrumentation and runtime tracing,
+              and record compact bitwise signatures at stable tensor boundaries.
+            </p>
+          </div>
+          <img class="workflow-card__shield" src="assets/images/workflow/determinsm-control.png" alt="Replay determinism control shield illustration">
+        </article>
+
+        <article class="workflow-card workflow-card--orange">
+          <div class="workflow-card__body">
+            <span class="workflow-card__phase">Phase 03</span>
+            <h3>Offline Diagnosis</h3>
+            <p>
+              Align the two runs offline, certify the first mismatch, and open the
+              divergence in a visual debugging UI with full operator context.
+            </p>
+          </div>
+          <img class="workflow-card__shield" src="assets/images/workflow/align.png" alt="Offline diagnosis shield illustration">
+        </article>
+      </div>
+
+      <div class="workflow__detail">
+        <div class="workflow__detail-text">
+          <h3>Pinpoint errors that loss curves miss</h3>
+          <p>
+            High-level metrics aggregate over millions of GPU operations. OpGuard compares
+            intermediate tensors bit-for-bit at linear projections, layer norms, and attention
+            blocks — surfacing kernel races, framework mismatches, and silent data corruption.
+          </p>
+          <ul class="workflow__list">
+            <li>Compact tensor fingerprints — no full-tensor storage overhead</li>
+            <li>Global alignment trace with first-divergence localization</li>
+            <li>Python call stack → source code navigation</li>
+          </ul>
+        </div>
+        <div class="workflow__detail-visual">
+          <img src="assets/images/workflow/localization.png" alt="OpGuard localization UI showing first divergent operation">
+        </div>
+      </div>
+    </section>
+
+    <section class="impact" id="impact">
+      <div class="impact__inner">
+        <div class="impact__content">
+          <span class="section-tag">Production Proven</span>
+          <h2>Days of debugging, reduced to minutes</h2>
+          <p>
+            Deployed at ByteDance, OpGuard diagnosed kernel races, framework mismatches,
+            and hardware-level corruptions that existing checks missed — including a five-day
+            embedding backward race localized in under five minutes.
+          </p>
+        </div>
+        <div class="impact__metrics">
+          <div class="impact-metric">
+            <span class="impact-metric__num">×288</span>
+            <span class="impact-metric__desc">faster localization in documented cases</span>
+          </div>
+          <div class="impact-metric">
+            <span class="impact-metric__num">SW + HW</span>
+            <span class="impact-metric__desc">bugs across the full training stack</span>
+          </div>
+          <div class="impact-metric">
+            <span class="impact-metric__num">OSDI '26</span>
+            <span class="impact-metric__desc">peer-reviewed at top systems venue</span>
+          </div>
+        </div>
+        <div class="impact__evidence">
+          <div class="impact-panel impact-panel--quotes">
+            <h3>Expert <span>testimony</span></h3>
+            <div class="impact-quote impact-quote--a">
+              <div class="impact-quote__avatar" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="18" r="9" stroke="currentColor" stroke-width="3"/>
+                  <path d="M12 40c2-9 7-13 12-13s10 4 12 13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M18 37h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="impact-quote__body">
+                <strong>Developer A</strong>
+                <p>
+                  We had been chasing the wrong subsystem for almost a week.
+                  OpGuard showed the exact kernel in under fifteen minutes.
+                </p>
+              </div>
+            </div>
+            <div class="impact-quote impact-quote--b">
+              <div class="impact-quote__body">
+                <strong>Developer B</strong>
+                <p>
+                  Without OpGuard, we would never have noticed that the drift originated
+                  in a single row race. The loss precision is too low and gives us no
+                  clue where to start.
+                </p>
+              </div>
+              <div class="impact-quote__avatar" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="18" r="9" stroke="currentColor" stroke-width="3"/>
+                  <path d="M12 40c2-9 7-13 12-13s10 4 12 13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M18 37h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-panel impact-panel--cases">
+            <h3>Diverse and tricky <span>root causes</span></h3>
+            <div class="impact-cases">
+              <div class="impact-cases__legend" aria-label="Root-cause categories">
+                <div class="impact-category impact-category--logic">
+                  <span></span>
+                  <strong>Wrong model implementation / logic</strong>
+                  <em>7 cases (35%)</em>
+                </div>
+                <div class="impact-category impact-category--race">
+                  <span></span>
+                  <strong>Race conditions</strong>
+                  <em>5 cases (25%)</em>
+                </div>
+                <div class="impact-category impact-category--drift">
+                  <span></span>
+                  <strong>Unexpected numerical drift</strong>
+                  <em>6 cases (30%)</em>
+                </div>
+                <div class="impact-category impact-category--hardware">
+                  <span></span>
+                  <strong>Hardware faults</strong>
+                  <em>2 cases (10%)</em>
+                </div>
+              </div>
+              <div class="impact-cases__chart" aria-label="20 production cases by root-cause categories">
+                <h4>20 Production Cases by Root-cause Categories</h4>
+                <div class="impact-pie">
+                  <span class="impact-pie__label impact-pie__label--logic">7 cases<br>(35%)</span>
+                  <span class="impact-pie__label impact-pie__label--race">5 cases<br>(25%)</span>
+                  <span class="impact-pie__label impact-pie__label--drift">6 cases<br>(30%)</span>
+                  <span class="impact-pie__label impact-pie__label--hardware">2 cases<br>(10%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-panel impact-panel--stacks">
+            <h3>Production-level <span>training stacks</span></h3>
+            <div class="impact-stacks">
+              <div class="impact-stack-notes">
+                <div class="impact-stack-note">
+                  <span class="impact-stack-note__icon" aria-hidden="true">▦</span>
+                  <p><strong>Internal:</strong> text and VLM pre-training, post-training framework</p>
+                </div>
+                <div class="impact-stack-note">
+                  <span class="impact-stack-note__icon" aria-hidden="true">⌁</span>
+                  <p><strong>Open source:</strong> Megatron-LM, DeepSpeed, GPT-Neox, veRL, etc.</p>
+                </div>
+                <div class="impact-stack-note impact-stack-note--warning">
+                  <span class="impact-stack-note__icon" aria-hidden="true">!</span>
+                  <p><strong>False positives:</strong> 2-10 during first adaptation, then disappear once marked.</p>
+                </div>
+              </div>
+              <div class="impact-stack-card" aria-label="Supported production-level training stacks">
+                <span>NVIDIA</span>
+                <span>Megatron-LM</span>
+                <span>DeepSpeed</span>
+                <span>PyTorch 2.0</span>
+                <span>PyTorch Compiler</span>
+                <span>veScale</span>
+                <span>veRL</span>
+                <span>PyTorch FSDP</span>
+                <span>GPT-Neox</span>
+                <span>Transformers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <img src="assets/images/brand/logo-transparent.png" alt="OpGuard" class="footer__logo">
+        <p>OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training</p>
+      </div>
+      <div class="footer__credits">
+        <div class="footer__partners" aria-label="Research collaboration">
+          <img src="assets/images/partners/umich.png" alt="University of Michigan" class="footer__partner-logo">
+          <img src="assets/images/partners/orderlab.png" alt="OrderLab" class="footer__partner-logo">
+          <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" class="footer__partner-logo footer__partner-logo--bytedance">
+        </div>
+        <p>University of Michigan CSE · ByteDance</p>
+        <p>Ziming Zhou, Yinjie Zhao, Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang, Shuguang Wang, Haibin Lin, Ryan Huang</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
