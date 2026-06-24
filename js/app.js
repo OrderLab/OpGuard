@@ -111,6 +111,7 @@ async function loadTrace() {
     setProgress(100);
     setStatus('Trace loaded', 'ready');
     overlayEl.classList.add('trace-panel__overlay--hidden');
+    onTraceReady();
   } catch (err) {
     console.error('Failed to load trace:', err);
     setStatus(`Failed to load trace: ${err.message}`, 'error');
@@ -810,6 +811,296 @@ function initTensorCellSelection() {
   });
 }
 
+const TRACE_TOUR_STORAGE_KEY = 'opguard-trace-tour-seen';
+const TRACE_TOUR_STEPS = [
+  {
+    target: 'viewer',
+    placement: 'dock-bottom',
+    spotlight: 'full',
+    title: 'Welcome to the trace viewer',
+    body: 'You are looking at OpGuard’s Global Alignment Trace for demo_case5 — a real DeepSpeed production case. The buggy run and reference run are aligned on one timeline so you can compare them side by side.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-bottom',
+    spotlight: 'overview',
+    title: 'Start with the overview strip',
+    body: 'Click the colored overview bar at the top to jump to any time range. Drag to select a region, then zoom in when you want to inspect a suspicious window.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-bottom',
+    spotlight: 'sidebar',
+    title: 'Browse process tracks',
+    body: 'Use the left sidebar to expand Process 0 / Process 1 and reveal individual op slices. This is where aligned execution tracks are grouped.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-bottom',
+    spotlight: 'tracks',
+    title: 'Click an op slice',
+    body: 'Click any horizontal slice in the timeline — for example the yellow or grey bars. Pan with drag, zoom with scroll or pinch, and select the slice you want to inspect.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-top',
+    spotlight: 'details',
+    title: 'Find the first divergent op',
+    body: 'After you click a slice, read the Current Selection panel for tensor-level diffs, operator metadata, and the Python call stack. Your goal is the first op where fingerprints stop matching — that is where the bug begins.',
+  },
+];
+
+let traceTourIndex = 0;
+let traceTourOpen = false;
+
+function getTraceTourTarget(step) {
+  const panel = document.getElementById('trace-panel');
+  if (!panel) return null;
+  if (step.target === 'panel') return panel;
+  return panel.querySelector(`[data-trace-tour="${step.target}"]`);
+}
+
+function getTraceTourSpotlightRect(target, step) {
+  const panel = document.getElementById('trace-panel');
+  if (!panel || !target) return null;
+
+  const panelRect = panel.getBoundingClientRect();
+  const rect = target.getBoundingClientRect();
+  const pad = 6;
+
+  let top = rect.top - panelRect.top - pad;
+  let left = rect.left - panelRect.left - pad;
+  let width = rect.width + pad * 2;
+  let height = rect.height + pad * 2;
+
+  if (step.target === 'viewer' && step.spotlight) {
+    const viewerRect = target.getBoundingClientRect();
+    const relTop = viewerRect.top - panelRect.top;
+    const relLeft = viewerRect.left - panelRect.left;
+    const h = viewerRect.height;
+    const w = viewerRect.width;
+    const sidebarW = Math.min(Math.max(w * 0.185, 172), 228);
+    const searchH = h * 0.082;
+    const overviewTop = searchH;
+    const overviewH = h * 0.118;
+    const tracksTop = overviewTop + overviewH + h * 0.008;
+    const tracksHExpanded = h * 0.335;
+    const tracksHCollapsed = h - tracksTop - h * 0.085;
+    const detailsTop = tracksTop + tracksHExpanded;
+    const detailsH = h - detailsTop - 2;
+
+    if (step.spotlight === 'overview') {
+      top = relTop + overviewTop;
+      left = relLeft + 4;
+      width = w - 8;
+      height = overviewH;
+    } else if (step.spotlight === 'sidebar') {
+      top = relTop + tracksTop;
+      left = relLeft + 2;
+      width = sidebarW;
+      height = tracksHCollapsed;
+    } else if (step.spotlight === 'tracks') {
+      top = relTop + tracksTop;
+      left = relLeft + sidebarW + 4;
+      width = w - sidebarW - 8;
+      height = Math.min(tracksHCollapsed * 0.48, h * 0.28);
+    } else if (step.spotlight === 'details') {
+      top = relTop + detailsTop;
+      left = relLeft + 2;
+      width = w - 4;
+      height = detailsH;
+    } else if (step.spotlight === 'full') {
+      top = relTop + 2;
+      left = relLeft + 4;
+      width = w - 8;
+      height = h - 4;
+    }
+  }
+
+  return { top, left, width, height };
+}
+
+function positionTraceTourCard(card, panelRect, spotlightRect, placement) {
+  const margin = 16;
+  const cardWidth = card.offsetWidth;
+  const cardHeight = card.offsetHeight;
+
+  card.style.right = 'auto';
+  card.style.bottom = 'auto';
+  card.style.width = '';
+
+  if (placement === 'dock-bottom') {
+    card.style.left = `${margin}px`;
+    card.style.top = `${Math.max(margin, panelRect.height - cardHeight - margin)}px`;
+    card.style.width = `${Math.min(360, panelRect.width - margin * 2)}px`;
+    return;
+  }
+
+  if (placement === 'dock-top') {
+    card.style.left = `${margin}px`;
+    card.style.top = `${margin + 58}px`;
+    card.style.width = `${Math.min(360, panelRect.width - margin * 2)}px`;
+    return;
+  }
+
+  if (placement === 'bottom') {
+    card.style.left = `${Math.min(
+      Math.max(margin, spotlightRect.left),
+      panelRect.width - cardWidth - margin,
+    )}px`;
+    card.style.top = `${Math.min(
+      spotlightRect.top + spotlightRect.height + margin,
+      panelRect.height - cardHeight - margin,
+    )}px`;
+    return;
+  }
+
+  if (placement === 'top') {
+    card.style.left = `${Math.min(
+      Math.max(margin, spotlightRect.left),
+      panelRect.width - cardWidth - margin,
+    )}px`;
+    card.style.top = `${Math.max(margin, spotlightRect.top - cardHeight - margin)}px`;
+    return;
+  }
+
+  if (placement === 'center') {
+    card.style.left = `${Math.min(
+      Math.max(margin, spotlightRect.left + (spotlightRect.width - cardWidth) / 2),
+      panelRect.width - cardWidth - margin,
+    )}px`;
+    card.style.top = `${Math.min(
+      spotlightRect.top + spotlightRect.height + margin,
+      panelRect.height - cardHeight - margin,
+    )}px`;
+    return;
+  }
+
+  card.style.left = `${Math.min(
+    Math.max(margin, spotlightRect.left + spotlightRect.width + margin),
+    panelRect.width - cardWidth - margin,
+  )}px`;
+  card.style.top = `${Math.min(
+    Math.max(margin, spotlightRect.top),
+    panelRect.height - cardHeight - margin,
+  )}px`;
+}
+
+function renderTraceTourStep(index) {
+  const tour = document.getElementById('trace-tour');
+  const panel = document.getElementById('trace-panel');
+  const spotlight = document.getElementById('trace-tour-spotlight');
+  const card = document.getElementById('trace-tour-card');
+  const progress = document.getElementById('trace-tour-progress');
+  const title = document.getElementById('trace-tour-title');
+  const body = document.getElementById('trace-tour-body');
+  const backBtn = document.getElementById('trace-tour-back');
+  const nextBtn = document.getElementById('trace-tour-next');
+  if (!tour || !panel || !spotlight || !card || !progress || !title || !body || !backBtn || !nextBtn) return;
+
+  panel.querySelectorAll('[data-trace-tour].trace-tour-target').forEach((el) => {
+    el.classList.remove('trace-tour-target');
+  });
+
+  const step = TRACE_TOUR_STEPS[index];
+  const target = getTraceTourTarget(step);
+  if (!target) return;
+
+  target.classList.add('trace-tour-target');
+  traceTourIndex = index;
+
+  progress.textContent = `${index + 1} / ${TRACE_TOUR_STEPS.length}`;
+  title.textContent = step.title;
+  body.textContent = step.body;
+  backBtn.disabled = index === 0;
+  nextBtn.textContent = index === TRACE_TOUR_STEPS.length - 1 ? 'Start exploring' : 'Next';
+
+  const panelRect = panel.getBoundingClientRect();
+  const spotlightRect = getTraceTourSpotlightRect(target, step);
+  if (!spotlightRect) return;
+
+  spotlight.style.top = `${spotlightRect.top}px`;
+  spotlight.style.left = `${spotlightRect.left}px`;
+  spotlight.style.width = `${spotlightRect.width}px`;
+  spotlight.style.height = `${spotlightRect.height}px`;
+
+  window.requestAnimationFrame(() => {
+    positionTraceTourCard(card, panelRect, spotlightRect, step.placement);
+  });
+}
+
+function openTraceTour(startIndex = 0) {
+  const tour = document.getElementById('trace-tour');
+  const panel = document.getElementById('trace-panel');
+  if (!tour) return;
+
+  traceTourOpen = true;
+  panel?.classList.add('trace-tour-active');
+  tour.hidden = false;
+  tour.setAttribute('aria-hidden', 'false');
+  renderTraceTourStep(startIndex);
+}
+
+function closeTraceTour(markSeen = true) {
+  const tour = document.getElementById('trace-tour');
+  const panel = document.getElementById('trace-panel');
+  if (!tour) return;
+
+  traceTourOpen = false;
+  panel?.classList.remove('trace-tour-active');
+  tour.hidden = true;
+  tour.setAttribute('aria-hidden', 'true');
+  panel?.querySelectorAll('[data-trace-tour].trace-tour-target').forEach((el) => {
+    el.classList.remove('trace-tour-target');
+  });
+
+  if (markSeen) {
+    localStorage.setItem(TRACE_TOUR_STORAGE_KEY, '1');
+  }
+}
+
+function onTraceReady() {
+  const launchBtn = document.getElementById('trace-tour-launch');
+  if (launchBtn) launchBtn.hidden = false;
+
+  if (!localStorage.getItem(TRACE_TOUR_STORAGE_KEY)) {
+    window.setTimeout(() => openTraceTour(0), 700);
+  }
+}
+
+function initTraceTour() {
+  const tour = document.getElementById('trace-tour');
+  const backBtn = document.getElementById('trace-tour-back');
+  const nextBtn = document.getElementById('trace-tour-next');
+  const skipBtn = document.getElementById('trace-tour-skip');
+  const launchBtn = document.getElementById('trace-tour-launch');
+  if (!tour || !backBtn || !nextBtn || !skipBtn || !launchBtn) return;
+
+  backBtn.addEventListener('click', () => {
+    if (traceTourIndex > 0) renderTraceTourStep(traceTourIndex - 1);
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (traceTourIndex < TRACE_TOUR_STEPS.length - 1) {
+      renderTraceTourStep(traceTourIndex + 1);
+      return;
+    }
+    closeTraceTour(true);
+  });
+
+  skipBtn.addEventListener('click', () => closeTraceTour(true));
+  launchBtn.addEventListener('click', () => openTraceTour(0));
+
+  window.addEventListener('keydown', (event) => {
+    if (!traceTourOpen) return;
+    if (event.key === 'Escape') closeTraceTour(true);
+  });
+
+  window.addEventListener('resize', () => {
+    if (traceTourOpen) renderTraceTourStep(traceTourIndex);
+  });
+}
+
 // Nav scroll effect
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
@@ -842,4 +1133,5 @@ loadTrace();
 updateDiagramGuides();
 initTensorCellSelection();
 initBitwiseAlignmentLinks();
+initTraceTour();
 window.addEventListener('load', updateDiagramGuides);

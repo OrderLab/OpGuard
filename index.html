@@ -415,18 +415,21 @@
         </p>
       </div>
 
-      <div class="trace-panel">
-        <div class="trace-panel__toolbar">
+      <div class="trace-panel" id="trace-panel" data-trace-tour="panel">
+        <div class="trace-panel__toolbar" data-trace-tour="toolbar">
           <div class="trace-panel__status" id="trace-status">
             <span class="trace-panel__spinner"></span>
             <span>Loading trace…</span>
           </div>
-          <div class="trace-panel__meta">
-            <span class="trace-chip">demo_case5</span>
-            <span class="trace-chip trace-chip--muted">DeepSpeed · Production Case</span>
+          <div class="trace-panel__toolbar-end">
+            <div class="trace-panel__meta" data-trace-tour="meta">
+              <span class="trace-chip">demo_case5</span>
+              <span class="trace-chip trace-chip--muted">DeepSpeed · Production Case</span>
+            </div>
+            <button class="trace-tour-launch" id="trace-tour-launch" type="button" hidden>Guided tour</button>
           </div>
         </div>
-        <div class="trace-panel__viewer">
+        <div class="trace-panel__viewer" data-trace-tour="viewer">
           <iframe
             id="perfetto"
             title="OpGuard Perfetto Trace Viewer"
@@ -440,6 +443,28 @@
               <div class="trace-panel__progress">
                 <div class="trace-panel__progress-bar" id="trace-progress"></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="trace-tour" id="trace-tour" hidden aria-hidden="true">
+          <div class="trace-tour__backdrop" id="trace-tour-backdrop"></div>
+          <div class="trace-tour__spotlight" id="trace-tour-spotlight" aria-hidden="true"></div>
+          <div
+            class="trace-tour__card"
+            id="trace-tour-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trace-tour-title"
+            aria-describedby="trace-tour-body"
+          >
+            <span class="trace-tour__progress" id="trace-tour-progress">1 / 5</span>
+            <h3 class="trace-tour__title" id="trace-tour-title"></h3>
+            <p class="trace-tour__body" id="trace-tour-body"></p>
+            <div class="trace-tour__actions">
+              <button class="trace-tour__btn trace-tour__btn--ghost" id="trace-tour-back" type="button">Back</button>
+              <button class="trace-tour__btn trace-tour__btn--primary" id="trace-tour-next" type="button">Next</button>
+              <button class="trace-tour__btn trace-tour__btn--ghost trace-tour__btn--skip" id="trace-tour-skip" type="button">Skip tour</button>
             </div>
           </div>
         </div>

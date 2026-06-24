@@ -1783,6 +1783,7 @@ body {
 }
 
 .trace-panel {
+  position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -1794,14 +1795,44 @@ body {
   transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
+.trace-panel.trace-tour-active {
+  overflow: visible;
+}
+
 .trace-panel__toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 16px 24px;
   background: var(--toolbar-bg);
   border-bottom: 1px solid var(--border);
   transition: background 0.3s;
+}
+
+.trace-panel__toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.trace-tour-launch {
+  padding: 8px 14px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--blue-400);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.trace-tour-launch:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
 }
 
 .trace-panel__status {
@@ -1925,6 +1956,127 @@ body {
   background: linear-gradient(90deg, var(--blue-500), var(--green-500));
   border-radius: 2px;
   transition: width 0.3s;
+}
+
+.trace-tour {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.trace-tour:not([hidden]) {
+  pointer-events: auto;
+}
+
+.trace-tour__backdrop {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.trace-tour__spotlight {
+  position: absolute;
+  border: 2px solid #60a5fa;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 9999px rgba(6, 13, 31, 0.58),
+    0 0 0 4px rgba(96, 165, 250, 0.25);
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+  pointer-events: none;
+}
+
+.trace-tour__card {
+  position: absolute;
+  z-index: 12;
+  width: min(360px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-surface);
+  box-shadow: var(--card-shadow);
+  transition: top 0.25s ease, left 0.25s ease, right 0.25s ease, bottom 0.25s ease;
+}
+
+.trace-tour__progress {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: var(--blue-400);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trace-tour__title {
+  margin-bottom: 10px;
+  color: var(--text-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.trace-tour__body {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.trace-tour__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.trace-tour__btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.trace-tour__btn--primary {
+  border: none;
+  background: var(--blue-500);
+  color: #ffffff;
+}
+
+.trace-tour__btn--primary:hover {
+  background: var(--blue-400);
+}
+
+.trace-tour__btn--ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.trace-tour__btn--ghost:hover {
+  color: var(--text-heading);
+  border-color: color-mix(in srgb, var(--blue-500) 35%, var(--border));
+}
+
+.trace-tour__btn--skip {
+  margin-left: auto;
+}
+
+.trace-tour__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+[data-trace-tour].trace-tour-target {
+  position: relative;
+  z-index: 5;
 }
 
 /* ── Workflow ── */
@@ -3046,5 +3198,18 @@ body {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
+  }
+
+  .trace-panel__toolbar-end {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .trace-tour__card {
+    width: calc(100% - 24px);
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: 12px !important;
   }
 }
