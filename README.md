@@ -1,10 +1,8 @@
 <div align="center">
-  <table>
-    <tr>
-      <td><img src="assets/images/brand/logo.svg" alt="OpGuard" width="96" /></td>
-      <td><h1>OpGuard</h1></td>
-    </tr>
-  </table>
+  <h1>
+    <img src="assets/images/brand/logo.svg" alt="" width="72" />
+    OpGuard
+  </h1>
 
   <p><strong>Bitwise Alignment for Precise and General Debugging of Production LLM Training</strong></p>
 
