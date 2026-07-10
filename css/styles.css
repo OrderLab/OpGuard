@@ -2842,6 +2842,51 @@ body.trace-tour-open .nav {
   font-weight: 500;
 }
 
+.footer__seed {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 12px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.footer__seed-logo-link {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.footer__seed-logo {
+  width: min(220px, 70vw);
+  height: auto;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.footer__seed-title {
+  margin: 0 0 8px;
+  color: var(--text-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.footer__seed-copy {
+  max-width: 560px;
+}
+
+.footer__seed-copy p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
 /* ── Cite ── */
 
 .cite {

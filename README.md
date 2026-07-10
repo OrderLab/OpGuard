@@ -64,3 +64,23 @@ OpGuard will appear at **[OSDI ’26](https://www.usenix.org/conference/osdi26/p
 Source code and internal tooling are **not publicly released**.
 
 For questions about the paper, demos, or access inquiries, please **email the authors** listed above.
+
+---
+
+## About ByteDance Seed Team
+
+<p align="center">
+  <a href="https://seed.bytedance.com/en/">
+    <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" width="220" />
+  </a>
+</p>
+
+Founded in 2023, ByteDance Seed Team is dedicated to crafting the industry's most advanced AI foundation models. The team aspires to become a world-class research team and make significant contributions to the advancement of science and society.
+
+---
+
+<p align="center">
+  <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="180" />
+  <br />
+  <sub><a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
+</p>
