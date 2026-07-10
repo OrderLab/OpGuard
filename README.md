@@ -21,7 +21,6 @@ OpGuard is a debugging system for large-scale LLM training. When two training ru
 
 In production use at ByteDance, OpGuard has reduced root-cause localization from **days** of manual effort to **minutes**.
 
----
 
 ## Paper
 
@@ -49,7 +48,6 @@ OpGuard will appear at **[OSDI ’26](https://www.usenix.org/conference/osdi26/p
 
 </details>
 
----
 
 ## What’s on this site
 
@@ -60,15 +58,7 @@ OpGuard will appear at **[OSDI ’26](https://www.usenix.org/conference/osdi26/p
 | **Workflow** | How OpGuard fits into production debugging |
 | **Impact** | Production case studies and timing results |
 
----
 
-## Authors
-
-Ziming Zhou · Yinjie Zhao · Hang Zhu · Wenxiao Wang · Zhihao Bai · Yun Zhang · Shuguang Wang · Haibin Lin · Peng Huang
-
-University of Michigan (OrderLab) · ByteDance Seed
-
----
 
 ## Contact
 
@@ -79,7 +69,6 @@ For questions about the paper, demos, or access inquiries, please **email the au
 ---
 
 <p align="center">
-  <img src="assets/images/brand/logo.svg" alt="" width="40" />
-  <br />
-  <sub>OpGuard · <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
+  <img src="assets/images/brand/logo.svg" alt="" width="28" />
+  <sub>&nbsp;OpGuard · <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
 </p>
