@@ -1,18 +1,21 @@
-<p align="center">
-  <img src="assets/images/brand/logo.svg" alt="OpGuard" width="128" />
-</p>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="assets/images/brand/logo.svg" alt="OpGuard" width="96" /></td>
+      <td><h1>OpGuard</h1></td>
+    </tr>
+  </table>
 
-<h1 align="center">OpGuard</h1>
+  <p><strong>Bitwise Alignment for Precise and General Debugging of Production LLM Training</strong></p>
 
-<p align="center">
-  <strong>Bitwise Alignment for Precise and General Debugging of Production LLM Training</strong>
-</p>
-
-<p align="center">
-  <a href="#paper">OSDI ’26</a>
-  ·
-  <a href="#contact">Contact</a>
-</p>
+  <p>
+    <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming"><strong>OSDI ’26</strong></a>
+    ·
+    <a href="#paper">Paper</a>
+    ·
+    <a href="#contact">Contact</a>
+  </p>
+</div>
 
 ---
 
@@ -20,14 +23,11 @@ OpGuard is a debugging system for large-scale LLM training. When two training ru
 
 In production use at ByteDance, OpGuard has reduced root-cause localization from **days** of manual effort to **minutes**.
 
-> **Source code is not open to the public at this time.**  
-> Interested in the system, collaboration, or early access? Please **email the authors**.
-
 ---
 
 ## Paper
 
-OpGuard will appear at **OSDI ’26**:
+OpGuard will appear at **[OSDI ’26](https://www.usenix.org/conference/osdi26/presentation/zhou-ziming)**:
 
 > Ziming Zhou, Yinjie Zhao, Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang, Shuguang Wang, Haibin Lin, Peng Huang.  
 > *OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training.*  
@@ -62,8 +62,6 @@ OpGuard will appear at **OSDI ’26**:
 | **Workflow** | How OpGuard fits into production debugging |
 | **Impact** | Production case studies and timing results |
 
-This repository hosts the **public project website** only — not the OpGuard source tree.
-
 ---
 
 ## Authors
@@ -85,5 +83,5 @@ For questions about the paper, demos, or access inquiries, please **email the au
 <p align="center">
   <img src="assets/images/brand/logo.svg" alt="" width="40" />
   <br />
-  <sub>OpGuard · OSDI ’26</sub>
+  <sub>OpGuard · <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
 </p>
