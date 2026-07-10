@@ -24,7 +24,7 @@
   --border: rgba(255, 255, 255, 0.08);
   --glass: rgba(255, 255, 255, 0.04);
   --glass-hover: rgba(255, 255, 255, 0.08);
-  --nav-scrolled-bg: rgba(6, 13, 31, 0.85);
+  --nav-scrolled-bg: #060d1f;
   --grid-line: rgba(255, 255, 255, 0.03);
   --glow-blue: rgba(59, 130, 246, 0.12);
   --glow-green: rgba(16, 185, 129, 0.08);
@@ -54,7 +54,7 @@
   --border: rgba(15, 23, 42, 0.1);
   --glass: rgba(15, 23, 42, 0.04);
   --glass-hover: rgba(15, 23, 42, 0.08);
-  --nav-scrolled-bg: rgba(248, 250, 252, 0.9);
+  --nav-scrolled-bg: #f8fafc;
   --grid-line: rgba(15, 23, 42, 0.06);
   --glow-blue: rgba(59, 130, 246, 0.08);
   --glow-green: rgba(16, 185, 129, 0.06);
@@ -153,7 +153,6 @@ body {
 
 .nav--scrolled {
   background: var(--nav-scrolled-bg);
-  backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
 
@@ -1202,7 +1201,17 @@ body {
 }
 
 .trace-panel.trace-tour-active {
+  /* Let the spotlight dim ring extend beyond the panel. */
   overflow: visible;
+}
+
+/* Raise the live-trace stacking context above later sections (workflow, etc.) and the nav. */
+body.trace-tour-open .trace-section {
+  z-index: 400;
+}
+
+body.trace-tour-open .nav {
+  z-index: 1;
 }
 
 .trace-panel__toolbar {
@@ -1520,15 +1529,10 @@ body {
   pointer-events: none;
 }
 
-.trace-tour__spotlight {
-  position: absolute;
-  border: 2px solid #60a5fa;
-  border-radius: 12px;
+[data-theme="light"] .trace-tour__spotlight {
   box-shadow:
-    0 0 0 9999px rgba(6, 13, 31, 0.58),
-    0 0 0 4px rgba(96, 165, 250, 0.25);
-  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
-  pointer-events: none;
+    0 0 0 9999px rgba(15, 23, 42, 0.45),
+    0 0 0 4px rgba(96, 165, 250, 0.28);
 }
 
 .trace-tour__card {

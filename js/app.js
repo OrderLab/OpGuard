@@ -669,6 +669,7 @@ function openTraceTour(startIndex = 0) {
   if (!tour) return;
 
   traceTourOpen = true;
+  document.body.classList.add('trace-tour-open');
   panel?.classList.add('trace-tour-active');
   tour.hidden = false;
   tour.setAttribute('aria-hidden', 'false');
@@ -681,6 +682,7 @@ function closeTraceTour(markSeen = true) {
   if (!tour) return;
 
   traceTourOpen = false;
+  document.body.classList.remove('trace-tour-open');
   panel?.classList.remove('trace-tour-active');
   tour.hidden = true;
   tour.setAttribute('aria-hidden', 'true');
@@ -702,22 +704,28 @@ function onTraceReady() {
   if (pendingOpenTour) {
     pendingOpenTour = false;
     window.setTimeout(() => openTraceTour(0), 400);
+  }
+}
+
+function scrollTracePanelToCenter() {
+  const panel = document.getElementById('trace-panel');
+  if (!panel) {
+    document.getElementById('trace')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 
-  if (!localStorage.getItem(TRACE_TOUR_STORAGE_KEY)) {
-    window.setTimeout(() => openTraceTour(0), 700);
-  }
+  const rect = panel.getBoundingClientRect();
+  const targetTop = window.scrollY + rect.top - (window.innerHeight - rect.height) / 2;
+  window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
 }
 
 function launchDemoTour(event) {
   if (event) event.preventDefault();
 
-  const section = document.getElementById('trace');
-  section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollTracePanelToCenter();
 
   if (traceReady) {
-    window.setTimeout(() => openTraceTour(0), 350);
+    window.setTimeout(() => openTraceTour(0), 450);
     return;
   }
 
