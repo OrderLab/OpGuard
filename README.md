@@ -1,8 +1,5 @@
 <div align="center">
-  <h1>
-    <img src="assets/images/brand/logo.svg" alt="" width="72" />
-    OpGuard
-  </h1>
+  <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="360" />
 
   <p><strong>Bitwise Alignment for Precise and General Debugging of Production LLM Training</strong></p>
 
@@ -69,6 +66,7 @@ For questions about the paper, demos, or access inquiries, please **email the au
 ---
 
 <p align="center">
-  <img src="assets/images/brand/logo.svg" alt="" width="28" />
-  <sub>&nbsp;OpGuard · <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
+  <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="180" />
+  <br />
+  <sub><a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
 </p>
