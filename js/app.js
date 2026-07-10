@@ -218,19 +218,19 @@ function getTraceTourSpotlightRect(target, step) {
   const panel = document.getElementById('trace-panel');
   if (!panel || !target) return null;
 
-  const panelRect = panel.getBoundingClientRect();
   const rect = target.getBoundingClientRect();
   const pad = 6;
 
-  let top = rect.top - panelRect.top - pad;
-  let left = rect.left - panelRect.left - pad;
+  // Viewport coordinates — tour overlay is position:fixed.
+  let top = rect.top - pad;
+  let left = rect.left - pad;
   let width = rect.width + pad * 2;
   let height = rect.height + pad * 2;
 
   if (step.target === 'viewer' && step.spotlight) {
     const viewerRect = target.getBoundingClientRect();
-    const relTop = viewerRect.top - panelRect.top;
-    const relLeft = viewerRect.left - panelRect.left;
+    const relTop = viewerRect.top;
+    const relLeft = viewerRect.left;
     const h = viewerRect.height;
     const w = viewerRect.width;
     const sidebarW = Math.min(Math.max(w * 0.185, 172), 228);
@@ -330,22 +330,26 @@ function positionTraceTourCard(card, panelRect, spotlightRect, placement) {
   const margin = 16;
   const cardWidth = card.offsetWidth;
   const cardHeight = card.offsetHeight;
+  const minLeft = panelRect.left + margin;
+  const maxLeft = panelRect.right - cardWidth - margin;
+  const minTop = panelRect.top + margin;
+  const maxTop = panelRect.bottom - cardHeight - margin;
 
   card.style.right = 'auto';
   card.style.bottom = 'auto';
   card.style.width = '';
 
   if (placement === 'dock-bottom') {
-    card.style.left = `${margin}px`;
-    card.style.top = `${Math.max(margin, panelRect.height - cardHeight - margin)}px`;
     card.style.width = `${Math.min(360, panelRect.width - margin * 2)}px`;
+    card.style.left = `${minLeft}px`;
+    card.style.top = `${Math.max(minTop, panelRect.bottom - cardHeight - margin)}px`;
     return;
   }
 
   if (placement === 'dock-top') {
-    card.style.left = `${margin}px`;
-    card.style.top = `${margin + 58}px`;
     card.style.width = `${Math.min(360, panelRect.width - margin * 2)}px`;
+    card.style.left = `${minLeft}px`;
+    card.style.top = `${panelRect.top + margin + 58}px`;
     return;
   }
 
@@ -353,8 +357,8 @@ function positionTraceTourCard(card, panelRect, spotlightRect, placement) {
     // Keep the left sidebar free so the user can click expand arrows.
     const width = Math.min(360, panelRect.width - margin * 2);
     card.style.width = `${width}px`;
-    card.style.left = `${Math.max(margin, panelRect.width - width - margin)}px`;
-    card.style.top = `${Math.max(margin, panelRect.height - cardHeight - margin)}px`;
+    card.style.left = `${Math.max(minLeft, panelRect.right - width - margin)}px`;
+    card.style.top = `${Math.max(minTop, panelRect.bottom - cardHeight - margin)}px`;
     return;
   }
 
@@ -362,52 +366,37 @@ function positionTraceTourCard(card, panelRect, spotlightRect, placement) {
     // Keep the pivot / call-stack region on the right free to click.
     const width = Math.min(320, panelRect.width - margin * 2);
     card.style.width = `${width}px`;
-    card.style.left = `${margin}px`;
-    card.style.top = `${Math.max(margin + 58, (panelRect.height - cardHeight) / 2)}px`;
+    card.style.left = `${minLeft}px`;
+    card.style.top = `${Math.max(panelRect.top + margin + 58, panelRect.top + (panelRect.height - cardHeight) / 2)}px`;
     return;
   }
 
   if (placement === 'bottom') {
-    card.style.left = `${Math.min(
-      Math.max(margin, spotlightRect.left),
-      panelRect.width - cardWidth - margin,
-    )}px`;
-    card.style.top = `${Math.min(
-      spotlightRect.top + spotlightRect.height + margin,
-      panelRect.height - cardHeight - margin,
-    )}px`;
+    card.style.left = `${Math.min(Math.max(minLeft, spotlightRect.left), maxLeft)}px`;
+    card.style.top = `${Math.min(spotlightRect.top + spotlightRect.height + margin, maxTop)}px`;
     return;
   }
 
   if (placement === 'top') {
-    card.style.left = `${Math.min(
-      Math.max(margin, spotlightRect.left),
-      panelRect.width - cardWidth - margin,
-    )}px`;
-    card.style.top = `${Math.max(margin, spotlightRect.top - cardHeight - margin)}px`;
+    card.style.left = `${Math.min(Math.max(minLeft, spotlightRect.left), maxLeft)}px`;
+    card.style.top = `${Math.max(minTop, spotlightRect.top - cardHeight - margin)}px`;
     return;
   }
 
   if (placement === 'center') {
     card.style.left = `${Math.min(
-      Math.max(margin, spotlightRect.left + (spotlightRect.width - cardWidth) / 2),
-      panelRect.width - cardWidth - margin,
+      Math.max(minLeft, spotlightRect.left + (spotlightRect.width - cardWidth) / 2),
+      maxLeft,
     )}px`;
-    card.style.top = `${Math.min(
-      spotlightRect.top + spotlightRect.height + margin,
-      panelRect.height - cardHeight - margin,
-    )}px`;
+    card.style.top = `${Math.min(spotlightRect.top + spotlightRect.height + margin, maxTop)}px`;
     return;
   }
 
   card.style.left = `${Math.min(
-    Math.max(margin, spotlightRect.left + spotlightRect.width + margin),
-    panelRect.width - cardWidth - margin,
+    Math.max(minLeft, spotlightRect.left + spotlightRect.width + margin),
+    maxLeft,
   )}px`;
-  card.style.top = `${Math.min(
-    Math.max(margin, spotlightRect.top),
-    panelRect.height - cardHeight - margin,
-  )}px`;
+  card.style.top = `${Math.min(Math.max(minTop, spotlightRect.top), maxTop)}px`;
 }
 
 function zoomToCallstackSlice() {
@@ -671,6 +660,9 @@ function openTraceTour(startIndex = 0) {
   traceTourOpen = true;
   document.body.classList.add('trace-tour-open');
   panel?.classList.add('trace-tour-active');
+  if (tour.parentElement !== document.body) {
+    document.body.appendChild(tour);
+  }
   tour.hidden = false;
   tour.setAttribute('aria-hidden', 'false');
   renderTraceTourStep(startIndex);
@@ -689,6 +681,9 @@ function closeTraceTour(markSeen = true) {
   panel?.querySelectorAll('[data-trace-tour].trace-tour-target').forEach((el) => {
     el.classList.remove('trace-tour-target');
   });
+  if (panel && tour.parentElement !== panel) {
+    panel.appendChild(tour);
+  }
   hideTourOverlayPanels();
 
   if (markSeen) {
@@ -724,12 +719,16 @@ function launchDemoTour(event) {
 
   scrollTracePanelToCenter();
 
-  if (traceReady) {
-    window.setTimeout(() => openTraceTour(0), 450);
-    return;
-  }
+  const startTour = () => {
+    if (traceReady) {
+      openTraceTour(0);
+      return;
+    }
+    pendingOpenTour = true;
+  };
 
-  pendingOpenTour = true;
+  // Wait for smooth scroll to settle so spotlight boxes align to the final layout.
+  window.setTimeout(startTour, 550);
 }
 
 function initTraceTour() {
@@ -767,6 +766,18 @@ function initTraceTour() {
   window.addEventListener('resize', () => {
     if (traceTourOpen) renderTraceTourStep(traceTourIndex);
   });
+
+  window.addEventListener('scroll', () => {
+    if (!traceTourOpen) return;
+    const step = TRACE_TOUR_STEPS[traceTourIndex];
+    const target = getTraceTourTarget(step);
+    const panel = document.getElementById('trace-panel');
+    const spotlight = document.getElementById('trace-tour-spotlight');
+    const card = document.getElementById('trace-tour-card');
+    if (step && target && panel && spotlight && card) {
+      refitTourStepChrome(traceTourIndex, target, step, panel, spotlight, card);
+    }
+  }, { passive: true });
 }
 
 function updateWfAlignLinks() {

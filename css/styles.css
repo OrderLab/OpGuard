@@ -1200,16 +1200,7 @@ body {
   transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-.trace-panel.trace-tour-active {
-  /* Let the spotlight dim ring extend beyond the panel. */
-  overflow: visible;
-}
-
-/* Raise the live-trace stacking context above later sections (workflow, etc.) and the nav. */
-body.trace-tour-open .trace-section {
-  z-index: 400;
-}
-
+/* Keep panel clipped; tour overlay is fixed to the viewport instead. */
 body.trace-tour-open .nav {
   z-index: 1;
 }
@@ -1515,9 +1506,9 @@ body.trace-tour-open .nav {
 }
 
 .trace-tour {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 500;
   /* Pass clicks through to Perfetto; only the card captures input. */
   pointer-events: none;
 }
@@ -1526,6 +1517,17 @@ body.trace-tour-open .nav {
   position: absolute;
   inset: 0;
   background: transparent;
+  pointer-events: none;
+}
+
+.trace-tour__spotlight {
+  position: absolute;
+  border: 2px solid #60a5fa;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 9999px rgba(6, 13, 31, 0.58),
+    0 0 0 4px rgba(96, 165, 250, 0.25);
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
   pointer-events: none;
 }
 
