@@ -62,11 +62,3 @@ OpGuard will appear at **[OSDI ’26](https://www.usenix.org/conference/osdi26/p
 Source code and internal tooling are **not publicly released**.
 
 For questions about the paper, demos, or access inquiries, please **email the authors** listed above.
-
----
-
-<p align="center">
-  <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="180" />
-  <br />
-  <sub><a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
-</p>
