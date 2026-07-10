@@ -1,0 +1,62 @@
+    <section class="loss-section" id="loss">
+      <div class="section-header">
+        <span class="section-tag">Loss Alignment Evidence</span>
+        <h2>The loss curve looks normal. The diff exposes the first mismatch.</h2>
+        <p>
+          Hover over any step to inspect the baseline loss, buggy loss, and exact
+          delta. Step 3080 is still bit-aligned; step 3081 is where the hidden bug appears.
+        </p>
+      </div>
+
+      <div class="loss-layout">
+        <aside class="loss-timeline" aria-label="Loss debugging timeline">
+          <div class="loss-timeline__rail"></div>
+          <article class="loss-timeline__item loss-timeline__item--ok">
+            <div class="loss-timeline__icon">✓</div>
+            <div class="loss-timeline__content">
+              <span class="loss-timeline__step">Step 3080</span>
+              <h3>Still aligned</h3>
+              <p>Δ = 0 (match bit-by-bit)</p>
+            </div>
+          </article>
+          <article class="loss-timeline__item loss-timeline__item--bug">
+            <div class="loss-timeline__icon">↯</div>
+            <div class="loss-timeline__content">
+              <span class="loss-timeline__step">Step 3081</span>
+              <h3>First hidden mismatch</h3>
+              <p>Δ ≠ 0 (bug appears)</p>
+            </div>
+          </article>
+          <article class="loss-timeline__item loss-timeline__item--manual">
+            <div class="loss-timeline__icon">▦</div>
+            <div class="loss-timeline__content">
+              <span class="loss-timeline__step">5 days</span>
+              <h3>Manual debugging</h3>
+              <p>No root cause found</p>
+            </div>
+          </article>
+        </aside>
+
+        <div class="loss-visuals">
+          <div class="loss-card">
+            <div class="loss-card__header">
+              <div>
+                <span class="section-tag">Interactive Curves</span>
+                <h3>Training loss with aligned diff</h3>
+              </div>
+              <div class="loss-legend">
+                <span class="loss-legend__item loss-legend__item--buggy">buggy</span>
+                <span class="loss-legend__item loss-legend__item--baseline">baseline</span>
+              </div>
+            </div>
+            <div class="loss-chart-stack">
+              <svg id="loss-chart" class="loss-chart loss-chart--main" role="img" aria-label="Training loss chart"></svg>
+              <svg id="loss-diff-mini-chart" class="loss-chart loss-chart--mini" role="img" aria-label="Training loss delta chart"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="loss-tooltip" id="loss-tooltip" hidden></div>
+    </section>
+

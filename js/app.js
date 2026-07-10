@@ -1,27 +1,25 @@
-const TRACE_URL = './assets/traces/demo_case5.json.gz';
-const TRACE_TITLE = 'OpGuard — demo_case5 (DeepSpeed)';
-const LOSS_RUNS = [
-  {
-    key: 'baseline',
-    label: 'baseline (correct)',
-    url: './assets/data/run_20251001_12292e6b.csv',
+const TRACE_URL = './assets/traces/demo_case5.json.gz?v=track-names';
+const TRACE_TITLE = 'OpGuard — demo_case5 (open-source issue)';
+const TRACE_SOURCE_URL = './assets/traces/demo_case5_source.json';
+const TRACE_DIFF_URL = './assets/traces/demo_case5_diff.json';
+// Bottom-most call-stack frame at the first-diff pivot (Chrome JSON µs).
+const CALLSTACK_SOURCE_SLICE = {
+  tsUs: 128647000,
+  get timeSec() {
+    return this.tsUs / 1e6;
   },
-  {
-    key: 'buggy',
-    label: 'buggy',
-    url: './assets/data/run_20251001_9e609e46.csv',
-  },
-];
-const LOSS_STEP_MIN = 3050;
-const LOSS_STEP_MAX = 3450;
-const LOSS_NOTE_STEPS = [3080, 3081];
+};
 
 const iframe = document.getElementById('perfetto');
 const statusEl = document.getElementById('trace-status');
 const overlayEl = document.getElementById('trace-overlay');
 const progressEl = document.getElementById('trace-progress');
-const lossTooltip = document.getElementById('loss-tooltip');
-let lossData = [];
+
+let cachedTraceBuffer = null;
+let cachedTourSource = null;
+let cachedTourDiff = null;
+let traceReady = false;
+let pendingOpenTour = false;
 
 function setStatus(text, state) {
   const label = statusEl.querySelector('span:last-child');
@@ -103,10 +101,13 @@ async function loadTrace() {
           buffer,
           title: TRACE_TITLE,
           fileName: 'demo_case5.json',
+          keepApiOpen: true,
         },
       },
       '*',
     );
+
+    cachedTraceBuffer = buffer;
 
     setProgress(100);
     setStatus('Trace loaded', 'ready');
@@ -120,675 +121,6 @@ async function loadTrace() {
   }
 }
 
-function parseRunCsv(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const headers = lines.shift().split(',').map((header) => header.trim());
-  const stepIndex = headers.findIndex((header) => header.toLowerCase().includes('step'));
-  const lossIndex = headers.findIndex((header) => header.toLowerCase().includes('loss'));
-
-  if (stepIndex === -1 || lossIndex === -1) {
-    throw new Error('CSV is missing step or loss columns');
-  }
-
-  const byStep = new Map();
-  for (const line of lines) {
-    if (!line) continue;
-    const cols = line.split(',');
-    const step = Number(cols[stepIndex]);
-    const loss = Number(cols[lossIndex]);
-    if (!Number.isFinite(step) || !Number.isFinite(loss)) continue;
-    if (step < LOSS_STEP_MIN || step > LOSS_STEP_MAX) continue;
-    byStep.set(step, loss);
-  }
-
-  return byStep;
-}
-
-async function loadLossData() {
-  const [baselineText, buggyText] = await Promise.all(
-    LOSS_RUNS.map((run) => fetch(run.url).then((response) => {
-      if (!response.ok) throw new Error(`Failed to load ${run.url}: ${response.status}`);
-      return response.text();
-    })),
-  );
-
-  const baselineByStep = parseRunCsv(baselineText);
-  const buggyByStep = parseRunCsv(buggyText);
-  return [...baselineByStep.keys()]
-    .filter((step) => buggyByStep.has(step))
-    .sort((a, b) => a - b)
-    .map((step) => {
-      const baseline = baselineByStep.get(step);
-      const buggy = buggyByStep.get(step);
-      return {
-        step,
-        baseline,
-        buggy,
-        delta: buggy - baseline,
-      };
-    });
-}
-
-function cssVar(name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-
-function chartTheme() {
-  return {
-    bg: cssVar('--bg-surface-alt'),
-    border: cssVar('--border'),
-    text: cssVar('--text-primary'),
-    muted: cssVar('--text-muted'),
-    secondary: cssVar('--text-secondary'),
-    surface: cssVar('--bg-surface'),
-    grid: cssVar('--border'),
-    baseline: '#2ca02c',
-    buggy: '#d62728',
-    delta: '#d62728',
-    zero: cssVar('--text-primary'),
-  };
-}
-
-function fmtLoss(value) {
-  return value.toFixed(6);
-}
-
-function fmtDelta(value) {
-  if (Math.abs(value) < 1e-12) return '0';
-  if (Math.abs(value) < 1e-4) return value.toExponential(5);
-  return value.toFixed(6);
-}
-
-function pathFor(data, xScale, yScale, key) {
-  return data.map((point, index) => {
-    const cmd = index === 0 ? 'M' : 'L';
-    return `${cmd}${xScale(point.step).toFixed(2)},${yScale(point[key]).toFixed(2)}`;
-  }).join(' ');
-}
-
-function buildTicks(min, max, count) {
-  if (count <= 1) return [min];
-  const step = (max - min) / (count - 1);
-  return Array.from({ length: count }, (_, index) => min + step * index);
-}
-
-function chartSize(svg, fallbackHeight) {
-  const rect = svg.getBoundingClientRect();
-  return {
-    width: Math.max(320, rect.width || 800),
-    height: Math.max(120, rect.height || fallbackHeight),
-  };
-}
-
-function showLossTooltip(event, point) {
-  lossTooltip.hidden = false;
-  lossTooltip.innerHTML = `
-    <div class="loss-tooltip__step">Step ${point.step}</div>
-    <div class="loss-tooltip__row">
-      <span class="loss-tooltip__label">baseline</span>
-      <span class="loss-tooltip__value">${fmtLoss(point.baseline)}</span>
-    </div>
-    <div class="loss-tooltip__row">
-      <span class="loss-tooltip__label">buggy</span>
-      <span class="loss-tooltip__value">${fmtLoss(point.buggy)}</span>
-    </div>
-    <div class="loss-tooltip__row">
-      <span class="loss-tooltip__label">Δ buggy-baseline</span>
-      <span class="loss-tooltip__value">${fmtDelta(point.delta)}</span>
-    </div>
-  `;
-
-  const padding = 18;
-  const maxLeft = window.innerWidth - lossTooltip.offsetWidth - padding;
-  const maxTop = window.innerHeight - lossTooltip.offsetHeight - padding;
-  lossTooltip.style.left = `${Math.min(event.clientX + 16, maxLeft)}px`;
-  lossTooltip.style.top = `${Math.min(event.clientY + 16, maxTop)}px`;
-}
-
-function hideLossTooltip() {
-  lossTooltip.hidden = true;
-}
-
-function installHover(svg, data, scales, mode) {
-  const hoverGroup = svg.querySelector('.chart-hover');
-  const dataByStep = new Map(data.map((point) => [point.step, point]));
-
-  svg.onpointermove = (event) => {
-    const rect = svg.getBoundingClientRect();
-    const px = event.clientX - rect.left;
-    const step = Math.round(scales.xInvert(px));
-    const point = dataByStep.get(Math.max(LOSS_STEP_MIN, Math.min(LOSS_STEP_MAX, step)));
-    if (!point) return;
-
-    const x = scales.x(point.step);
-    const markerY = mode === 'loss'
-      ? [scales.y(point.buggy), scales.y(point.baseline)]
-      : [scales.y(point.delta)];
-
-    hoverGroup.innerHTML = `
-      <line x1="${x}" y1="${scales.plotTop}" x2="${x}" y2="${scales.plotBottom}" stroke="${scales.theme.secondary}" stroke-width="1.2" stroke-dasharray="4 4"/>
-      ${markerY.map((y, index) => `
-        <circle cx="${x}" cy="${y}" r="${mode === 'loss' ? 4.5 : 5}" fill="${mode === 'loss' ? (index === 0 ? scales.theme.buggy : scales.theme.baseline) : scales.theme.delta}" stroke="${scales.theme.surface}" stroke-width="2"/>
-      `).join('')}
-    `;
-    showLossTooltip(event, point);
-  };
-
-  svg.onpointerleave = () => {
-    hoverGroup.innerHTML = '';
-    hideLossTooltip();
-  };
-}
-
-function drawLossChart(svg, data) {
-  const theme = chartTheme();
-  const { width, height } = chartSize(svg, 280);
-  const margin = { top: 26, right: 22, bottom: 36, left: 62 };
-  const plotWidth = width - margin.left - margin.right;
-  const plotHeight = height - margin.top - margin.bottom;
-  const allLoss = data.flatMap((point) => [point.baseline, point.buggy]);
-  const minY = Math.min(...allLoss);
-  const maxY = Math.max(...allLoss);
-  const padY = Math.max((maxY - minY) * 0.12, 0.001);
-  const yMin = minY - padY;
-  const yMax = maxY + padY;
-  const xScale = (step) => margin.left + ((step - LOSS_STEP_MIN) / (LOSS_STEP_MAX - LOSS_STEP_MIN)) * plotWidth;
-  const yScale = (value) => margin.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
-  const xInvert = (px) => LOSS_STEP_MIN + ((px - margin.left) / plotWidth) * (LOSS_STEP_MAX - LOSS_STEP_MIN);
-  const yTicks = buildTicks(yMin, yMax, 5);
-  const xTicks = [3050, 3150, 3250, 3350, 3450];
-
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.innerHTML = `
-    <rect width="${width}" height="${height}" rx="14" fill="transparent"/>
-    <text x="${margin.left}" y="18" fill="${theme.text}" font-size="14" font-weight="700">Training Loss</text>
-    ${yTicks.map((tick) => `
-      <line x1="${margin.left}" y1="${yScale(tick)}" x2="${width - margin.right}" y2="${yScale(tick)}" stroke="${theme.grid}" stroke-width="1" stroke-dasharray="3 4"/>
-      <text x="${margin.left - 10}" y="${yScale(tick) + 4}" text-anchor="end" fill="${theme.muted}" font-size="11">${tick.toFixed(2)}</text>
-    `).join('')}
-    ${xTicks.map((tick) => `
-      <line x1="${xScale(tick)}" y1="${margin.top}" x2="${xScale(tick)}" y2="${height - margin.bottom}" stroke="${theme.grid}" stroke-width="0.8" opacity="0.5"/>
-      <text x="${xScale(tick)}" y="${height - 12}" text-anchor="middle" fill="${theme.muted}" font-size="11">${tick}</text>
-    `).join('')}
-    ${LOSS_NOTE_STEPS.map((step) => `
-      <line x1="${xScale(step)}" y1="${margin.top}" x2="${xScale(step)}" y2="${height - margin.bottom}" stroke="${theme.secondary}" stroke-width="1" stroke-dasharray="2 4"/>
-    `).join('')}
-    <path d="${pathFor(data, xScale, yScale, 'buggy')}" fill="none" stroke="${theme.buggy}" stroke-width="1.8" opacity="0.75"/>
-    <path d="${pathFor(data, xScale, yScale, 'baseline')}" fill="none" stroke="${theme.baseline}" stroke-width="2.3" opacity="0.95"/>
-    ${LOSS_NOTE_STEPS.map((step, index) => {
-      const point = data.find((item) => item.step === step);
-      if (!point) return '';
-      const labelY = index === 0 ? margin.top + 22 : margin.top + 52;
-      const labelX = Math.min(xScale(step) + 8, width - 116);
-      const bg = index === 0 ? 'rgba(44, 160, 44, 0.12)' : 'rgba(214, 39, 40, 0.12)';
-      const stroke = index === 0 ? theme.baseline : theme.buggy;
-      return `
-        <rect x="${labelX}" y="${labelY - 15}" width="96" height="28" rx="6" fill="${bg}" stroke="${stroke}" stroke-width="1"/>
-        <text x="${labelX + 8}" y="${labelY + 4}" fill="${theme.text}" font-size="11" font-weight="700">step ${step}</text>
-      `;
-    }).join('')}
-    <text x="18" y="${height / 2}" transform="rotate(-90 18 ${height / 2})" text-anchor="middle" fill="${theme.text}" font-size="13" font-weight="700">Training Loss</text>
-    <g class="chart-hover"></g>
-  `;
-
-  installHover(svg, data, {
-    x: xScale,
-    y: yScale,
-    xInvert,
-    plotTop: margin.top,
-    plotBottom: height - margin.bottom,
-    theme,
-  }, 'loss');
-}
-
-function drawDiffChart(svg, data, compact = false) {
-  const theme = chartTheme();
-  const { width, height } = chartSize(svg, compact ? 108 : 240);
-  const margin = compact
-    ? { top: 16, right: 22, bottom: 28, left: 62 }
-    : { top: 26, right: 22, bottom: 36, left: 62 };
-  const plotWidth = width - margin.left - margin.right;
-  const plotHeight = height - margin.top - margin.bottom;
-  const maxAbs = Math.max(...data.map((point) => Math.abs(point.delta)), 1e-8) * 1.2;
-  const yMin = -maxAbs;
-  const yMax = maxAbs;
-  const xScale = (step) => margin.left + ((step - LOSS_STEP_MIN) / (LOSS_STEP_MAX - LOSS_STEP_MIN)) * plotWidth;
-  const yScale = (value) => margin.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
-  const xInvert = (px) => LOSS_STEP_MIN + ((px - margin.left) / plotWidth) * (LOSS_STEP_MAX - LOSS_STEP_MIN);
-  const yTicks = compact ? [-maxAbs, 0, maxAbs] : buildTicks(yMin, yMax, 5);
-  const xTicks = [3050, 3150, 3250, 3350, 3450];
-
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.innerHTML = `
-    <rect width="${width}" height="${height}" rx="14" fill="transparent"/>
-    ${compact ? '' : `<text x="${margin.left}" y="18" fill="${theme.text}" font-size="14" font-weight="700">Δ Loss</text>`}
-    ${yTicks.map((tick) => `
-      <line x1="${margin.left}" y1="${yScale(tick)}" x2="${width - margin.right}" y2="${yScale(tick)}" stroke="${theme.grid}" stroke-width="1" stroke-dasharray="${tick === 0 ? '0' : '3 4'}" opacity="${tick === 0 ? '0.75' : '0.75'}"/>
-      <text x="${margin.left - 10}" y="${yScale(tick) + 4}" text-anchor="end" fill="${theme.muted}" font-size="11">${fmtDelta(tick)}</text>
-    `).join('')}
-    ${xTicks.map((tick) => `
-      <line x1="${xScale(tick)}" y1="${margin.top}" x2="${xScale(tick)}" y2="${height - margin.bottom}" stroke="${theme.grid}" stroke-width="0.8" opacity="0.45"/>
-      <text x="${xScale(tick)}" y="${height - 10}" text-anchor="middle" fill="${theme.muted}" font-size="11">${tick}</text>
-    `).join('')}
-    ${LOSS_NOTE_STEPS.map((step) => `
-      <line x1="${xScale(step)}" y1="${margin.top}" x2="${xScale(step)}" y2="${height - margin.bottom}" stroke="${theme.secondary}" stroke-width="1" stroke-dasharray="2 4"/>
-    `).join('')}
-    <path d="${pathFor(data, xScale, yScale, 'delta')}" fill="none" stroke="${theme.delta}" stroke-width="${compact ? 1.6 : 2.1}" opacity="0.88"/>
-    ${LOSS_NOTE_STEPS.map((step, index) => {
-      const point = data.find((item) => item.step === step);
-      if (!point) return '';
-      const x = xScale(step);
-      const y = yScale(point.delta);
-      const labelX = Math.min(x + 10, width - 128);
-      const labelY = index === 0 ? y - 24 : y + (compact ? 34 : 46);
-      if (compact && index === 1) {
-        return `<circle cx="${x}" cy="${y}" r="4" fill="${theme.delta}" stroke="${theme.surface}" stroke-width="2"/>`;
-      }
-      return `
-        <circle cx="${x}" cy="${y}" r="4" fill="${theme.delta}" stroke="${theme.surface}" stroke-width="2"/>
-        <line x1="${x}" y1="${y}" x2="${labelX}" y2="${labelY}" stroke="${theme.delta}" stroke-width="1"/>
-        <rect x="${labelX}" y="${labelY - 18}" width="118" height="36" rx="6" fill="${theme.surface}" stroke="${theme.delta}" stroke-width="1"/>
-        <text x="${labelX + 7}" y="${labelY - 3}" fill="${theme.text}" font-size="11" font-weight="700">step ${step}</text>
-        <text x="${labelX + 7}" y="${labelY + 12}" fill="${theme.text}" font-size="11">Δ = ${fmtDelta(point.delta)}</text>
-      `;
-    }).join('')}
-    <text x="18" y="${height / 2}" transform="rotate(-90 18 ${height / 2})" text-anchor="middle" fill="${theme.text}" font-size="13" font-weight="700">Δ</text>
-    <text x="${width / 2}" y="${height - 2}" text-anchor="middle" fill="${theme.text}" font-size="12" font-weight="700">Step</text>
-    <g class="chart-hover"></g>
-  `;
-
-  installHover(svg, data, {
-    x: xScale,
-    y: yScale,
-    xInvert,
-    plotTop: margin.top,
-    plotBottom: height - margin.bottom,
-    theme,
-  }, 'diff');
-}
-
-function renderLossCharts() {
-  if (!lossData.length) return;
-  const lossChart = document.getElementById('loss-chart');
-  const diffMiniChart = document.getElementById('loss-diff-mini-chart');
-  if (!lossChart || !diffMiniChart) return;
-  drawLossChart(lossChart, lossData);
-  drawDiffChart(diffMiniChart, lossData, true);
-}
-
-async function initLossCharts() {
-  try {
-    lossData = await loadLossData();
-    renderLossCharts();
-  } catch (err) {
-    console.error('Failed to render loss charts:', err);
-    const container = document.querySelector('.loss-visuals');
-    if (container) {
-      container.insertAdjacentHTML(
-        'afterbegin',
-        `<div class="trace-panel__status trace-panel__status--error">Failed to load loss CSV: ${err.message}</div>`,
-      );
-    }
-  }
-}
-
-let resizeTimer = null;
-window.addEventListener('resize', () => {
-  window.clearTimeout(resizeTimer);
-  resizeTimer = window.setTimeout(() => {
-    renderLossCharts();
-    updateDiagramGuides();
-  }, 120);
-}, { passive: true });
-
-function updateRootCauseGuides() {
-  const diagram = document.querySelector('.root-cause-diagram');
-  const svg = document.getElementById('root-cause-guides');
-  const alignedMarker = document.querySelector('.op-lane__marker--aligned');
-  const divergesMarker = document.querySelector('.op-lane__marker--diverges');
-  const zoomBody = document.querySelector('.op-zoom__body');
-  if (!diagram || !svg || !alignedMarker || !divergesMarker || !zoomBody) return;
-
-  const diagramRect = diagram.getBoundingClientRect();
-  const width = diagramRect.width;
-  const height = diagramRect.height;
-  if (!width || !height) return;
-
-  const point = (el, anchor) => {
-    const rect = el.getBoundingClientRect();
-    const x = rect.left - diagramRect.left;
-    const y = rect.top - diagramRect.top;
-    if (anchor === 'marker-bottom') {
-      return { x: x + rect.width / 2, y: y + rect.height };
-    }
-    if (anchor === 'zoom-top') {
-      return { x, y };
-    }
-    return { x: x + rect.width, y };
-  };
-
-  const alignedStart = point(alignedMarker, 'marker-bottom');
-  const divergesStart = point(divergesMarker, 'marker-bottom');
-  const zoomTop = point(zoomBody, 'zoom-top').y;
-  const alignedEnd = { x: alignedStart.x, y: zoomTop };
-  const divergesEnd = { x: divergesStart.x, y: zoomTop };
-
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-
-  const alignedLine = svg.querySelector('.root-cause-guides__line--aligned');
-  const divergesLine = svg.querySelector('.root-cause-guides__line--diverges');
-  alignedLine.setAttribute('x1', alignedStart.x);
-  alignedLine.setAttribute('y1', alignedStart.y);
-  alignedLine.setAttribute('x2', alignedEnd.x);
-  alignedLine.setAttribute('y2', alignedEnd.y);
-  divergesLine.setAttribute('x1', divergesStart.x);
-  divergesLine.setAttribute('y1', divergesStart.y);
-  divergesLine.setAttribute('x2', divergesEnd.x);
-  divergesLine.setAttribute('y2', divergesEnd.y);
-}
-
-function updateWhatIsOpGuides() {
-  const diagram = document.getElementById('what-is-op-diagram');
-  const svg = document.getElementById('what-is-op-guides');
-  const opDetail = document.querySelector('.op-detail');
-  if (!diagram || !svg || !opDetail) return;
-
-  const diagramRect = diagram.getBoundingClientRect();
-  const width = diagramRect.width;
-  const height = diagramRect.height;
-  if (!width || !height) return;
-
-  const detailRect = opDetail.getBoundingClientRect();
-  const anchors = diagram.querySelectorAll('[data-op-anchor]');
-  const detailLeft = detailRect.left - diagramRect.left;
-  const detailTop = detailRect.top - diagramRect.top;
-  const detailBottom = detailTop + detailRect.height;
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-  svg.innerHTML = `
-    <defs>
-      <marker id="what-is-op-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-        <polygon points="0 0, 8 4, 0 8" fill="#2563eb"/>
-      </marker>
-    </defs>
-  `;
-
-  anchors.forEach((node) => {
-    const rect = node.getBoundingClientRect();
-    const x1 = rect.right - diagramRect.left;
-    const y1 = rect.top - diagramRect.top + rect.height / 2;
-    const x2 = detailLeft - 1;
-    const y2 = clamp(y1, detailTop + 18, detailBottom - 18);
-    const midX = x1 + (x2 - x1) * 0.55;
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
-    path.setAttribute('marker-end', 'url(#what-is-op-arrow)');
-    svg.appendChild(path);
-  });
-}
-
-function updateOpDetailConnectors() {
-  const detail = document.getElementById('op-detail');
-  const svg = document.getElementById('op-detail-connectors');
-  const leftTensor = document.querySelector('.op-matrices--stack');
-  const rightTensor = document.querySelector('.op-matrices--single .op-matrix');
-  const opBox = document.querySelector('.op-detail__op');
-  if (!detail || !svg || !leftTensor || !rightTensor || !opBox) return;
-
-  const detailRect = detail.getBoundingClientRect();
-  const width = detailRect.width;
-  const height = detailRect.height;
-  if (!width || !height) return;
-
-  const localRect = (el) => {
-    const rect = el.getBoundingClientRect();
-    return {
-      left: rect.left - detailRect.left,
-      top: rect.top - detailRect.top,
-      width: rect.width,
-      height: rect.height,
-    };
-  };
-
-  const point = (rect, anchor) => {
-    if (anchor === 'bottom-center') return { x: rect.left + rect.width / 2, y: rect.top + rect.height };
-    if (anchor === 'top-left-third') return { x: rect.left + rect.width * 0.36, y: rect.top };
-    if (anchor === 'top-right-third') return { x: rect.left + rect.width * 0.64, y: rect.top };
-    return { x: rect.left + rect.width / 2, y: rect.top };
-  };
-
-  const left = point(localRect(leftTensor), 'bottom-center');
-  const right = point(localRect(rightTensor), 'bottom-center');
-  const opRect = localRect(opBox);
-  const leftTarget = point(opRect, 'top-left-third');
-  const rightTarget = point(opRect, 'top-right-third');
-  const pathToOp = (start, end) => {
-    const midY = start.y + (end.y - start.y) * 0.58;
-    return `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y - 4}`;
-  };
-
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-  svg.innerHTML = `
-    <defs>
-      <marker id="op-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-        <polygon points="0 0, 8 4, 0 8" fill="#2563eb"/>
-      </marker>
-    </defs>
-    <path d="${pathToOp(left, leftTarget)}" marker-end="url(#op-arrow)" />
-    <path d="${pathToOp(right, rightTarget)}" marker-end="url(#op-arrow)" />
-  `;
-}
-
-function updateDiagramGuides() {
-  updateRootCauseGuides();
-  updateWhatIsOpGuides();
-  updateOpDetailConnectors();
-  updateWorkflowDiagramLinks();
-  updateBitwiseAlignmentLink();
-}
-
-function getWorkflowPoint(element, canvas, anchor) {
-  const rect = element.getBoundingClientRect();
-  const canvasRect = canvas.getBoundingClientRect();
-  const left = rect.left - canvasRect.left;
-  const top = rect.top - canvasRect.top;
-
-  const points = {
-    left: { x: left, y: top + rect.height / 2 },
-    right: { x: left + rect.width, y: top + rect.height / 2 },
-    top: { x: left + rect.width / 2, y: top },
-    bottom: { x: left + rect.width / 2, y: top + rect.height },
-    center: { x: left + rect.width / 2, y: top + rect.height / 2 },
-  };
-
-  return points[anchor] || points.center;
-}
-
-function linePath(start, end) {
-  return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
-}
-
-function elbowPath(start, end, viaX = (start.x + end.x) / 2) {
-  return `M ${start.x} ${start.y} L ${viaX} ${start.y} L ${viaX} ${end.y} L ${end.x} ${end.y}`;
-}
-
-function updateWorkflowDiagramLinks() {
-  const canvas = document.querySelector('.workflow-diagram__canvas');
-  const svg = document.getElementById('workflow-diagram-links');
-  if (!canvas || !svg) return;
-
-  const select = (selector) => canvas.querySelector(selector);
-  const elements = {
-    buggy: select('.workflow-run--buggy'),
-    reference: select('.workflow-run--ref'),
-    preflightPanel: select('.workflow-panel--preflight'),
-    run5: select('.workflow-tag--run5'),
-    profile: select('.workflow-tag--profile'),
-    determinism: select('.workflow-control--determinism'),
-    replayPanel: select('.workflow-panel--replay'),
-    runtime: select('.workflow-tag--runtime'),
-    signature: select('.workflow-output--signature'),
-    diagnosisPanel: select('.workflow-panel--diagnosis'),
-    align: select('.workflow-control--align'),
-    ui: select('.workflow-tag--ui'),
-  };
-
-  if (Object.values(elements).some((element) => !element)) return;
-
-  const canvasRect = canvas.getBoundingClientRect();
-  svg.setAttribute('viewBox', `0 0 ${canvasRect.width} ${canvasRect.height}`);
-  svg.setAttribute('width', canvasRect.width);
-  svg.setAttribute('height', canvasRect.height);
-
-  const p = (key, anchor) => getWorkflowPoint(elements[key], canvas, anchor);
-  const preflightLeft = p('preflightPanel', 'left').x;
-  const run5Right = p('run5', 'right');
-  const determinismLeft = p('determinism', 'left');
-  const replayLeft = p('replayPanel', 'left').x;
-  const signatureRight = p('signature', 'right');
-  const alignLeft = p('align', 'left');
-
-  const paths = [
-    { d: linePath(p('buggy', 'right'), { x: preflightLeft, y: p('buggy', 'right').y }) },
-    { d: linePath(p('reference', 'right'), { x: preflightLeft, y: p('reference', 'right').y }) },
-    { d: elbowPath(p('profile', 'right'), { x: replayLeft, y: p('replayPanel', 'center').y }, replayLeft - 24) },
-    { d: linePath(p('determinism', 'bottom'), p('replayPanel', 'top')), dashed: true },
-    { d: elbowPath(determinismLeft, run5Right, determinismLeft.x - 42), dashed: true },
-    { d: linePath(p('runtime', 'bottom'), p('signature', 'top')) },
-    { d: elbowPath(signatureRight, alignLeft, signatureRight.x + 62) },
-    { d: linePath(p('diagnosisPanel', 'bottom'), p('ui', 'top')) },
-  ];
-
-  svg.innerHTML = `
-    <defs>
-      <marker id="workflow-arrow" viewBox="0 0 10 10" markerWidth="8" markerHeight="8" refX="9" refY="5" orient="auto">
-        <path d="M 0 0 L 10 5 L 0 10 z" />
-      </marker>
-    </defs>
-    ${paths.map(({ d, dashed }) => `<path class="workflow-link${dashed ? ' workflow-link--dashed' : ''}" d="${d}" />`).join('')}
-  `;
-}
-
-let activeBitwiseLink = null;
-
-function getBitwiseCellPair(sourceCell) {
-  const diagram = sourceCell.closest('.bitwise-diagram');
-  const sourceTensor = sourceCell.closest('.bitwise-tensor');
-  if (!diagram || !sourceTensor || !sourceCell.closest('.bitwise-track--buggy')) return null;
-
-  const buggyTensors = Array.from(diagram.querySelectorAll('.bitwise-track--buggy .bitwise-tensor'));
-  const referenceTensors = Array.from(diagram.querySelectorAll('.bitwise-track--ref .bitwise-tensor'));
-  const tensorIndex = buggyTensors.indexOf(sourceTensor);
-  if (tensorIndex < 0) return null;
-
-  const sourceCells = Array.from(sourceTensor.querySelectorAll('.bitwise-tensor__cell'));
-  const cellIndex = sourceCells.indexOf(sourceCell);
-  const targetTensor = referenceTensors[tensorIndex];
-  const targetCell = targetTensor?.querySelectorAll('.bitwise-tensor__cell')[cellIndex];
-  if (!targetCell) return null;
-
-  return { diagram, sourceCell, targetCell };
-}
-
-function getElementCenter(element, container) {
-  const rect = element.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-
-  return {
-    x: rect.left - containerRect.left + rect.width / 2,
-    y: rect.top - containerRect.top + rect.height / 2,
-  };
-}
-
-function clearBitwiseLinkState(diagram) {
-  diagram.querySelectorAll(
-    '.bitwise-tensor__cell--link-source, .bitwise-tensor__cell--link-target, .bitwise-tensor__cell--link-match, .bitwise-tensor__cell--link-mismatch',
-  ).forEach((cell) => {
-    cell.classList.remove(
-      'bitwise-tensor__cell--link-source',
-      'bitwise-tensor__cell--link-target',
-      'bitwise-tensor__cell--link-match',
-      'bitwise-tensor__cell--link-mismatch',
-    );
-  });
-
-  const svg = diagram.querySelector('.bitwise-link-layer');
-  if (svg) svg.innerHTML = '';
-}
-
-function drawBitwiseAlignmentLink(sourceCell, targetCell, isMatch) {
-  const flow = sourceCell.closest('.bitwise-flow');
-  const svg = flow?.querySelector('.bitwise-link-layer');
-  if (!flow || !svg) return;
-
-  const width = flow.scrollWidth;
-  const height = flow.scrollHeight;
-  const source = getElementCenter(sourceCell, flow);
-  const target = getElementCenter(targetCell, flow);
-  const midY = source.y + (target.y - source.y) * 0.5;
-  const pathClass = isMatch ? 'bitwise-link--match' : 'bitwise-link--mismatch';
-
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-  svg.innerHTML = `<path class="${pathClass}" d="M ${source.x} ${source.y} C ${source.x} ${midY}, ${target.x} ${midY}, ${target.x} ${target.y}" />`;
-}
-
-function updateBitwiseAlignmentLink() {
-  if (!activeBitwiseLink) return;
-
-  const { sourceCell, targetCell, isMatch } = activeBitwiseLink;
-  if (!document.contains(sourceCell) || !document.contains(targetCell)) {
-    activeBitwiseLink = null;
-    return;
-  }
-
-  drawBitwiseAlignmentLink(sourceCell, targetCell, isMatch);
-}
-
-function selectBitwiseAlignmentCell(sourceCell) {
-  const pair = getBitwiseCellPair(sourceCell);
-  if (!pair) return;
-
-  const { diagram, targetCell } = pair;
-  const isMatch = sourceCell.textContent.trim() === targetCell.textContent.trim();
-  const stateClass = isMatch ? 'bitwise-tensor__cell--link-match' : 'bitwise-tensor__cell--link-mismatch';
-
-  clearBitwiseLinkState(diagram);
-  sourceCell.classList.add('bitwise-tensor__cell--link-source', stateClass);
-  targetCell.classList.add('bitwise-tensor__cell--link-target', stateClass);
-  activeBitwiseLink = { sourceCell, targetCell, isMatch };
-  drawBitwiseAlignmentLink(sourceCell, targetCell, isMatch);
-}
-
-function initBitwiseAlignmentLinks() {
-  const buggyCells = document.querySelectorAll('.bitwise-track--buggy .bitwise-tensor__cell');
-
-  buggyCells.forEach((cell) => {
-    cell.setAttribute('aria-label', `Link buggy value ${cell.textContent.trim()} to the matching reference tensor position`);
-
-    cell.addEventListener('click', () => {
-      const selection = window.getSelection();
-      if (selection && !selection.isCollapsed) return;
-      selectBitwiseAlignmentCell(cell);
-    });
-
-    cell.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        selectBitwiseAlignmentCell(cell);
-      }
-    });
-  });
-}
 
 function initTensorCellSelection() {
   const cells = document.querySelectorAll('.op-matrix__cell:not(.bitwise-tensor__cell)');
@@ -811,42 +143,64 @@ function initTensorCellSelection() {
   });
 }
 
-const TRACE_TOUR_STORAGE_KEY = 'opguard-trace-tour-seen';
+const TRACE_TOUR_STORAGE_KEY = 'opguard-trace-tour-seen-v18';
 const TRACE_TOUR_STEPS = [
   {
     target: 'viewer',
     placement: 'dock-bottom',
     spotlight: 'full',
     title: 'Welcome to the trace viewer',
-    body: 'You are looking at OpGuard’s Global Alignment Trace for demo_case5 — a real DeepSpeed production case. The buggy run and reference run are aligned on one timeline so you can compare them side by side.',
+    body: 'This is OpGuard’s Global Alignment Trace for an open-source issue. Two runs are lined up on one timeline: the suspect run (top) and the reference run (bottom), so you can compare them side by side.',
   },
   {
     target: 'viewer',
-    placement: 'dock-bottom',
-    spotlight: 'overview',
-    title: 'Start with the overview strip',
-    body: 'Click the colored overview bar at the top to jump to any time range. Drag to select a region, then zoom in when you want to inspect a suspicious window.',
-  },
-  {
-    target: 'viewer',
-    placement: 'dock-bottom',
+    placement: 'dock-right',
     spotlight: 'sidebar',
-    title: 'Browse process tracks',
-    body: 'Use the left sidebar to expand Process 0 / Process 1 and reveal individual op slices. This is where aligned execution tracks are grouped.',
+    interactive: true,
+    title: 'Expand the suspect run',
+    body: 'Click the arrow next to suspect run in the left sidebar (the highlighted area is clickable). Expand it to reveal op tracks and alignment slices — then press Next.',
   },
   {
     target: 'viewer',
     placement: 'dock-bottom',
-    spotlight: 'tracks',
-    title: 'Click an op slice',
-    body: 'Click any horizontal slice in the timeline — for example the yellow or grey bars. Pan with drag, zoom with scroll or pinch, and select the slice you want to inspect.',
+    spotlight: 'pivot',
+    interactive: true,
+    title: 'Click the first-mismatch pivot',
+    body: 'On the Alignment Status track, click the blue pivot marker (▲). That is the first mismatch between the suspect and reference runs — the clean pivot for debugging. Then press Next.',
   },
   {
     target: 'viewer',
     placement: 'dock-top',
-    spotlight: 'details',
-    title: 'Find the first divergent op',
-    body: 'After you click a slice, read the Current Selection panel for tensor-level diffs, operator metadata, and the Python call stack. Your goal is the first op where fingerprints stop matching — that is where the bug begins.',
+    spotlight: 'following-flows',
+    interactive: true,
+    title: 'Open the divergent op',
+    body: 'In Current Selection → Following Flows, click the linked op (e.g. _linalg.linalg_vector_norm#…). The tensor-level diff details live on that op — not on the pivot marker itself. Then press Next.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-top',
+    spotlight: 'diff-panel',
+    interactive: true,
+    autoReveal: 'diff-field',
+    title: 'Inspect the diff field',
+    body: 'Here is the scrolled-to diff for this op: fields = outputs, and the summary shows which tensor mismatched (xor_signature … vs …). Then press Next.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-top',
+    spotlight: 'details-chrome',
+    interactive: true,
+    title: 'Hide the details panel',
+    body: 'In the top-right corner of Current Selection, click the downward chevron (v) to collapse the panel and free the timeline. Then press Next.',
+  },
+  {
+    target: 'viewer',
+    placement: 'dock-left',
+    spotlight: 'source-panel',
+    interactive: true,
+    autoReveal: 'callstack-source',
+    title: 'Source from the call stack',
+    body: 'In the real workflow you’d click the bottom-most Call Stack frame under the pivot, then scroll down in Current Selection to open source. Here we jump straight to that end state: norm · functional.py:1629 — the call site of the first mismatched op.',
   },
 ];
 
@@ -895,20 +249,72 @@ function getTraceTourSpotlightRect(target, step) {
       width = w - 8;
       height = overviewH;
     } else if (step.spotlight === 'sidebar') {
+      // Cover the process tree so the expand arrow is easy to hit.
       top = relTop + tracksTop;
       left = relLeft + 2;
       width = sidebarW;
-      height = tracksHCollapsed;
+      height = Math.min(tracksHCollapsed * 0.42, h * 0.28);
     } else if (step.spotlight === 'tracks') {
       top = relTop + tracksTop;
       left = relLeft + sidebarW + 4;
       width = w - sidebarW - 8;
       height = Math.min(tracksHCollapsed * 0.48, h * 0.28);
+    } else if (step.spotlight === 'pivot') {
+      // first_diff_global sits ~80% along the demo timeline on Alignment Status.
+      const trackLeft = relLeft + sidebarW + 4;
+      const trackWidth = w - sidebarW - 8;
+      const pivotFrac = 0.78;
+      const boxW = Math.min(Math.max(trackWidth * 0.22, 160), 280);
+      top = relTop + tracksTop + h * 0.055;
+      left = trackLeft + trackWidth * pivotFrac - boxW * 0.35;
+      width = boxW;
+      height = Math.min(h * 0.2, 120);
     } else if (step.spotlight === 'details') {
       top = relTop + detailsTop;
       left = relLeft + 2;
       width = w - 4;
       height = detailsH;
+    } else if (step.spotlight === 'following-flows') {
+      // Right half of Current Selection — Following Flows table.
+      top = relTop + detailsTop + detailsH * 0.08;
+      left = relLeft + w * 0.42;
+      width = w * 0.56;
+      height = Math.min(detailsH * 0.42, h * 0.22);
+    } else if (step.spotlight === 'diff-field') {
+      // Lower-right args / diff tree in Current Selection.
+      top = relTop + detailsTop + detailsH * 0.28;
+      left = relLeft + w * 0.36;
+      width = w * 0.62;
+      height = Math.min(detailsH * 0.55, h * 0.28);
+    } else if (step.spotlight === 'diff-panel') {
+      top = relTop + h * 0.55;
+      left = relLeft + 10;
+      width = w - 20;
+      height = h * 0.42;
+    } else if (step.spotlight === 'details-chrome') {
+      // Collapse chevron sits on the Current Selection tab bar, far top-right.
+      const boxW = 64;
+      const boxH = 52;
+      const drawerTop = relTop + h * 0.455;
+      top = drawerTop;
+      left = relLeft + w - boxW - 6;
+      width = boxW;
+      height = boxH;
+    } else if (step.spotlight === 'callstack') {
+      // After details are hidden: suspect Call Stack is the upper track group, near the pivot.
+      const trackLeft = relLeft + sidebarW + 4;
+      const trackWidth = w - sidebarW - 8;
+      const pivotFrac = 0.78;
+      const boxW = Math.min(Math.max(trackWidth * 0.2, 150), 220);
+      top = relTop + tracksTop + 6;
+      left = trackLeft + trackWidth * pivotFrac - boxW * 0.45;
+      width = boxW;
+      height = Math.min(h * 0.16, 120);
+    } else if (step.spotlight === 'source-panel') {
+      top = relTop + h * 0.55;
+      left = relLeft + 10;
+      width = w - 20;
+      height = h * 0.42;
     } else if (step.spotlight === 'full') {
       top = relTop + 2;
       left = relLeft + 4;
@@ -940,6 +346,24 @@ function positionTraceTourCard(card, panelRect, spotlightRect, placement) {
     card.style.left = `${margin}px`;
     card.style.top = `${margin + 58}px`;
     card.style.width = `${Math.min(360, panelRect.width - margin * 2)}px`;
+    return;
+  }
+
+  if (placement === 'dock-right') {
+    // Keep the left sidebar free so the user can click expand arrows.
+    const width = Math.min(360, panelRect.width - margin * 2);
+    card.style.width = `${width}px`;
+    card.style.left = `${Math.max(margin, panelRect.width - width - margin)}px`;
+    card.style.top = `${Math.max(margin, panelRect.height - cardHeight - margin)}px`;
+    return;
+  }
+
+  if (placement === 'dock-left') {
+    // Keep the pivot / call-stack region on the right free to click.
+    const width = Math.min(320, panelRect.width - margin * 2);
+    card.style.width = `${width}px`;
+    card.style.left = `${margin}px`;
+    card.style.top = `${Math.max(margin + 58, (panelRect.height - cardHeight) / 2)}px`;
     return;
   }
 
@@ -986,6 +410,174 @@ function positionTraceTourCard(card, panelRect, spotlightRect, placement) {
   )}px`;
 }
 
+function zoomToCallstackSlice() {
+  if (!iframe?.contentWindow) return;
+  const t = CALLSTACK_SOURCE_SLICE.timeSec;
+  iframe.contentWindow.postMessage(
+    {
+      perfetto: {
+        timeStart: t - 0.45,
+        timeEnd: t + 0.45,
+        viewPercentage: 0.4,
+      },
+    },
+    '*',
+  );
+}
+
+async function loadTourSource() {
+  if (cachedTourSource) return cachedTourSource;
+  const response = await fetch(TRACE_SOURCE_URL);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  cachedTourSource = await response.json();
+  return cachedTourSource;
+}
+
+async function loadTourDiff() {
+  if (cachedTourDiff) return cachedTourDiff;
+  const response = await fetch(TRACE_DIFF_URL);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  cachedTourDiff = await response.json();
+  return cachedTourDiff;
+}
+
+function hideTourOverlayPanels() {
+  ['trace-source', 'trace-diff'].forEach((id) => {
+    const panel = document.getElementById(id);
+    if (!panel) return;
+    panel.hidden = true;
+    panel.setAttribute('aria-hidden', 'true');
+  });
+}
+
+function hideTourSourcePanel() {
+  hideTourOverlayPanels();
+}
+
+function renderTourSourcePanel(source) {
+  hideTourOverlayPanels();
+  const panel = document.getElementById('trace-source');
+  const title = document.getElementById('trace-source-title');
+  const path = document.getElementById('trace-source-path');
+  const code = document.getElementById('trace-source-code');
+  if (!panel || !title || !path || !code) return;
+
+  title.textContent = source.title;
+  path.textContent = source.original_path || `${source.file}:${source.line}`;
+  code.replaceChildren();
+
+  let targetEl = null;
+  String(source.code || '')
+    .split('\n')
+    .forEach((line) => {
+      const row = document.createElement('span');
+      row.className = 'trace-source__line';
+      const isTarget = line.includes('>>>') && line.includes('TARGET LINE');
+      if (isTarget) {
+        row.classList.add('is-target');
+        row.textContent = line
+          .replace('>>> ', '')
+          .replace(' <<< TARGET LINE', '');
+        targetEl = row;
+      } else {
+        row.textContent = line;
+      }
+      code.appendChild(row);
+    });
+
+  panel.hidden = false;
+  panel.setAttribute('aria-hidden', 'false');
+  window.requestAnimationFrame(() => {
+    targetEl?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+}
+
+function renderTourDiffPanel(diff) {
+  hideTourOverlayPanels();
+  const panel = document.getElementById('trace-diff');
+  const title = document.getElementById('trace-diff-title');
+  const path = document.getElementById('trace-diff-path');
+  const body = document.getElementById('trace-diff-body');
+  if (!panel || !title || !path || !body) return;
+
+  title.textContent = diff.title;
+  path.textContent = diff.fn || diff.search || '';
+  body.replaceChildren();
+
+  const fields = (diff.diff && diff.diff.fields) || [];
+  const summary = (diff.diff && diff.diff.summary) || '';
+  const output = diff.io && diff.io.outputs && diff.io.outputs[0];
+
+  const rows = [
+    ['fields', fields.join(', ') || '—'],
+    ['status', diff.status || '—'],
+    ['dtype', output?.dtype || '—'],
+    ['device', output?.device || '—'],
+    ['shape', output ? JSON.stringify(output.shape) : '—'],
+  ];
+
+  rows.forEach(([key, val]) => {
+    const row = document.createElement('div');
+    row.className = 'trace-diff__row';
+    const k = document.createElement('div');
+    k.className = 'trace-diff__key';
+    k.textContent = key;
+    const v = document.createElement('div');
+    v.className = 'trace-diff__val';
+    v.textContent = val;
+    row.append(k, v);
+    body.appendChild(row);
+  });
+
+  if (summary) {
+    const summaryEl = document.createElement('div');
+    summaryEl.className = 'trace-diff__summary';
+    const parts = String(summary).split(' vs ');
+    if (parts.length === 2) {
+      const left = document.createElement('strong');
+      left.textContent = parts[0];
+      const right = document.createElement('strong');
+      right.textContent = parts[1];
+      summaryEl.append(left, document.createTextNode(' vs '), right);
+    } else {
+      summaryEl.textContent = summary;
+    }
+    body.appendChild(summaryEl);
+  }
+
+  panel.hidden = false;
+  panel.setAttribute('aria-hidden', 'false');
+  window.requestAnimationFrame(() => {
+    body.querySelector('.trace-diff__summary')?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth',
+    });
+  });
+}
+
+async function revealTourCallstackSourceSlice() {
+  zoomToCallstackSlice();
+  const source = await loadTourSource();
+  renderTourSourcePanel(source);
+}
+
+async function revealTourDiffField() {
+  const diff = await loadTourDiff();
+  renderTourDiffPanel(diff);
+}
+
+function refitTourStepChrome(index, target, step, panel, spotlight, card) {
+  if (!traceTourOpen || traceTourIndex !== index) return;
+  const panelRect = panel.getBoundingClientRect();
+  const spotlightRect = getTraceTourSpotlightRect(target, step);
+  if (!spotlightRect) return;
+  spotlight.style.top = `${spotlightRect.top}px`;
+  spotlight.style.left = `${spotlightRect.left}px`;
+  spotlight.style.width = `${spotlightRect.width}px`;
+  spotlight.style.height = `${spotlightRect.height}px`;
+  positionTraceTourCard(card, panelRect, spotlightRect, step.placement);
+}
+
 function renderTraceTourStep(index) {
   const tour = document.getElementById('trace-tour');
   const panel = document.getElementById('trace-panel');
@@ -1013,7 +605,49 @@ function renderTraceTourStep(index) {
   title.textContent = step.title;
   body.textContent = step.body;
   backBtn.disabled = index === 0;
-  nextBtn.textContent = index === TRACE_TOUR_STEPS.length - 1 ? 'Start exploring' : 'Next';
+  nextBtn.textContent =
+    index === TRACE_TOUR_STEPS.length - 1
+      ? 'Start exploring'
+      : step.nextLabel || 'Next';
+
+  tour.classList.toggle('trace-tour--interactive', Boolean(step.interactive));
+  card.setAttribute('aria-modal', step.interactive ? 'false' : 'true');
+
+  if (step.autoReveal === 'diff-field') {
+    body.textContent = 'Scrolling to the diff field…';
+    revealTourDiffField()
+      .then(() => {
+        if (traceTourOpen && traceTourIndex === index) {
+          body.textContent = step.body;
+          refitTourStepChrome(index, target, step, panel, spotlight, card);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to open tour diff panel:', err);
+        if (traceTourOpen && traceTourIndex === index) {
+          body.textContent =
+            'Could not open the diff panel. In Current Selection, scroll to args → diff manually.';
+        }
+      });
+  } else if (step.autoReveal === 'callstack-source') {
+    body.textContent = 'Opening source for norm · functional.py:1629…';
+    revealTourCallstackSourceSlice()
+      .then(() => {
+        if (traceTourOpen && traceTourIndex === index) {
+          body.textContent = step.body;
+          refitTourStepChrome(index, target, step, panel, spotlight, card);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to open tour source panel:', err);
+        if (traceTourOpen && traceTourIndex === index) {
+          body.textContent =
+            'Could not load the source panel. You can still inspect Call Stack frames in the timeline.';
+        }
+      });
+  } else {
+    hideTourOverlayPanels();
+  }
 
   const panelRect = panel.getBoundingClientRect();
   const spotlightRect = getTraceTourSpotlightRect(target, step);
@@ -1053,6 +687,7 @@ function closeTraceTour(markSeen = true) {
   panel?.querySelectorAll('[data-trace-tour].trace-tour-target').forEach((el) => {
     el.classList.remove('trace-tour-target');
   });
+  hideTourOverlayPanels();
 
   if (markSeen) {
     localStorage.setItem(TRACE_TOUR_STORAGE_KEY, '1');
@@ -1062,10 +697,31 @@ function closeTraceTour(markSeen = true) {
 function onTraceReady() {
   const launchBtn = document.getElementById('trace-tour-launch');
   if (launchBtn) launchBtn.hidden = false;
+  traceReady = true;
+
+  if (pendingOpenTour) {
+    pendingOpenTour = false;
+    window.setTimeout(() => openTraceTour(0), 400);
+    return;
+  }
 
   if (!localStorage.getItem(TRACE_TOUR_STORAGE_KEY)) {
     window.setTimeout(() => openTraceTour(0), 700);
   }
+}
+
+function launchDemoTour(event) {
+  if (event) event.preventDefault();
+
+  const section = document.getElementById('trace');
+  section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  if (traceReady) {
+    window.setTimeout(() => openTraceTour(0), 350);
+    return;
+  }
+
+  pendingOpenTour = true;
 }
 
 function initTraceTour() {
@@ -1091,6 +747,10 @@ function initTraceTour() {
   skipBtn.addEventListener('click', () => closeTraceTour(true));
   launchBtn.addEventListener('click', () => openTraceTour(0));
 
+  document.querySelectorAll('[data-open-tour]').forEach((el) => {
+    el.addEventListener('click', launchDemoTour);
+  });
+
   window.addEventListener('keydown', (event) => {
     if (!traceTourOpen) return;
     if (event.key === 'Escape') closeTraceTour(true);
@@ -1099,6 +759,216 @@ function initTraceTour() {
   window.addEventListener('resize', () => {
     if (traceTourOpen) renderTraceTourStep(traceTourIndex);
   });
+}
+
+function updateWfAlignLinks() {
+  const root = document.getElementById('workflow-deck');
+  const diagram = document.getElementById('wf-diagram');
+  const svg = document.getElementById('wf-align');
+  if (!root || !diagram || !svg) return;
+
+  if (Number(root.dataset.step) < 4) {
+    svg.innerHTML = '';
+    return;
+  }
+
+  const width = diagram.clientWidth;
+  const height = Math.max(svg.clientHeight || 56, 56);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('width', String(width));
+  svg.setAttribute('height', String(height));
+
+  const svgRect = svg.getBoundingClientRect();
+  const colors = {
+    v: '#ca8a04',
+    k: '#0284c7',
+    attn: '#15803d',
+  };
+
+  const markers = Object.entries(colors).map(([key, color]) => `
+    <marker id="wf-arrow-start-${key}" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10 z" fill="${color}" />
+    </marker>
+    <marker id="wf-arrow-end-${key}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="${color}" />
+    </marker>
+  `).join('');
+
+  const paths = ['v', 'k', 'attn'].map((key) => {
+    const top = diagram.querySelector(`.wf-fps--suspect .wf-fp[data-fp="${key}"]`);
+    const bottom = diagram.querySelector(`.wf-fps--ref .wf-fp[data-fp="${key}"]`);
+    if (!top || !bottom) return '';
+
+    const topRect = top.getBoundingClientRect();
+    const bottomRect = bottom.getBoundingClientRect();
+    const x1 = topRect.left + topRect.width / 2 - svgRect.left;
+    const x2 = bottomRect.left + bottomRect.width / 2 - svgRect.left;
+    const y1 = 6;
+    const y2 = height - 6;
+    const midY = height * 0.5;
+    return `<path stroke="${colors[key]}" marker-start="url(#wf-arrow-start-${key})" marker-end="url(#wf-arrow-end-${key})" d="M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}" />`;
+  }).join('');
+
+  svg.innerHTML = `<defs>${markers}</defs>${paths}`;
+}
+
+function initBitwiseAlignment() {
+  const root = document.getElementById('ba-deck');
+  if (!root) return;
+
+  const dots = Array.from(root.querySelectorAll('.ba-deck__dot'));
+  const headings = Array.from(root.querySelectorAll('.ba-heading'));
+  const prevBtn = document.getElementById('ba-prev');
+  const nextBtn = document.getElementById('ba-next');
+  const playBtn = document.getElementById('ba-play');
+  const total = 3;
+  let step = 1;
+  let timer = null;
+
+  function setStep(next) {
+    step = ((next - 1 + total) % total) + 1;
+    root.dataset.step = String(step);
+
+    dots.forEach((dot) => {
+      dot.classList.toggle('is-active', Number(dot.dataset.step) === step);
+    });
+
+    headings.forEach((heading) => {
+      heading.classList.toggle('is-on', Number(heading.dataset.step) === step);
+    });
+  }
+
+  function stopPlay() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    playBtn?.setAttribute('aria-pressed', 'false');
+    if (playBtn) playBtn.textContent = 'Play';
+  }
+
+  function startPlay() {
+    stopPlay();
+    playBtn?.setAttribute('aria-pressed', 'true');
+    if (playBtn) playBtn.textContent = 'Pause';
+    timer = setInterval(() => setStep(step + 1), 2800);
+  }
+
+  prevBtn?.addEventListener('click', () => {
+    stopPlay();
+    setStep(step - 1);
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    stopPlay();
+    setStep(step + 1);
+  });
+
+  playBtn?.addEventListener('click', () => {
+    if (timer) stopPlay();
+    else startPlay();
+  });
+
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      stopPlay();
+      setStep(Number(dot.dataset.step));
+    });
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !timer) startPlay();
+        if (!entry.isIntersecting) stopPlay();
+      });
+    },
+    { threshold: 0.4 },
+  );
+  observer.observe(root);
+
+  setStep(1);
+}
+
+function initHowItWorks() {
+  const root = document.getElementById('workflow-deck');
+  if (!root) return;
+
+  const dots = Array.from(root.querySelectorAll('.wf__dot'));
+  const headings = Array.from(root.querySelectorAll('.wf-heading'));
+  const prevBtn = document.getElementById('workflow-prev');
+  const nextBtn = document.getElementById('workflow-next');
+  const playBtn = document.getElementById('workflow-play');
+  const total = 4;
+  let step = 1;
+  let timer = null;
+
+  function setStep(next) {
+    step = ((next - 1 + total) % total) + 1;
+    root.dataset.step = String(step);
+
+    dots.forEach((dot) => {
+      dot.classList.toggle('is-active', Number(dot.dataset.step) === step);
+    });
+
+    headings.forEach((heading) => {
+      heading.classList.toggle('is-on', Number(heading.dataset.step) === step);
+    });
+
+    setTimeout(updateWfAlignLinks, step === 4 ? 80 : 0);
+  }
+
+  function stopPlay() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    playBtn?.setAttribute('aria-pressed', 'false');
+    if (playBtn) playBtn.textContent = 'Play';
+  }
+
+  function startPlay() {
+    stopPlay();
+    playBtn?.setAttribute('aria-pressed', 'true');
+    if (playBtn) playBtn.textContent = 'Pause';
+    timer = setInterval(() => setStep(step + 1), 2600);
+  }
+
+  prevBtn?.addEventListener('click', () => {
+    stopPlay();
+    setStep(step - 1);
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    stopPlay();
+    setStep(step + 1);
+  });
+
+  playBtn?.addEventListener('click', () => {
+    if (timer) stopPlay();
+    else startPlay();
+  });
+
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      stopPlay();
+      setStep(Number(dot.dataset.step));
+    });
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !timer) startPlay();
+        if (!entry.isIntersecting) stopPlay();
+      });
+    },
+    { threshold: 0.4 },
+  );
+  observer.observe(root);
+
+  window.addEventListener('resize', updateWfAlignLinks);
+  setStep(1);
 }
 
 // Nav scroll effect
@@ -1114,7 +984,6 @@ const root = document.documentElement;
 function setTheme(theme) {
   root.setAttribute('data-theme', theme);
   localStorage.setItem('opguard-theme', theme);
-  renderLossCharts();
 }
 
 themeToggle.addEventListener('click', () => {
@@ -1128,10 +997,36 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e
   }
 });
 
-initLossCharts();
 loadTrace();
-updateDiagramGuides();
 initTensorCellSelection();
-initBitwiseAlignmentLinks();
 initTraceTour();
-window.addEventListener('load', updateDiagramGuides);
+initHowItWorks();
+initBitwiseAlignment();
+initCiteCopy();
+
+function initCiteCopy() {
+  const btn = document.getElementById('cite-copy');
+  const code = document.getElementById('cite-bibtex');
+  if (!btn || !code) return;
+
+  btn.addEventListener('click', async () => {
+    const text = code.textContent.trim();
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(code);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      document.execCommand('copy');
+      selection.removeAllRanges();
+    }
+    btn.textContent = 'Copied';
+    btn.classList.add('is-copied');
+    window.setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('is-copied');
+    }, 1600);
+  });
+}

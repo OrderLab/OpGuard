@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OpGuard">
+  <defs>
+    <linearGradient id="shieldGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8EC8FF"/>
+      <stop offset="25%" stop-color="#3B82FF"/>
+      <stop offset="50%" stop-color="#0A38B0"/>
+      <stop offset="78%" stop-color="#000830"/>
+      <stop offset="100%" stop-color="#000008"/>
+    </linearGradient>
+    <linearGradient id="arcGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#0B3FA8"/>
+      <stop offset="45%" stop-color="#3B86FF"/>
+      <stop offset="100%" stop-color="#7AD4FF"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#F2F8FF"/>
+      <stop offset="100%" stop-color="#8BBCFF"/>
+    </linearGradient>
+  </defs>
+
+  <!--
+    穗: 上半偏圆、粗细均匀；下半向盾底收尖聚拢
+    上沿不超过盾牌左右肩尖
+  -->
+  <path
+    d="M248 408
+       C205 385 120 320 100 255
+       C88 210 95 155 125 128"
+    fill="none"
+    stroke="url(#arcGrad)"
+    stroke-width="7"
+    stroke-linecap="round"
+  />
+  <path
+    d="M264 408
+       C307 385 392 320 412 255
+       C424 210 417 155 387 128"
+    fill="none"
+    stroke="url(#arcGrad)"
+    stroke-width="7"
+    stroke-linecap="round"
+  />
+
+  <!-- 四角星: 稍小，再靠近盾牌一点 -->
+  <path
+    d="M128 52
+       L131 76
+       L154 82
+       L131 88
+       L128 112
+       L125 88
+       L102 82
+       L125 76
+       Z"
+    fill="#0C5CEB"
+  />
+
+  <!-- 盾牌：宽度取修改前后中间值 -->
+  <path
+    d="M256 58
+       C286 96 322 118 362 124
+       C372 126 378 134 378 144
+       V196
+       C378 280 334 352 260 412
+       C258 414 254 414 252 412
+       C178 352 134 280 134 196
+       V144
+       C134 134 140 126 150 124
+       C190 118 226 96 256 58Z"
+    fill="url(#shieldGrad)"
+  />
+
+  <!-- Toggle rows -->
+  <g>
+    <rect x="214" y="192" width="84" height="7" rx="3.5" fill="url(#barGrad)"/>
+    <rect x="214" y="262" width="84" height="7" rx="3.5" fill="url(#barGrad)"/>
+
+    <circle cx="200" cy="196" r="20" fill="#FFFFFF"/>
+    <circle cx="312" cy="196" r="20" fill="#00B4FF"/>
+    <circle cx="200" cy="266" r="20" fill="#FFFFFF"/>
+    <circle cx="312" cy="266" r="20" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Verification badge -->
+  <g transform="translate(322 348)">
+    <circle cx="0" cy="0" r="44" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="34" fill="#FFFFFF" stroke="#0A2F8A" stroke-width="8"/>
+    <path
+      d="M-14 2 L-3 13 L18 -12"
+      fill="none"
+      stroke="#0A2F8A"
+      stroke-width="8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>

@@ -1,0 +1,294 @@
+/* ── Loss Evidence ── */
+
+.loss-section {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 32px 120px;
+}
+
+.loss-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 36px;
+  align-items: stretch;
+}
+
+.loss-timeline {
+  position: relative;
+  padding: 18px 0;
+}
+
+.loss-timeline__rail {
+  position: absolute;
+  top: 52px;
+  bottom: 52px;
+  left: 48px;
+  width: 2px;
+  background: var(--border);
+}
+
+.loss-timeline__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+  align-items: center;
+  min-height: 132px;
+}
+
+.loss-timeline__icon {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.loss-timeline__content {
+  padding: 18px 20px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+}
+
+.loss-timeline__step {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.loss-timeline__content h3 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.loss-timeline__content p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.loss-timeline__item--ok .loss-timeline__icon {
+  color: #2ca02c;
+  background: rgba(44, 160, 44, 0.12);
+}
+
+.loss-timeline__item--ok .loss-timeline__step {
+  color: #1f7a1f;
+  background: rgba(44, 160, 44, 0.16);
+}
+
+.loss-timeline__item--bug .loss-timeline__icon {
+  color: #d62728;
+  background: rgba(214, 39, 40, 0.12);
+}
+
+.loss-timeline__item--bug .loss-timeline__content {
+  background: rgba(214, 39, 40, 0.05);
+  border-color: rgba(214, 39, 40, 0.16);
+}
+
+.loss-timeline__item--bug .loss-timeline__step {
+  color: #ffffff;
+  background: #d62728;
+}
+
+.loss-timeline__item--bug h3 {
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .loss-timeline__item--bug h3 {
+  color: #f87171;
+}
+
+.loss-timeline__item--manual .loss-timeline__icon {
+  color: #d62728;
+  background: rgba(214, 39, 40, 0.1);
+}
+
+.loss-timeline__item--manual .loss-timeline__step {
+  color: #ffffff;
+  background: #d62728;
+}
+
+.loss-timeline__item--manual h3 {
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .loss-timeline__item--manual h3 {
+  color: #f87171;
+}
+
+.loss-visuals {
+  display: grid;
+  gap: 24px;
+}
+
+.loss-card {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+}
+
+.loss-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.loss-card__header h3 {
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.loss-card__hint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+}
+
+.loss-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.loss-legend__item {
+  position: relative;
+  padding-left: 20px;
+}
+
+.loss-legend__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 12px;
+  height: 3px;
+  border-radius: 3px;
+  transform: translateY(-50%);
+}
+
+.loss-legend__item--buggy::before {
+  background: #d62728;
+}
+
+.loss-legend__item--baseline::before {
+  background: #2ca02c;
+}
+
+.loss-chart-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.loss-chart {
+  display: block;
+  width: 100%;
+  background: color-mix(in srgb, var(--bg-surface-alt) 72%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  touch-action: none;
+}
+
+.loss-chart--main {
+  height: 280px;
+}
+
+.loss-chart--mini {
+  height: 108px;
+}
+
+.loss-tooltip {
+  position: fixed;
+  z-index: 200;
+  min-width: 220px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--panel-shadow);
+  pointer-events: none;
+  font-size: 0.875rem;
+}
+
+.loss-tooltip__step {
+  font-weight: 800;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+}
+
+.loss-tooltip__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.loss-tooltip__label {
+  color: var(--text-secondary);
+}
+
+.loss-tooltip__value {
+  font-family: var(--font-mono);
+}
+
+/* responsive */
+  .loss-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .loss-timeline {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .loss-card {
+    padding: 18px;
+  }
+
+  .loss-card__header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .loss-timeline__item {
+    grid-template-columns: 76px 1fr;
+  }
+
+  .loss-timeline__rail {
+    left: 38px;
+  }
+
+  .loss-timeline__icon {
+    width: 52px;
+    height: 52px;
+    margin-left: 12px;
+    font-size: 1.8rem;
+  }
+
+  .loss-chart--main {
+    height: 240px;
+  }
+
