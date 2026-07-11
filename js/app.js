@@ -143,38 +143,38 @@ function initTensorCellSelection() {
   });
 }
 
-const TRACE_TOUR_STORAGE_KEY = 'opguard-trace-tour-seen-v18';
+const TRACE_TOUR_STORAGE_KEY = 'opguard-trace-tour-seen-v19';
 const TRACE_TOUR_STEPS = [
   {
     target: 'viewer',
     placement: 'dock-bottom',
     spotlight: 'full',
-    title: 'Welcome to the trace viewer',
-    body: 'This is OpGuard’s Global Alignment Trace for an open-source issue. Two runs are lined up on one timeline: the suspect run (top) and the reference run (bottom), so you can compare them side by side.',
+    title: 'Two runs, one timeline',
+    body: 'Suspect on top, reference underneath. OpGuard lined them up so you can spot where they stop matching.',
   },
   {
     target: 'viewer',
     placement: 'dock-right',
     spotlight: 'sidebar',
     interactive: true,
-    title: 'Expand the suspect run',
-    body: 'Click the arrow next to suspect run in the left sidebar (the highlighted area is clickable). Expand it to reveal op tracks and alignment slices — then press Next.',
+    title: 'Peek inside the suspect run',
+    body: 'Click the arrow next to suspect run in the left sidebar. That opens the op tracks you’ll debug from.',
   },
   {
     target: 'viewer',
     placement: 'dock-bottom',
     spotlight: 'pivot',
     interactive: true,
-    title: 'Click the first-mismatch pivot',
-    body: 'On the Alignment Status track, click the blue pivot marker (▲). That is the first mismatch between the suspect and reference runs — the clean pivot for debugging. Then press Next.',
+    title: 'Jump to the first mismatch',
+    body: 'See the blue ▲ on Alignment Status? Click it. That’s the first place the two runs disagree — your debugging pivot.',
   },
   {
     target: 'viewer',
     placement: 'dock-top',
     spotlight: 'following-flows',
     interactive: true,
-    title: 'Open the divergent op',
-    body: 'In Current Selection → Following Flows, click the linked op (e.g. _linalg.linalg_vector_norm#…). The tensor-level diff details live on that op — not on the pivot marker itself. Then press Next.',
+    title: 'Follow the linked op',
+    body: 'In Following Flows, click the linked op (like _linalg.linalg_vector_norm#…). The real tensor diff lives on that op, not on the pivot marker.',
   },
   {
     target: 'viewer',
@@ -182,16 +182,8 @@ const TRACE_TOUR_STEPS = [
     spotlight: 'diff-panel',
     interactive: true,
     autoReveal: 'diff-field',
-    title: 'Inspect the diff field',
-    body: 'Here is the scrolled-to diff for this op: fields = outputs, and the summary shows which tensor mismatched (xor_signature … vs …). Then press Next.',
-  },
-  {
-    target: 'viewer',
-    placement: 'dock-top',
-    spotlight: 'details-chrome',
-    interactive: true,
-    title: 'Hide the details panel',
-    body: 'In the top-right corner of Current Selection, click the downward chevron (v) to collapse the panel and free the timeline. Then press Next.',
+    title: 'See what actually diverged',
+    body: 'Here’s the diff: outputs mismatched. The xor_signature line shows the two tensors that no longer match bit-for-bit.',
   },
   {
     target: 'viewer',
@@ -199,8 +191,8 @@ const TRACE_TOUR_STEPS = [
     spotlight: 'source-panel',
     interactive: true,
     autoReveal: 'callstack-source',
-    title: 'Source from the call stack',
-    body: 'In the real workflow you’d click the bottom-most Call Stack frame under the pivot, then scroll down in Current Selection to open source. Here we jump straight to that end state: norm · functional.py:1629 — the call site of the first mismatched op.',
+    title: 'Land on the call site',
+    body: 'Last stop: the Python line that called the mismatched op — norm in functional.py:1629. From here, you know exactly where to dig.',
   },
 ];
 
@@ -291,15 +283,6 @@ function getTraceTourSpotlightRect(target, step) {
       left = relLeft + 10;
       width = w - 20;
       height = h * 0.42;
-    } else if (step.spotlight === 'details-chrome') {
-      // Collapse chevron sits on the Current Selection tab bar, far top-right.
-      const boxW = 64;
-      const boxH = 52;
-      const drawerTop = relTop + h * 0.455;
-      top = drawerTop;
-      left = relLeft + w - boxW - 6;
-      width = boxW;
-      height = boxH;
     } else if (step.spotlight === 'callstack') {
       // After details are hidden: suspect Call Stack is the upper track group, near the pivot.
       const trackLeft = relLeft + sidebarW + 4;
