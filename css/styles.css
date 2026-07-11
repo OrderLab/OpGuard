@@ -2930,6 +2930,18 @@ body.trace-tour-open .nav {
   color: var(--text-muted);
 }
 
+.cite__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cite__pdf {
+  padding: 12px 22px;
+  font-size: 0.875rem;
+}
+
 .cite__bib {
   margin-top: 22px;
   border: 1px solid var(--border);
