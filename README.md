@@ -6,7 +6,7 @@
   <p>
     <a href="https://orderlab.io/OpGuard/"><strong>Website</strong></a>
     ·
-    <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming"><strong>OSDI ’26</strong></a>
+    <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming"><strong>OSDI ’26 · Best Paper Award Nominee</strong></a>
     ·
     <a href="assets/docs/paper-preprint.pdf"><strong>Paper</strong></a>
     ·
@@ -23,7 +23,7 @@ In production use at ByteDance, OpGuard has reduced root-cause localization from
 
 ## Paper
 
-**[Preprint (PDF)](assets/docs/paper-preprint.pdf)** · OpGuard will appear at **[OSDI ’26](https://www.usenix.org/conference/osdi26/presentation/zhou-ziming)**:
+**[Preprint (PDF)](assets/docs/paper-preprint.pdf)** · OpGuard was presented at **[OSDI ’26](https://www.usenix.org/conference/osdi26/presentation/zhou-ziming)** (**Best Paper Award nominee**):
 
 > Ziming Zhou, Yinjie Zhao, Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang, Shuguang Wang, Haibin Lin, Peng Huang.  
 > *OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training.*  
