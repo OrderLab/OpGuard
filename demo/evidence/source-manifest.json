@@ -17,5 +17,5 @@
       "lines": 2567
     }
   ],
-  "selection": "OpGuard arm only: complete captured module referenced by observed events. Standard-log arm receives logs and recorded environment versions, with no captured source, selected code location, launch commands or reference answer."
+  "selection": "OpGuard arm only: 20 lines before and after each first observed difference, with overlapping windows merged per source snapshot. Complete snapshots are retained for verification and manual viewing but are not sent to the model. Standard-log arm receives logs and recorded environment versions, with no captured source, selected code location, launch commands or reference answer."
 }

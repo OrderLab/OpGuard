@@ -139,8 +139,8 @@ scalar input signatures:
 Unaligned operations before boundary:
   run1: 0 · run2: 33
 …</pre>
-          <p class="rootcause__source">Captured source: <a href="demo/sources/run1-stage_1_and_2.html#L1734" target="_blank" rel="noopener">run1:1734</a> · <a href="demo/sources/run2-stage_1_and_2.html#L1736" target="_blank" rel="noopener">run2:1736</a></p>
-          <div class="rootcause__cost"><strong>~70.3k input tokens · 1 call</strong><span>Observations + captured source + versions · budget ≤ $0.0108</span></div>
+          <p class="rootcause__source">First-diff source: <a href="demo/sources/run1-stage_1_and_2.html#L1734" target="_blank" rel="noopener">run1:1734</a> · <a href="demo/sources/run2-stage_1_and_2.html#L1736" target="_blank" rel="noopener">run2:1736</a></p>
+          <div class="rootcause__cost"><strong>~3.7k input tokens · 1 call</strong><span>Observations + surrounding code + versions · budget ≤ $0.0023</span></div>
           <footer><button type="button" data-rootcause="opguard" aria-label="Get rootcause from OpGuard output">Get rootcause</button></footer>
           <div class="rootcause__answer" id="opguard-answer" role="status" aria-live="polite" hidden></div>
         </article>
@@ -149,7 +149,7 @@ Unaligned operations before boundary:
         <summary>Actual root cause</summary>
         <p>A gradient buffer is overwritten on the default stream before its reduction on another stream finishes. <a href="https://github.com/OrderLab/OpGuard/blob/main/harness/examples/demo_case5/README.md#3-hypothesis-validation-and-known-answer-cross-check">Details ↗</a></p>
       </details>
-      <p class="rootcause__note">Groq · GPT-OSS 20B · Same model and diagnostic prompt. Standard logs include recorded environment versions; OpGuard includes captured differences and their source module. No launch commands supplied. Each analysis reads its complete input in one call, without external source search. Expand shows the full evidence sent to the model.</p>
+      <p class="rootcause__note">Groq · GPT-OSS 20B · Same model and diagnostic prompt. Both inputs include recorded environment versions. OpGuard includes first observed differences and ±20 lines of surrounding code, with overlapping excerpts merged. No launch commands supplied. Each analysis reads its complete input in one call, without external source search. Expand shows the full evidence sent to the model.</p>
       <p class="rootcause__note">Conservative inference budgets include prompts and maximum output; actual usage may be lower. Free to try, with shared usage limits. <a href="https://console.groq.com/docs/model/openai/gpt-oss-20b" target="_blank" rel="noopener">Groq list prices ↗</a></p>
     </section>
 

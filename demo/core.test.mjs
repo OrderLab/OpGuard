@@ -44,7 +44,7 @@ test('fixed evidence fits the model and monetary reservations exceed tokenized m
     assert.ok(reservation.costNanos >= input * PRICING.input + MAX_COMPLETION * PRICING.output);
   }
 });
-test('standard logs get recorded versions; only OpGuard gets captured source and mapped callsites', () => {
+test('standard logs get versions; OpGuard gets only merged context around first differences', () => {
   const marker = '\n--- Runtime observations ---\n';
   const shared = packets.trace.split(marker)[0];
   assert.ok(packets.opguard.startsWith(shared));
@@ -54,15 +54,38 @@ test('standard logs get recorded versions; only OpGuard gets captured source and
   assert.doesNotMatch(shared + PROMPT, /stage_1_and_2|get_grad_norm_direct|all_norms|overlap_comm|Megatron/i);
   assert.doesNotMatch(packets.trace, /OpGuard captured source|complete module|opguard_wrapped__|get_grad_norm_direct|captured_source_line|source_at_observation/);
   const manifest = JSON.parse(readFileSync(new URL('./evidence/source-manifest.json',import.meta.url)));
+  const stats = JSON.parse(readFileSync(new URL('./evidence-stats.json',import.meta.url)));
+  assert.equal(stats.source_context_lines, 20);
+  assert.deepEqual(stats.source_windows.map(window => [window.start_line, window.end_line]), [[1714,1765],[1716,1767]]);
+  const report=JSON.parse(packets.opguard.split(marker)[1]);
+  let sentLines = 0;
   for (const file of manifest.sources) {
     const raw = readFileSync(new URL('./evidence/'+file.path,import.meta.url));
     assert.equal(createHash('sha256').update(raw).digest('hex'),file.sha256);
     const lines=raw.toString().replaceAll('overlap-off','run1').replaceAll('overlap-on','run2').split(/\r?\n/);
     if(lines.at(-1)==='') lines.pop();
-    assert.ok(packets.opguard.includes(lines.map((line,i)=>`${i+1}:` + (line ? ` ${line}` : '')).join('\n')));
+    const windows = stats.source_windows.filter(window => window.source_file === `${file.run}/${file.source_file}`);
+    const expectedLines = new Set();
+    for (const rank of report.ranks) for (const observed of rank.observations) {
+      if (observed.run !== file.run) continue;
+      for (let i = Math.max(1, observed.captured_source_line - 20); i <= Math.min(lines.length, observed.captured_source_line + 20); i++) expectedLines.add(i);
+    }
+    const sent = [];
+    for (const window of windows) {
+      const selected = Array.from({length: window.end_line-window.start_line+1}, (_, i) => window.start_line+i);
+      sent.push(...selected);
+      const text = selected.map(i => `${i}:` + (lines[i-1] ? ` ${lines[i-1]}` : '')).join('\n');
+      assert.ok(packets.opguard.includes(`--- ${window.source_file}:${window.start_line}-${window.end_line} (surrounding context) ---\n${text}`));
+    }
+    assert.deepEqual(sent, [...expectedLines].sort((a,b)=>a-b));
+    sentLines += sent.length;
     const page=readFileSync(new URL('./sources/'+file.path.replace('.py','.html'),import.meta.url),'utf8');
     assert.ok(page.includes(`id="L${file.lines}"`));
   }
+  assert.equal([...packets.opguard.split(marker)[0].matchAll(/^\d+:/gm)].length, sentLines);
+  assert.equal(sentLines, 104);
+  assert.doesNotMatch(packets.opguard, /complete module|^1:|def reduce_ipg_grads\(/m);
+  assert.ok(encode(packets.opguard).length < 5000, 'context must remain bounded instead of embedding entire modules');
   for(const packet of Object.values(packets)) {
     assert.doesNotMatch(packet,/overlap-off|overlap-on|run1 overlap_comm=False|run2 overlap_comm=True/);
     assert.match(packet,/Launch commands are not supplied/);
@@ -75,7 +98,6 @@ test('standard logs get recorded versions; only OpGuard gets captured source and
       assert.ok(packets.trace.includes(`--- ${run} / ${stream} ---\n` + log));
     }
   }
-  const report=JSON.parse(packets.opguard.split(marker)[1]);
   assert.equal(capturedLocations.length, 4);
   assert.deepEqual(capturedLocations, report.ranks.flatMap(rank => rank.observations.map(observed => ({rank: rank.rank, source_file: observed.source_file, line: observed.captured_source_line}))));
   for(const rank of report.ranks) for(const observed of rank.observations) {

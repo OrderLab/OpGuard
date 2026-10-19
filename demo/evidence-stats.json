@@ -1,7 +1,20 @@
 {
+  "source_context_lines": 20,
+  "source_windows": [
+    {
+      "source_file": "run1/deepspeed/runtime/zero/stage_1_and_2.py",
+      "start_line": 1714,
+      "end_line": 1765
+    },
+    {
+      "source_file": "run2/deepspeed/runtime/zero/stage_1_and_2.py",
+      "start_line": 1716,
+      "end_line": 1767
+    }
+  ],
   "source_bytes": {
     "trace": 0,
-    "opguard": 290707
+    "opguard": 6954
   },
   "observation_bytes": {
     "trace": 55678,
@@ -9,7 +22,7 @@
   },
   "packet_bytes": {
     "trace": 56315,
-    "opguard": 299312
+    "opguard": 15559
   },
   "source_lines": {
     "run1": 2565,

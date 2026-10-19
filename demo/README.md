@@ -8,7 +8,8 @@ The reference answer is separate HTML and never sent to Groq.
 Both arms receive the recorded environment versions (including PyTorch,
 DeepSpeed, Accelerate, NumPy, CUDA and driver). The standard-log arm receives
 no captured source or preselected suspect code. Only the OpGuard arm receives
-the complete captured module referenced by its observed events, with line numbers.
+20 lines before and after each first observed difference, with overlapping source
+windows merged per snapshot and captured line numbers preserved.
 Neither arm has a source-search tool: this is an evidence-input comparison using
 single model calls, not a benchmark of an agent searching dependency repositories.
 Dependency commits are unknown, and no commit or Megatron dependency is invented.
@@ -100,8 +101,14 @@ Separate stdout/stderr cannot be interleaved retrospectively. Expand shows the e
 packet; the page preview is only a few lines. Neither arm uses intermediate summaries.
 
 `demo/evidence/source-manifest.json` pins two exact `sourceFiles` entries extracted
-from the rank-0 trace. The complete module is supplied only to the OpGuard arm;
-this selection comes from its observed callsites, not the known root cause.
+from the rank-0 trace. Only surrounding source windows are supplied to the OpGuard
+arm, selected mechanically from the observed callsites without using the known
+root cause. A window covers ±20 lines, clipped at file boundaries; overlapping or
+adjacent windows merge per snapshot. In this case, four observations merge into
+two windows: run1 lines 1714–1765 and run2 lines 1716–1767 (104 lines total).
+Complete snapshots remain available for hash verification and manual viewing;
+they are never included in the model input. The selected ranges are recorded in
+`demo/evidence-stats.json` and checked against the captured source in tests.
 Source line numbers include instrumentation, so they differ from upstream package
 line numbers and the original operator tags. For example, rank 0's tag 1688 maps
 to captured lines 1734/1736, and rank 1's tag 1699 to 1745/1747. Source hashes verify
@@ -119,13 +126,13 @@ answers can be wrong. The reference cause remains a separate disclosure.
 
 ## Cost labels
 
-Complete evidence inputs are 18,689 tokens for logs + versions and 70,291 for
-OpGuard observations + captured source + versions, measured with o200k_base.
-The shared system prompt adds 210 tokens. Both arms use one request. The
-conservative per-call reservations are 61,566 versus 134,144 total tokens
+Complete evidence inputs are 18,689 tokens for logs + versions and 3,725 for
+OpGuard observations + surrounding source + versions, measured with o200k_base.
+The shared system prompt adds 222 tokens. Both arms use one request. The
+conservative per-call reservations are 61,625 versus 20,869 total tokens
 (input bound, framing, and maximum output).
-Their maximum reserved inference costs are $0.00530865 and $0.010752, rounded
-up in the UI to $0.0054 and $0.0108. These are conservative budget caps, not
+Their maximum reserved inference costs are $0.005313075 and $0.002256375, rounded
+up in the UI to $0.0054 and $0.0023. These are conservative budget caps, not
 measured charges or diagnostic-accuracy guarantees. Actual charges are normally
 lower. Failed/repeated analyses and evidence collection/hosting are excluded
 from the displayed per-analysis caps. Visitors are not charged for the demo.
