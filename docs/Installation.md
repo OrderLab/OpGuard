@@ -1,6 +1,6 @@
 # Installation
 
-OpGuard runs inside the training environment; the harness can live in a separate agent environment. Both require Python 3.10+. They share this repository but remain two independently installed packages: `opguard` at the root and `opguard-harness` in [harness/](../harness/). The commands below describe the published packages; until a release is published, install from source or local wheels.
+OpGuard runs inside the training environment; the harness can live in a separate agent environment. Both require Python 3.10+. They share this repository but remain two independently installed packages: `opguard` at the root and `opguard-harness` in [harness/](../harness/). `opguard` is distributed as a PyPI source package. The harness is currently installed from this repository.
 
 ```bash
 # Linux: install CUDA-enabled PyTorch and CUDA/CUPTI development tools first.
@@ -11,7 +11,7 @@ uv pip install --no-build-isolation --no-binary=opguard opguard
 opguard doctor --require-native
 
 # Agent environment: isolated tool installation, no Torch dependency.
-uv tool install opguard-harness
+uv tool install ./harness  # from a checkout of OrderLab/OpGuard
 opguard-harness tools
 ```
 
