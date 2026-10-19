@@ -30,3 +30,7 @@ The `index.html`, `assets/`, `css/`, and `js/` directories serve the existing pr
 website. Preserve their URLs when changing the source layout.
 
 Keep third-party attribution and license notices with copied or adapted code.
+
+## Website
+
+The website and live demo are maintained on [`webpage`](https://github.com/OrderLab/OpGuard/tree/webpage). GitHub Pages publishes that branch’s root. Keep website changes on that branch; `main` contains the Python packages, harness, and documentation.

@@ -6,7 +6,7 @@ when a design is selected to replace quickstart.gif. Fonts stay on the host.
 import argparse
 from functools import lru_cache
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 ROOT = Path(__file__).resolve().parent
 W, H, SCALE = 960, 440, 2
@@ -63,9 +63,8 @@ class Canvas:
         labels = ['Install', 'Ask your agent', 'Root-cause report']
         for i, label in enumerate(labels):
             x = 40 + i * 300
-            self.line(x, 476, x+280, 476, 'accent' if i == step else 'line', 3 if i == step else 1)
-            self.text(x, 492, f'0{i+1}  {label}', size=19,
-                      color='accent' if i == step else 'muted', bold=i == step)
+            self.text(x, 498, f'0{i+1}  {label}', size=14,
+                      color='accent' if i == step else 'muted')
 
 
 PROMPT_LINES = ('Use OpGuard to investigate these two training runs.',
@@ -85,7 +84,45 @@ def typed_prompt(c, count):
         remaining -= len(line)
 
 
-def standard(theme, step, count=None):
+def source_backdrop(c, reveal, highlight):
+    """Reflowed buffer-view excerpt; softly reveal storage and its write."""
+    def tint(color, opacity):
+        bg = ImageColor.getrgb(c.t['bg'])
+        fg = ImageColor.getrgb(c.t[color])
+        return tuple(round(a + (b-a)*opacity) for a, b in zip(bg, fg))
+
+    rows = [
+        'if self.contiguous_gradients:',
+        '    new_grad_tensor = (',
+        '        self.ipg_buffer[self.ipg_index]',
+        '        .narrow(',
+        '            0,',
+        '            self.elements_in_ipg_bucket,',
+        '            param.numel()',
+        '        )',
+        '    )',
+        '    new_grad_tensor.copy_(grad_reduc.view(-1))',
+        '    grad_reduc.data = new_grad_tensor.data',
+    ]
+    x, y, size, leading = 495, 188, 15, 25
+    for i, row in enumerate(rows):
+        yy = layout_y(y+i*leading)*SCALE
+        token = ('self.ipg_buffer[self.ipg_index]' if i == 2 else
+                 'new_grad_tensor.copy_' if i == 9 else None)
+        if token:
+            prefix = row[:row.index(token)]
+            xx = x*SCALE+c.d.textlength(prefix, font=font(size, mono=True))
+            tw = c.d.textlength(token, font=font(size, mono=True))
+            c.d.rounded_rectangle((xx-4*SCALE, yy-4*SCALE, xx+tw+4*SCALE, yy+(size+5)*SCALE),
+                                     radius=4*SCALE, fill=tint('accent', .09*highlight))
+        c.d.text((x*SCALE, yy), row, font=font(size, mono=True),
+                 fill=tint('muted', .34*reveal), anchor='lt')
+        if token:
+            c.d.text((xx, yy), token, font=font(size, mono=True),
+                     fill=tint('accent', .34*reveal+.56*highlight), anchor='lt')
+
+
+def standard(theme, step, count=None, reveal=1, highlight=1):
     c = Canvas(theme)
     c.navigation(step)
     if step == 0:
@@ -108,20 +145,14 @@ def standard(theme, step, count=None):
         c.text(64, 378, 'A  ./run-a/train.py     B  ./run-b/train.py', size=20, mono=True, color='muted')
         c.text(64, 415, 'Python: /path/to/train-env/bin/python', size=19, color='muted', mono=True)
     else:
-        c.text(40, 109, 'Root-cause analysis', size=24, bold=True)
-        c.text(40, 145, 'DeepSpeed communication overlap · evidence and next steps', size=18, color='muted')
-        c.box(40, 203, 880, 250, fill='panel', outline='line')
-        c.text(64, 221, 'LIKELY ROOT CAUSE', size=17, color='accent', bold=True)
-        c.text(64, 253, 'Gradient buffer reused before reduction completes.', size=24, bold=True)
-        c.text(64, 292, 'The overwrite can corrupt gradients consumed by the norm.', size=22)
-        c.line(64, 328, 896, 328)
-        c.text(64, 343, 'TRACE', size=17, color='muted', bold=True)
-        c.text(150, 340, 'Perfetto / vector_norm#2144 / rank 0', size=21, color='accent')
-        c.text(64, 378, 'SOURCE', size=17, color='muted', bold=True)
-        c.text(150, 375, 'stage_1_and_2.py:967–1004 · buffer reuse', size=21)
-        c.text(64, 412, 'NEXT', size=17, color='muted', bold=True)
-        c.text(150, 409, 'Test a per-buffer completion wait before reuse.', size=21)
-        c.text(40, 459, 'Public demo: source-supported diagnosis; GPU intervention not run.', size=15, color='muted')
+        source_backdrop(c, reveal, highlight)
+        c.text(40, 109, 'Root-cause analysis', size=18, color='muted')
+        c.text(40, 205, 'Likely root cause', size=16, color='accent')
+        c.text(40, 242, 'Gradient buffer reused', size=34, bold=True)
+        c.text(40, 287, 'before reduction', size=34, bold=True)
+        c.text(40, 332, 'completes.', size=34, bold=True)
+        c.text(40, 403, 'Perfetto · vector_norm#2144 · rank 0', size=16, color='muted')
+        c.text(40, 430, 'stage_1_and_2.py:967–1004', size=16, color='muted')
     return c.image
 
 
@@ -139,8 +170,18 @@ def save_variant(name, directory):
     for count in range(0, PROMPT_LENGTH, 3):
         frames.append(indexed(standard(name, 1, count)))
         durations.append(90 if count else 450)
-    frames.extend([indexed(stills[1]), indexed(stills[2])])
-    durations.extend([2400, 9000])
+    frames.extend([indexed(stills[1]), indexed(standard(name, 2, reveal=0, highlight=0))])
+    durations.extend([2400, 500])
+    def ease(t):
+        return t*t*(3-2*t)
+    for i in range(1, 17):
+        frames.append(indexed(standard(name, 2, reveal=ease(i/16), highlight=0)))
+        durations.append(60)
+    for i in range(1, 13):
+        frames.append(indexed(standard(name, 2, highlight=ease(i/12))))
+        durations.append(60)
+    frames.append(indexed(stills[2]))
+    durations.append(6820)
     path = directory / f'{name}.gif'
     frames[0].save(path, save_all=True, append_images=frames[1:],
                    duration=durations, loop=0, optimize=False, disposal=1)

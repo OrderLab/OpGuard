@@ -1,7 +1,7 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/images/brand/logo-wordmark-dark.svg">
-    <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="320">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-wordmark-dark.svg">
+    <img src="assets/brand/logo-wordmark.svg" alt="OpGuard" width="320">
   </picture>
   <p><strong>Debug training differences with your AI agent.</strong></p>
   <p>
