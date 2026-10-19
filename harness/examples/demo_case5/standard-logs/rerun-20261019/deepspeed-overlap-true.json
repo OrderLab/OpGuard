@@ -1,0 +1,25 @@
+{
+  "train_micro_batch_size_per_gpu": 6,
+  "steps_per_print": 100,
+  "prescale_gradients": false,
+  "zero_allow_untested_optimizer": true,
+  "gradient_accumulation_steps": "auto",
+  "bf16": {
+    "enabled": false
+  },
+  "fp16": {
+    "enabled": true
+  },
+  "wall_clock_breakdown": false,
+  "gradient_clipping": 1.0,
+  "zero_optimization": {
+    "stage": 1,
+    "allgather_partitions": true,
+    "reduce_scatter": true,
+    "allgather_bucket_size": 100000000.0,
+    "reduce_bucket_size": 1048576,
+    "stage3_max_reuse_distance": 2000000000.0,
+    "overlap_comm": true,
+    "contiguous_gradients": true
+  }
+}

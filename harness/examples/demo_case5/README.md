@@ -5,6 +5,13 @@ blind agent benchmark or a locally reproduced GPU race. The user supplied the
 answer; the embedded source also includes a proposed repair. Generic skills and
 readers contain no case-specific diagnosis rule.
 
+Complete native [stdout/stderr from a new two-GPU rerun](standard-logs/rerun-20261019/README.md)
+are now available for overlap enabled and disabled. These are separately captured
+2026-10-19 runs, not the missing original console logs of the historical trace.
+Each completed all 20 training steps; source, configuration and log hashes are
+recorded with the files. The historical artifact analysis below retains its
+original evidence limits.
+
 ## Replay the artifact queries
 
 From the harness checkout, use Python 3.10+:
