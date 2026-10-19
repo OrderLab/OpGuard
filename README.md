@@ -60,7 +60,7 @@ Deployed at ByteDance, OpGuard has helped diagnose **20+ production issues**, in
 
 ## Paper
 
-**[Preprint (PDF)](assets/docs/paper-preprint.pdf)** · OpGuard was presented at **[OSDI ’26](https://www.usenix.org/conference/osdi26/presentation/zhou-ziming)** (**Best Paper Award nominee**):
+**[OSDI ’26 Paper (PDF)](https://www.usenix.org/system/files/osdi26-zhou-ziming.pdf)** · OpGuard was presented at **[OSDI ’26](https://www.usenix.org/conference/osdi26/presentation/zhou-ziming)** (**Best Paper Award nominee**):
 
 > Ziming Zhou, Yinjie Zhao, Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang, Shuguang Wang, Haibin Lin, Peng Huang.  
 > *OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training.*  
