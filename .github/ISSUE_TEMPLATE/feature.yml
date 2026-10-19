@@ -1,0 +1,112 @@
+name: OpGuard feature proposal
+description: Propose a numerical debugging, alignment, capture, or agent workflow feature.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the debugging task this feature should make possible. Start with the problem and expected outcome; implementation details can evolve during discussion.
+        Use a small synthetic example when possible. Remove credentials, private paths, model weights, and private workload source from shared evidence.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      multiple: true
+      options:
+        - Numerical determinism and numerical alignment
+        - Alignment across parallelisms (TP / CP / SP / PP / DP)
+        - Agentic debugging and tool calls
+        - Capture, instrumentation, and framework adapters
+        - Other OpGuard capability
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Debugging problem
+      description: What are you trying to investigate, and where does the current OpGuard workflow fall short?
+      placeholder: Describe a concrete investigation, its current workaround, and the missing capability.
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired behavior
+      description: What should a user or coding agent be able to do, and what evidence should OpGuard return?
+      placeholder: Describe the trigger, action, and observable result. Proposed tool calls or a short interaction example are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workload
+    attributes:
+      label: Workload and execution context
+      description: Include only details relevant to this proposal. Unknown values are fine.
+      placeholder: |
+        Training / inference (prefill or decode):
+        Framework and relevant versions:
+        Precision / shapes / kernel or compile mode:
+        Baseline and candidate topology (TP / CP / SP / PP / DP):
+        Inputs, checkpoint, RNG, or request/step identity:
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Numerical or alignment contract
+      description: For relevant features, explain what is comparable and what the observations would establish. Leave blank if not applicable.
+      placeholder: |
+        Logical operator/tensor boundary or producer-consumer relation:
+        Partition axes, rank mapping, transforms, or framework semantics:
+        Comparison criterion (bitwise, numerical tolerance, historical baseline, or operator constraint):
+        Required context, unsupported cases, and when to return undetermined:
+        Separate an anomaly or fingerprint match from a validated correctness claim.
+    validations:
+      required: false
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Capture and agent workflow
+      description: For relevant features, describe how evidence is collected and how an agent should act on it.
+      placeholder: |
+        Capture window / callsites / tensor slots and replay requirements:
+        Safe activation points, async behavior, and instrumentation overhead budget:
+        Proposed tool interaction and persistent evidence/history:
+        Failure, interruption, or inconclusive-result behavior:
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: First milestone and follow-up scope
+      description: Suggest the smallest useful implementation, dependencies, and what can follow later.
+      placeholder: A bounded first slice, followed by optional extensions and open design questions.
+    validations:
+      required: false
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Acceptance and validation
+      description: How will we know this feature helps? Include a successful case, a negative or unsupported case, and relevant cost measurements.
+      placeholder: |
+        - [ ] A small synthetic or public workload demonstrates the intended behavior.
+        - [ ] A benign variation or incompatible mapping produces the expected result.
+        - [ ] Evidence and conclusions are inspectable and reproducible.
+        - [ ] Relevant latency, throughput, storage, or replay cost is measured.
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Related roadmap items and evidence
+      description: Link related issues, designs, public reproductions, or sanitized artifacts. Say whether evidence was observed locally, inferred from source, or reported elsewhere.
+    validations:
+      required: false
