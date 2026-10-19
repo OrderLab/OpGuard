@@ -26,27 +26,21 @@ Give your coding agent two training runs. OpGuard helps it find where their comp
 
 <table>
 <tr>
-<th>Execution trace · <a href="https://orderlab.io/OpGuard/demo/inputs/trace.txt">Expand ↗</a></th>
+<th>Standard logs · <a href="https://orderlab.io/OpGuard/demo/inputs/trace.txt">Expand ↗</a></th>
 <th>OpGuard output · <a href="https://orderlab.io/OpGuard/demo/inputs/opguard.txt">Expand ↗</a></th>
 </tr>
 <tr>
-<td><pre>{
-  "name": "_linalg.linalg_vector_norm#2144",
-  "ph": "X",
-  "ts": 128647000,
-  "dur": 60000,
-  "pid": 1,
-  "tid": 10
-}
+<td><pre>The Zen of Python, by Tim Peters
+
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
 …</pre></td>
-<td><pre>{
-  "title": "_linalg.linalg_vector_norm#2144",
-  "status": "diff",
-  "diff": {
-    "fields": ["outputs"],
-    "summary": "outputs::xor_signature: 1078077440.0 vs 1077945344.0"
-  }
-}
+<td><pre>First observed difference · rank 0
+get_grad_norm_direct · None.append#2246
+run1: [0, 1077945344, 0, 0]
+run2: [0, 1077804032, 0, 0]
+Unaligned before boundary: 0 / 33
 …</pre></td>
 </tr>
 <tr><td align="center"><a href="https://orderlab.io/OpGuard/?analyze=trace#rootcause"><kbd>Get rootcause</kbd></a></td><td align="center"><a href="https://orderlab.io/OpGuard/?analyze=opguard#rootcause"><kbd>Get rootcause</kbd></a></td></tr>
@@ -59,7 +53,7 @@ A gradient buffer is overwritten on the default stream before its reduction on a
 
 </details>
 
-*Groq · GPT-OSS 20B · Same prompt, selected evidence + shared source. Answers generated on click.*
+*Groq · GPT-OSS 20B · Same model and diagnostic prompt; same-launch evidence. Full logs read in six parts (a few minutes); OpGuard uses first observed differences.*
 
 ## Get started
 
