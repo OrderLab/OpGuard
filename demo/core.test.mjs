@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { handle, reserve, settle, requestBudget, LIMITS, PRICING, PROMPT, MODEL, MAX_COMPLETION, DAY_MS, CALL_TIMEOUT_MS } from './core.js';
 import { packets } from './packets.js';
 import { encode } from 'gpt-tokenizer/encoding/o200k_base';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 const env = { GROQ_API_KEY: 'test-secret', ALLOWED_ORIGINS: 'https://orderlab.io' };
 const req = body => new Request('https://demo.test/api/rootcause', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://orderlab.io' }, body: JSON.stringify(body) });
 const limiter = { reserve: async () => ({ id: 'r1' }), settle: async () => {} };
@@ -38,6 +40,43 @@ test('fixed evidence fits the model and monetary reservations exceed tokenized m
     assert.ok(reservation.tokens >= input + MAX_COMPLETION);
     assert.ok(reservation.tokens < LIMITS.minuteTokens);
     assert.ok(reservation.costNanos >= input * PRICING.input + MAX_COMPLETION * PRICING.output);
+  }
+});
+test('standard logs get recorded versions; only OpGuard gets captured source and mapped callsites', () => {
+  const marker = '\n--- Runtime observations ---\n';
+  const shared = packets.trace.split(marker)[0];
+  assert.ok(packets.opguard.startsWith(shared));
+  const runtime = JSON.parse(readFileSync(new URL('./evidence/manifest.json', import.meta.url))).runtime;
+  assert.ok(shared.includes(JSON.stringify(runtime, null, 2)));
+  assert.match(shared, /git-hash=unknown/);
+  assert.doesNotMatch(shared + PROMPT, /stage_1_and_2|get_grad_norm_direct|all_norms|overlap_comm|Megatron/i);
+  assert.doesNotMatch(packets.trace, /OpGuard captured source|complete module|opguard_wrapped__|get_grad_norm_direct|captured_source_line|source_at_observation/);
+  const manifest = JSON.parse(readFileSync(new URL('./evidence/source-manifest.json',import.meta.url)));
+  for (const file of manifest.sources) {
+    const raw = readFileSync(new URL('./evidence/'+file.path,import.meta.url));
+    assert.equal(createHash('sha256').update(raw).digest('hex'),file.sha256);
+    const lines=raw.toString().replaceAll('overlap-off','run1').replaceAll('overlap-on','run2').split(/\r?\n/);
+    if(lines.at(-1)==='') lines.pop();
+    assert.ok(packets.opguard.includes(lines.map((line,i)=>`${i+1}:` + (line ? ` ${line}` : '')).join('\n')));
+    const page=readFileSync(new URL('./sources/'+file.path.replace('.py','.html'),import.meta.url),'utf8');
+    assert.ok(page.includes(`id="L${file.lines}"`));
+  }
+  for(const packet of Object.values(packets)) {
+    assert.doesNotMatch(packet,/overlap-off|overlap-on|run1 overlap_comm=False|run2 overlap_comm=True/);
+    assert.match(packet,/Launch commands are not supplied/);
+    assert.match(packet,/Do not assume.*only one difference/);
+  }
+  for (const [side, run] of [['overlap-off', 'run1'], ['overlap-on', 'run2']]) {
+    for (const stream of ['stdout', 'stderr']) {
+      const log = readFileSync(new URL(`./evidence/${side}-${stream}.log`, import.meta.url), 'utf8')
+        .replaceAll('overlap-off', 'run1').replaceAll('overlap-on', 'run2');
+      assert.ok(packets.trace.includes(`--- ${run} / ${stream} ---\n` + log));
+    }
+  }
+  const report=JSON.parse(packets.opguard.split(marker)[1]);
+  for(const rank of report.ranks) for(const observed of rank.observations) {
+    assert.equal(observed.source_at_observation[0].line,observed.captured_source_line);
+    assert.ok(observed.source_at_observation[0].text.includes(String(observed.operator_tag_line)));
   }
 });
 test('arbitrary prompt, model, URL and unknown arm are rejected before quota or upstream', async () => {

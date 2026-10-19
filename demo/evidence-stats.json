@@ -1,0 +1,18 @@
+{
+  "source_bytes": {
+    "trace": 0,
+    "opguard": 290707
+  },
+  "observation_bytes": {
+    "trace": 55678,
+    "opguard": 7968
+  },
+  "packet_bytes": {
+    "trace": 56315,
+    "opguard": 299312
+  },
+  "source_lines": {
+    "run1": 2565,
+    "run2": 2567
+  }
+}

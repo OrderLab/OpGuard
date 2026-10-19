@@ -1,7 +1,22 @@
-Two DeepSpeed training runs, run1 overlap_comm=False and run2 overlap_comm=True, use the same workload. Diagnose their numerical divergence.
-Complete standard logs with normalized host paths, in original order within each stream. stdout/stderr were captured separately; their interleaving is unknown.
+Two training runs show numerical divergence. Diagnose it from the supplied evidence. Launch commands are not supplied. Do not assume the runs have identical configurations or that there is only one difference.
 
---- overlap-off / stdout ---
+--- Recorded environment (both runs) ---
+{
+  "python": "3.11.2",
+  "torch": "2.9.1+cu130",
+  "cuda_build": "13.0",
+  "driver": "580.126.20",
+  "deepspeed": "0.14.2",
+  "accelerate": "0.29.3",
+  "numpy": "1.26.4",
+  "gpu": "2 x NVIDIA GB200"
+}
+Dependency Git commits were not recorded; DeepSpeed reports git-hash=unknown. Package versions identify the environment, not a verified source location.
+
+--- Runtime observations ---
+Standard logs with normalized paths and neutral run labels, in original order within each stream. stdout/stderr were captured separately; their interleaving is unknown.
+
+--- run1 / stdout ---
 The Zen of Python, by Tim Peters
 
 Beautiful is better than ugly.
@@ -271,18 +286,18 @@ rank [0] global_step [17] loss [0.00145053864] grad_norm [0.00138282776]
 rank [0] global_step [18] loss [0.219383374] grad_norm [0.000346183777]
 rank [0] global_step [19] loss [0.12809968] grad_norm [0.00147438049]
 
---- overlap-off / stderr ---
+--- run1 / stderr ---
 /opt/opguard/.venv_opguard/lib/python3.11/site-packages/_distutils_hack/__init__.py:53: UserWarning: Reliance on distutils from stdlib is deprecated. Users must rely on setuptools to provide the distutils module. Avoid importing distutils or import setuptools first, and avoid setting SETUPTOOLS_USE_DISTUTILS=stdlib. Register concerns at https://github.com/pypa/setuptools/issues/new?template=distutils-deprecation.yml
   warnings.warn(
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run1/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
   @autocast_custom_fwd
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run1/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
   @autocast_custom_bwd
 /opt/opguard/.venv_opguard/lib/python3.11/site-packages/_distutils_hack/__init__.py:53: UserWarning: Reliance on distutils from stdlib is deprecated. Users must rely on setuptools to provide the distutils module. Avoid importing distutils or import setuptools first, and avoid setting SETUPTOOLS_USE_DISTUTILS=stdlib. Register concerns at https://github.com/pypa/setuptools/issues/new?template=distutils-deprecation.yml
   warnings.warn(
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run1/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
   @autocast_custom_fwd
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run1/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
   @autocast_custom_bwd
 [W1019 21:19:01.708631404 ProcessGroupNCCL.cpp:924] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
 [W1019 21:19:01.800671515 ProcessGroupNCCL.cpp:924] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
@@ -305,7 +320,7 @@ rank [0] global_step [19] loss [0.12809968] grad_norm [0.00147438049]
 [rank0]:[W1019 21:19:08.438463548 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
 [W1019 21:19:09.602545498 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
 
---- overlap-on / stdout ---
+--- run2 / stdout ---
 The Zen of Python, by Tim Peters
 
 Beautiful is better than ugly.
@@ -575,18 +590,18 @@ rank [0] global_step [17] loss [0.00145053864] grad_norm [0.00151081756]
 rank [0] global_step [18] loss [0.219383374] grad_norm [0.00111055549]
 rank [0] global_step [19] loss [0.129150391] grad_norm [0.00158956705]
 
---- overlap-on / stderr ---
+--- run2 / stderr ---
 /opt/opguard/.venv_opguard/lib/python3.11/site-packages/_distutils_hack/__init__.py:53: UserWarning: Reliance on distutils from stdlib is deprecated. Users must rely on setuptools to provide the distutils module. Avoid importing distutils or import setuptools first, and avoid setting SETUPTOOLS_USE_DISTUTILS=stdlib. Register concerns at https://github.com/pypa/setuptools/issues/new?template=distutils-deprecation.yml
   warnings.warn(
 /opt/opguard/.venv_opguard/lib/python3.11/site-packages/_distutils_hack/__init__.py:53: UserWarning: Reliance on distutils from stdlib is deprecated. Users must rely on setuptools to provide the distutils module. Avoid importing distutils or import setuptools first, and avoid setting SETUPTOOLS_USE_DISTUTILS=stdlib. Register concerns at https://github.com/pypa/setuptools/issues/new?template=distutils-deprecation.yml
   warnings.warn(
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run2/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
   @autocast_custom_fwd
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run2/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
   @autocast_custom_bwd
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run2/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
   @autocast_custom_fwd
-/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/run2/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
   @autocast_custom_bwd
 [W1019 21:19:36.087727907 ProcessGroupNCCL.cpp:924] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
 [W1019 21:19:36.095211100 ProcessGroupNCCL.cpp:924] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())

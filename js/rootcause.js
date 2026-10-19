@@ -3,17 +3,29 @@
   if (!module) return;
   const local = ['localhost', '127.0.0.1'].includes(location.hostname);
   const endpoint = local ? '/api/rootcause' : (window.OPGUARD_DEMO_API || '');
+  function appendCitations(container, text) {
+    for (const part of text.split(/(run[12]\/deepspeed\/runtime\/zero\/stage_1_and_2\.py:\d+)/g)) {
+      const match = /^(run[12])\/deepspeed\/runtime\/zero\/stage_1_and_2\.py:(\d+)$/.exec(part);
+      const line = match && Number(match[2]);
+      if (match && line >= 1 && line <= (match[1] === 'run1' ? 2565 : 2567)) {
+        const link = document.createElement('a');
+        link.href = `demo/sources/${match[1]}-stage_1_and_2.html#L${line}`;
+        link.target = '_blank'; link.rel = 'noopener'; link.textContent = part;
+        container.append(link);
+      } else container.append(document.createTextNode(part));
+    }
+  }
   function renderAnswer(container, text) {
     container.replaceChildren();
     // Small, safe inline formatter: model text never enters innerHTML.
     for (const part of text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)) {
       if (part.startsWith('**') && part.endsWith('**')) {
         const strong = document.createElement('strong');
-        strong.textContent = part.slice(2, -2); container.append(strong);
+        appendCitations(strong, part.slice(2, -2)); container.append(strong);
       } else if (part.startsWith('`') && part.endsWith('`')) {
         const code = document.createElement('code');
-        code.textContent = part.slice(1, -1); container.append(code);
-      } else container.append(document.createTextNode(part));
+        appendCitations(code, part.slice(1, -1)); container.append(code);
+      } else appendCitations(container, part);
     }
   }
   for (const button of module.querySelectorAll('[data-rootcause]')) {

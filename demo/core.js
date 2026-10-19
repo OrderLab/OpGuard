@@ -1,8 +1,9 @@
 import { packets } from './packets.js';
 
 export const MODEL = 'openai/gpt-oss-20b';
-export const PROMPT = 'Diagnose the training divergence using only this evidence. In at most 120 words, separate: observed localization; root-cause hypothesis; missing proof. Cite observations or source lines. Source code is not evidence that a path executed. Export timestamps are presentation fields, not GPU timing. XOR signatures are NOT tensor values: equal XOR does NOT establish equal inputs; differing XOR cannot measure numerical error. If the cause is undetermined, say so.';
+export const PROMPT = 'Diagnose the training divergence from the supplied evidence. In at most 250 words, separate: observed localization; root-cause hypothesis; missing proof. Cite code locations as the supplied file path followed by :LINE. If source is provided, name the exact observed file, line and expression, and follow relevant data producers and mutations upstream to explain a plausible mechanism with code citations. Distinguish the first observed difference from the causal operation. If source is absent, do not invent source contents or line numbers; identify the next evidence needed. No source-search tool is available in this demo; do not claim to have searched or verified external code. Do not assume there is only one configuration difference or infer missing launch commands. Source definitions do not prove runtime branch execution. Unaligned event counts alone do not establish causality. Export timestamps are not GPU timing. XOR signatures are fingerprints, not tensor values: equality does not prove equal inputs and differences do not measure numerical error. If no causal line is established, say so without discarding any observed line localization.';
 export const MAX_COMPLETION = 3072;
+export const CONTEXT_TOKENS = 131072;
 export const CALL_TIMEOUT_MS = 60000;
 export const DAY_MS = 86400000;
 // Integer nano-USD: $0.075/M input and $0.30/M output, as of 2026-10-19.
@@ -14,7 +15,9 @@ const encoder = new TextEncoder();
 export function requestBudget(arm) {
   // Each UTF-8 byte is an upper bound of one input token. Include ample framing
   // overhead instead of depending on the provider matching a local tokenizer.
-  const inputTokens = encoder.encode(PROMPT + packets[arm]).length + 1024;
+  // Accepted input cannot exceed the model's context window; reserve the full
+  // output allowance on top, conservatively, even though it shares that window.
+  const inputTokens = Math.min(encoder.encode(PROMPT + packets[arm]).length + 1024, CONTEXT_TOKENS);
   return { tokens: inputTokens + MAX_COMPLETION, costNanos: inputTokens * PRICING.input + MAX_COMPLETION * PRICING.output };
 }
 

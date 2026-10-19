@@ -25,3 +25,5 @@
 .rootcause__cost strong { color: var(--text-heading); font-size: 15px; }
 .rootcause__cost span { font-size: 12px; }
 .rootcause__note a { color: var(--text-secondary); }
+.rootcause__answer a { color: var(--green-500); white-space: normal; overflow-wrap: anywhere; }
+.rootcause__source { margin: 12px 22px 0; font-size: 12px; color: var(--text-secondary); }

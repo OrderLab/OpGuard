@@ -44,7 +44,7 @@ http.createServer(async (req, res) => {
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405).end(); return; }
     const name = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
     // Explicit public paths: never serve backend source, dotfiles, keys, or quota DB.
-    if (!/^\/(index\.html|(?:css|js|assets)\/[\w./-]+|demo\/inputs\/(trace|opguard)\.txt)$/.test(name) || name.split('/').some(part => part.startsWith('.'))) { res.writeHead(404).end(); return; }
+    if (!/^\/(index\.html|(?:css|js|assets)\/[\w./-]+|demo\/inputs\/(trace|opguard)\.txt|demo\/sources\/run[12]-stage_1_and_2\.(html|py))$/.test(name) || name.split('/').some(part => part.startsWith('.'))) { res.writeHead(404).end(); return; }
     const filename = await realpath(path.join(root, name));
     if (!filename.startsWith(root)) { res.writeHead(404).end(); return; }
     const data = await readFile(filename);

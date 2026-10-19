@@ -1,0 +1,21 @@
+{
+  "sources": [
+    {
+      "run": "run1",
+      "path": "run1-stage_1_and_2.py",
+      "source_file": "deepspeed/runtime/zero/stage_1_and_2.py",
+      "sha256": "dd22b084b8ec3a41eabb7f4548f19cba4c1e93fad6260d3cb5677d7b63be5253",
+      "trace_sha256": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d",
+      "lines": 2565
+    },
+    {
+      "run": "run2",
+      "path": "run2-stage_1_and_2.py",
+      "source_file": "deepspeed/runtime/zero/stage_1_and_2.py",
+      "sha256": "ec1f9aa6f0d24fa0b93bdb3d0bb543f37c1bfa08cff947dd28164a4826257963",
+      "trace_sha256": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d",
+      "lines": 2567
+    }
+  ],
+  "selection": "OpGuard arm only: complete captured module referenced by observed events. Standard-log arm receives logs and recorded environment versions, with no captured source, selected code location, launch commands or reference answer."
+}

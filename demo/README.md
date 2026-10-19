@@ -5,6 +5,13 @@ uses one request containing its complete input, with the same diagnostic prompt,
 model, reasoning setting, and 3,072-token completion cap. The browser sends only
 an arm identifier; it cannot choose prompts, models, URLs, or token limits.
 The reference answer is separate HTML and never sent to Groq.
+Both arms receive the recorded environment versions (including PyTorch,
+DeepSpeed, Accelerate, NumPy, CUDA and driver). The standard-log arm receives
+no captured source or preselected suspect code. Only the OpGuard arm receives
+the complete captured module referenced by its observed events, with line numbers.
+Neither arm has a source-search tool: this is an evidence-input comparison using
+single model calls, not a benchmark of an agent searching dependency repositories.
+Dependency commits are unknown, and no commit or Megatron dependency is invented.
 
 ## Local preview and verification
 
@@ -22,7 +29,8 @@ and restrict permissions to `600`. The server binds to `127.0.0.1:8937`, serves 
 explicit allowlist of public paths, and persists quota reservations in ignored
 `.demo-state/quota.sqlite`. It does not log keys, prompts, or model answers.
 
-Tests verify exact full-evidence delivery, spend accounting, rate windows, failures,
+Tests verify evidence isolation, captured-source hashes and line mappings, clickable
+citations, exact full-evidence delivery, spend accounting, rate windows, failures,
 and actual SQLite Durable Object concurrency and persistence across runtime restarts.
 The integration test starts an isolated local Cloudflare runtime; it never calls Groq.
 `python3 demo/build_packets.py` rebuilds the evidence packets from pinned artifacts.
@@ -57,7 +65,9 @@ rolling 24-hour window** receives HTTP 429 without calling Groq.
 Accounting uses integer nano-USD at the 2026-10-19 GPT-OSS 20B prices:
 $0.075/M input tokens and $0.30/M completion tokens, including reasoning.
 Input reservation uses the UTF-8 byte count of the fixed prompt and entire packet
-plus 1,024 tokens of framing headroom; output reserves all 3,072 allowed tokens.
+plus 1,024 tokens of framing headroom, capped at the model's 131,072-token input
+context bound; output conservatively reserves all 3,072 allowed tokens on top.
+Tests also tokenize both complete packets to verify that input plus output fits.
 Cached inputs are conservatively charged at the full input rate.
 
 Successful calls settle to provider-reported input and completion usage. Missing
@@ -78,13 +88,25 @@ per-call gate; Groq's monthly spend reporting can lag by 10–15 minutes.
 
 ## Evidence provenance
 
-Inputs come from main commit d10c4a0, harness/examples/demo_case5/paired-capture-20261019.
+Inputs come from main commit 146d6bb523cf8364bbf2788cb319aef1a46f966b,
+harness/examples/demo_case5/paired-capture-20261019.
 The four complete console streams and OpGuard summaries share the same capture IDs.
 `demo/evidence/manifest.json` pins the imported files; build_packets.py verifies hashes.
-No diagnostic source excerpt, patch, or reference answer is added to either packet.
-The left arm retains every original log byte, in order within each of four streams.
+No launch command, patch, reference answer, or statement that only one configuration
+differs is added to either packet. Run labels are normalized to run1/run2 in the
+derived inputs, preserving all original log records and their order. Configuration
+values printed by the application remain in the logs.
 Separate stdout/stderr cannot be interleaved retrospectively. Expand shows the entire
 packet; the page preview is only a few lines. Neither arm uses intermediate summaries.
+
+`demo/evidence/source-manifest.json` pins two exact `sourceFiles` entries extracted
+from the rank-0 trace. The complete module is supplied only to the OpGuard arm;
+this selection comes from its observed callsites, not the known root cause.
+Source line numbers include instrumentation, so they differ from upstream package
+line numbers and the original operator tags. For example, rank 0's tag 1688 maps
+to captured lines 1734/1736, and rank 1's tag 1699 to 1745/1747. Source hashes verify
+the original captured snapshots; public viewers and numbered model inputs normalize
+run labels without changing line counts. The viewers support `#L<number>` links.
 
 The right arm retains the 33 unaligned operations before each run2 boundary and
 unverified correspondence limitations. These are first observed captured callsites,
@@ -94,11 +116,13 @@ answers can be wrong. The reference cause remains a separate disclosure.
 
 ## Cost labels
 
-Raw evidence is 18,640 tokens versus 1,455 (~12.8x), measured with o200k_base.
-Both arms use one request. The conservative per-call reservations are 60,444
-versus 11,238 total tokens (UTF-8 input bound, framing, and maximum output).
-Their maximum reserved inference costs are $0.0052245 and $0.00153405, rounded
-up in the UI to $0.0053 and $0.0016. These are conservative budget caps, not
+Complete evidence inputs are 18,689 tokens for logs + versions and 70,291 for
+OpGuard observations + captured source + versions, measured with o200k_base.
+The shared system prompt adds 210 tokens. Both arms use one request. The
+conservative per-call reservations are 61,566 versus 134,144 total tokens
+(input bound, framing, and maximum output).
+Their maximum reserved inference costs are $0.00530865 and $0.010752, rounded
+up in the UI to $0.0054 and $0.0108. These are conservative budget caps, not
 measured charges or diagnostic-accuracy guarantees. Actual charges are normally
 lower. Failed/repeated analyses and evidence collection/hosting are excluded
 from the displayed per-analysis caps. Visitors are not charged for the demo.
