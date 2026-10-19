@@ -22,6 +22,45 @@ Give your coding agent two training runs. OpGuard helps it find where their comp
   </picture>
 </a>
 
+## Find the root cause
+
+<table>
+<tr>
+<th>Execution trace · <a href="https://orderlab.io/OpGuard/demo/inputs/trace.txt">Expand ↗</a></th>
+<th>OpGuard output · <a href="https://orderlab.io/OpGuard/demo/inputs/opguard.txt">Expand ↗</a></th>
+</tr>
+<tr>
+<td><pre>{
+  "name": "_linalg.linalg_vector_norm#2144",
+  "ph": "X",
+  "ts": 128647000,
+  "dur": 60000,
+  "pid": 1,
+  "tid": 10
+}
+…</pre></td>
+<td><pre>{
+  "title": "_linalg.linalg_vector_norm#2144",
+  "status": "diff",
+  "diff": {
+    "fields": ["outputs"],
+    "summary": "outputs::xor_signature: 1078077440.0 vs 1077945344.0"
+  }
+}
+…</pre></td>
+</tr>
+<tr><td align="center"><a href="https://orderlab.io/OpGuard/?analyze=trace#rootcause"><kbd>Get rootcause</kbd></a></td><td align="center"><a href="https://orderlab.io/OpGuard/?analyze=opguard#rootcause"><kbd>Get rootcause</kbd></a></td></tr>
+</table>
+
+<details>
+<summary>Actual root cause</summary>
+
+A gradient buffer is overwritten on the default stream before its reduction on another stream finishes. [Details ↗](harness/examples/demo_case5/README.md#3-hypothesis-validation-and-known-answer-cross-check)
+
+</details>
+
+*Groq · GPT-OSS 20B · Same prompt, selected evidence + shared source. Answers generated on click.*
+
 ## Get started
 
 Install from PyPI with Python 3.10+. The training environment needs CUDA-enabled PyTorch and CUDA/CUPTI development tools.

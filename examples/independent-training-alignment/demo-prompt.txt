@@ -1,0 +1,16 @@
+Review the public OpGuard independent-training-alignment example:
+https://github.com/OrderLab/OpGuard/tree/main/examples/independent-training-alignment
+
+This is a retrospective, known-answer evidence review, not a blind diagnosis benchmark.
+
+If you have a checkout and Python 3.11+, run:
+python3 examples/independent-training-alignment/replay.py
+
+Read examples/independent-training-alignment/README.md and the evidence files it cites.
+Explain:
+1. What the input fingerprint comparisons establish, and what they do not.
+2. Why forward agreement cannot establish backward correctness.
+3. What evidence supports the optimizer restart-state diagnosis.
+4. Which measurements the replay actually recomputed, versus measurements retained from the original investigation.
+
+Cite specific files and values. Separate observations, source-derived mechanisms, and repair validation. Do not claim to have rerun training, read unbundled checkpoints, or proven that OpGuard is necessary. If you cannot execute the replay or access an artifact, say so explicitly.

@@ -89,3 +89,11 @@ opguard-traces*/
 
 # Optional adjacent independent harness checkout
 /OpGuard-harness/
+
+# Private demo credentials and runtime state
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+*.sqlite*
