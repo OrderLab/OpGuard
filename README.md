@@ -16,9 +16,9 @@ Give your coding agent two training runs. OpGuard helps it find where their comp
 
 <a href="harness/doc/Usage.md#agent-integration">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/quickstart-dark.gif">
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/quickstart.gif">
-    <img alt="Install OpGuard, ask Codex or Claude Code, and read an evidence-backed root-cause report" src="docs/assets/quickstart.gif" width="960">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/quickstart-dark.gif?v=20261019-storage">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/quickstart.gif?v=20261019-storage">
+    <img alt="Install OpGuard, ask Codex or Claude Code, and read an evidence-backed root-cause report" src="docs/assets/quickstart.gif?v=20261019-storage" width="960">
   </picture>
 </a>
 
