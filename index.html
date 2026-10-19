@@ -125,7 +125,7 @@ Flat is better than nested.
 Sparse is better than dense.
 Readability counts.
 …</pre>
-          <div class="rootcause__cost"><strong>~19k input tokens · 8 calls</strong><span>~13× more evidence tokens · budget ≤ $0.010</span></div>
+          <div class="rootcause__cost"><strong>~19k evidence tokens · 1 call</strong><span>~13× more evidence tokens · budget ≤ $0.0053</span></div>
           <footer><button type="button" data-rootcause="trace" aria-label="Get rootcause from standard logs">Get rootcause</button></footer>
           <div class="rootcause__answer" id="trace-answer" role="status" aria-live="polite" hidden></div>
         </article>
@@ -139,7 +139,7 @@ scalar input signatures:
 Unaligned operations before boundary:
   run1: 0 · run2: 33
 …</pre>
-          <div class="rootcause__cost"><strong>~1.5k input tokens · 1 call</strong><span>Focused evidence · budget ≤ $0.0012</span></div>
+          <div class="rootcause__cost"><strong>~1.5k evidence tokens · 1 call</strong><span>Focused evidence · budget ≤ $0.0016</span></div>
           <footer><button type="button" data-rootcause="opguard" aria-label="Get rootcause from OpGuard output">Get rootcause</button></footer>
           <div class="rootcause__answer" id="opguard-answer" role="status" aria-live="polite" hidden></div>
         </article>
@@ -148,8 +148,8 @@ Unaligned operations before boundary:
         <summary>Actual root cause</summary>
         <p>A gradient buffer is overwritten on the default stream before its reduction on another stream finishes. <a href="https://github.com/OrderLab/OpGuard/blob/main/harness/examples/demo_case5/README.md#3-hypothesis-validation-and-known-answer-cross-check">Details ↗</a></p>
       </details>
-      <p class="rootcause__note">Groq · GPT-OSS 20B · Same model and diagnostic prompt. Same-launch evidence. Full logs read in chunks (a few minutes); OpGuard uses first observed differences. Expand shows the complete input.</p>
-      <p class="rootcause__note">Fixed estimates for this demo. Evidence tokens exclude prompts and reading notes; cost caps include them and maximum output. Inference only, free within quota. <a href="https://console.groq.com/docs/model/openai/gpt-oss-20b" target="_blank" rel="noopener">Groq list prices ↗</a></p>
+      <p class="rootcause__note">Groq · GPT-OSS 20B · Same model and diagnostic prompt. Same-launch evidence. Each analysis reads its complete input in one call. OpGuard uses first observed differences. Expand shows the complete input.</p>
+      <p class="rootcause__note">Conservative inference budgets include prompts and maximum output; actual usage may be lower. Free to try, with shared usage limits. <a href="https://console.groq.com/docs/model/openai/gpt-oss-20b" target="_blank" rel="noopener">Groq list prices ↗</a></p>
     </section>
 
     <section class="bitwise-section" id="bitwise-alignment">

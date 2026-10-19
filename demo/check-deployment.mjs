@@ -28,7 +28,7 @@ for (const check of checks) {
     method: check.method,
     headers: { Origin: check.origin, 'Content-Type': 'application/json' },
     ...(check.body ? { body: JSON.stringify(check.body) } : {}),
-    signal: AbortSignal.timeout(18 * 60000),
+    signal: AbortSignal.timeout(75000),
   });
   let response = await call();
   if (response.status === 429) {
@@ -58,7 +58,7 @@ for (const check of checks) {
   else assert.equal(response.headers.get('Access-Control-Allow-Origin'), null);
   if (check.status === 200) {
     const result = response.headers.get('content-type')?.includes('application/x-ndjson') ? text.trim().split('\n').map(JSON.parse).at(-1) : JSON.parse(text);
-    if (check.body.arm === 'trace') assert.equal(result.partsRead, 8, JSON.stringify(result));
+    assert.equal(result.partsRead, 1, JSON.stringify(result));
     assert.equal(result.model, 'openai/gpt-oss-20b');
     assert.ok(result.answer?.length > 0);
     console.log(JSON.stringify({ arm: check.body.arm, ...result }));

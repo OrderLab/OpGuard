@@ -22,7 +22,7 @@
     button.addEventListener('click', async () => {
       result.hidden = false;
       if (retryAt > Date.now()) {
-        result.textContent = `Free demo limit reached. Try again in ${Math.ceil((retryAt - Date.now()) / 1000)} seconds.`;
+        result.textContent = `Please try again in ${Math.ceil((retryAt - Date.now()) / 1000)} seconds.`;
         return;
       }
       if (!endpoint) { result.textContent = 'Live analysis is not connected on this deployment yet.'; return; }
@@ -31,7 +31,7 @@
       result.textContent = 'Reading the evidence…';
       result.setAttribute('aria-busy', 'true');
       try {
-        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arm: button.dataset.rootcause }), signal: AbortSignal.timeout(18 * 60000) });
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arm: button.dataset.rootcause }), signal: AbortSignal.timeout(75000) });
         let data;
         if (response.headers.get('content-type')?.includes('application/x-ndjson')) {
           const reader = response.body.getReader(); const decoder = new TextDecoder(); let pending = '';

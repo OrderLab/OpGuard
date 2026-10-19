@@ -1,15 +1,20 @@
 # Root-cause comparison
 
-Two fixed evidence inputs are sent independently to Groq GPT-OSS 20B. The browser
-sends only an arm identifier. The backend supplies the prompt, evidence, model,
-and token limit. The reference answer is separate HTML and never sent to Groq.
+Two fixed evidence inputs are sent independently to Groq GPT-OSS 20B. Each arm
+uses one request containing its complete input, with the same diagnostic prompt,
+model, reasoning setting, and 3,072-token completion cap. The browser sends only
+an arm identifier; it cannot choose prompts, models, URLs, or token limits.
+The reference answer is separate HTML and never sent to Groq.
 
-## Local preview
+## Local preview and verification
 
-Requires Node 24 or newer. The runtime needs no npm dependencies; rebuilding chunks uses gpt-tokenizer.
+Requires Node 24 or newer. The local server uses built-in SQLite. Install the
+pinned development dependencies with `pnpm install --frozen-lockfile`, then run:
 
 ```sh
 node demo/server.mjs /absolute/path/to/private/.dev.vars
+pnpm test
+pnpm run check:deploy
 ```
 
 The private file contains `GROQ_API_KEY=...`; keep it outside the public directory
@@ -17,84 +22,83 @@ and restrict permissions to `600`. The server binds to `127.0.0.1:8937`, serves 
 explicit allowlist of public paths, and persists quota reservations in ignored
 `.demo-state/quota.sqlite`. It does not log keys, prompts, or model answers.
 
-```sh
-python3 demo/build_packets.py
-node demo/build_chunks.mjs
-node --test demo/core.test.mjs
-```
+Tests verify exact full-evidence delivery, spend accounting, rate windows, failures,
+and actual SQLite Durable Object concurrency and persistence across runtime restarts.
+The integration test starts an isolated local Cloudflare runtime; it never calls Groq.
+`python3 demo/build_packets.py` rebuilds the evidence packets from pinned artifacts.
 
-## Public deployment
+## Paid deployment
 
-Deployment URL: `https://opguard-rootcause.opguard-website.workers.dev/api/rootcause`.
-The browser configuration points to this API; localhost previews continue to use
-the local backend. Publishing the website branch is a separate step.
+API: `https://opguard-rootcause.opguard-website.workers.dev/api/rootcause`.
+The browser configuration points to this API; localhost uses the local backend.
+The Groq organization must have Developer pay-as-you-go enabled. Its confirmed
+GPT-OSS 20B limit on 2026-10-19 is 250,000 tokens/minute and 1,000 requests/minute.
+The previous free plan cannot accept the full log packet in one request.
 
-The existing website stays on GitHub Pages. Deploy only the API to Cloudflare:
+The website stays on GitHub Pages (`webpage` branch). Deploy only the API to
+Cloudflare with `pnpm run deploy`. The existing Worker holds `GROQ_API_KEY` in its
+secret store; do not put credentials in frontend assets or committed files.
+For initial authentication, `pnpm exec wrangler login --device --scopes account:read user:read workers_scripts:write`
+authorizes the intended account. Provision a missing secret with
+`pnpm exec wrangler secret put GROQ_API_KEY` and enter it privately.
 
-1. Run `pnpm install --frozen-lockfile`, then `pnpm exec wrangler login --device --scopes account:read user:read workers_scripts:write` and authorize the intended Cloudflare account. Device authorization avoids the two-minute localhost callback timeout and requests only account reads and Worker deployment access.
-2. Run `pnpm exec wrangler secret put GROQ_API_KEY` and enter the key privately.
-3. Run `pnpm run deploy` using the included `wrangler.jsonc`.
-4. Put the returned Worker URL plus `/api/rootcause` in `js/demo-config.js`.
-5. Publish `webpage`, verify both buttons, then activate the main README links.
+After deployment, `node demo/check-deployment.mjs <api-url>` checks CORS,
+request validation, and both live arms (two real model calls, subject to the same
+budget). `pnpm exec wrangler deployments list` shows the active version.
+Publish `webpage` separately to update the public labels and browser timeout.
 
-The SQLite Durable Object keeps one atomic shared quota across Worker instances.
-The defaults allow 7,800 reserved tokens/minute, 180,000/day, 100 requests/day
-globally, and 24/day per hashed IP (all rolling windows). Successful calls settle
-to provider-reported usage; failures conservatively keep the reservation. No
-result caching or paid fallback. The log reader waits on short quota limits,
-without retrying completed model calls. The frontend displays errors and a
-retry delay without silently replacing the live answer.
+## $2 per rolling 24 hours
 
-These limits protect this demo, not other applications using the same Groq
-organization. Check your actual account limits before public release. The local
-SQLite adapter was tested. Wrangler 4.151.1 dry-run bundling passed and resolved
-the Durable Object binding. Public deployment checks passed: OPTIONS 204, rejected
-origin 403, arbitrary prompt 400, and both evidence arms 200 with actual Groq
-completions. Recheck with `node demo/check-deployment.mjs <api-url>` (uses nine
-model calls). Use `pnpm exec wrangler deployments list` to inspect the active version.
+One persistent SQLite Durable Object (`groq-demo-v1`) is shared by all Worker
+instances and regions. Before any Groq call, an atomic transaction reserves the
+maximum possible inference cost. A request that would exceed **$2 during any
+rolling 24-hour window** receives HTTP 429 without calling Groq.
 
-## Evidence provenance and reading budget
+Accounting uses integer nano-USD at the 2026-10-19 GPT-OSS 20B prices:
+$0.075/M input tokens and $0.30/M completion tokens, including reasoning.
+Input reservation uses the UTF-8 byte count of the fixed prompt and entire packet
+plus 1,024 tokens of framing headroom; output reserves all 3,072 allowed tokens.
+Cached inputs are conservatively charged at the full input rate.
 
-Inputs come from the path-normalized main snapshot `146d6bb523cf`,
-harness/examples/demo_case5/paired-capture-20261019.
+Successful calls settle to provider-reported input and completion usage. Missing
+or invalid usage, timeouts, upstream 429s and other failures retain the full
+reservation. No automatic upstream retries are performed. A successful charge
+expires 24 hours after settlement; uncertain calls retain reservations for 24
+hours plus the 60-second call deadline. Existing pre-upgrade entries remain in
+the same ledger and are conservatively valued at the higher output token price.
+Quota storage failures block the request rather than bypassing the budget.
+
+Additional rolling limits: 240,000 reserved tokens/minute, 120 requests/minute
+globally, 6 requests/minute per hashed IP, and 200 requests/24 hours per hashed IP.
+The IP digest remains stable across deployments with the same Groq secret. The
+$2 limit covers this demo's Groq inference at the pinned rates, not other apps
+using the organization or hosting/tax charges. Price/model changes require
+reviewing the accounting constants. No provider monthly cap replaces this local
+per-call gate; Groq's monthly spend reporting can lag by 10–15 minutes.
+
+## Evidence provenance
+
+Inputs come from main commit d10c4a0, harness/examples/demo_case5/paired-capture-20261019.
 The four complete console streams and OpGuard summaries share the same capture IDs.
-`demo/evidence/manifest.json` pins the imported files; build_packets.py verifies their hashes.
+`demo/evidence/manifest.json` pins the imported files; build_packets.py verifies hashes.
 No diagnostic source excerpt, patch, or reference answer is added to either packet.
-The left arm retains all log records in order within each of the four streams.
-Host-specific paths are normalized to `/opt/opguard`; checksums and event references
-identify the normalized export. Numerical values and capture IDs are unchanged.
+The left arm retains every original log byte, in order within each of four streams.
 Separate stdout/stderr cannot be interleaved retrospectively. Expand shows the entire
-packet; it is not just the short page preview.
+packet; the page preview is only a few lines. Neither arm uses intermediate summaries.
 
-The 55,469 normalized log bytes become eight sequential chunks of at most 2,500 o200k_base
-tokens. The build asserts that concatenation reproduces the exact packet. Chunk counts
-are pinned at build time; the Worker does not bundle a tokenizer. Each request reserves
-chunk tokens plus a conservative byte bound for prompt/previous notes, 3,072 completion
-tokens and 512 framing/instruction tokens, under the 7,800 rolling-minute cap.
-Successful requests settle to actual Groq usage. Intermediate notes are limited to
-1,000 bytes; oversized model notes are marked and shortened; incomplete results produce an error, never a substitute answer.
-
-The left arm streams progress and waits for short quota windows (up to fifteen minutes).
-It makes eight real calls, passing previous model notes onward; summaries can lose details.
-The right arm makes one call with selected first-observed boundaries on both ranks.
-Both use GPT-OSS 20B and the same diagnostic system prompt; their reading strategies differ.
-Every upstream call counts against the shared 100/day and per-IP 24/day limits.
-Cancellation stops further requests; failures do not produce a cached or fabricated answer.
-
-The right arm retains the 33 unaligned operations before each run2 boundary and the
+The right arm retains the 33 unaligned operations before each run2 boundary and
 unverified correspondence limitations. These are first observed captured callsites,
-not whole-graph first differences or evidence of exact stream ordering/buffer reuse.
-No guarantee is made that ordinary logs cannot suggest the cause, or that OpGuard
-alone proves it. The reference cause remains a separate disclosure below the panels.
+not whole-graph first differences or proof of stream ordering/buffer reuse.
+Ordinary logs may suggest the cause; OpGuard alone does not prove it. Live model
+answers can be wrong. The reference cause remains a separate disclosure.
 
-## Fixed cost comparison
+## Cost labels
 
-As of 2026-10-19, Groq lists GPT-OSS 20B at $0.075/M input and $0.30/M
-output tokens: https://console.groq.com/docs/model/openai/gpt-oss-20b.
-The UI shows fixed successful-pass budget caps, not measured charges or a guarantee
-of diagnostic accuracy. Raw evidence is 18,640 tokens versus 1,455 (~12.8x);
-sequential log reading uses eight calls versus one. Conservative input reservations
-(including prompt/framing and bounded model notes) total 33,416 versus 2,427;
-maximum output is 24,576 versus 3,072. List-price caps compute to $0.009879
-and $0.001103625, rounded upward to $0.010 and $0.0012. Failed/repeated
-analyses and evidence collection/hosting are excluded; free-tier usage is not billed.
+Raw evidence is 18,640 tokens versus 1,455 (~12.8x), measured with o200k_base.
+Both arms use one request. The conservative per-call reservations are 60,444
+versus 11,238 total tokens (UTF-8 input bound, framing, and maximum output).
+Their maximum reserved inference costs are $0.0052245 and $0.00153405, rounded
+up in the UI to $0.0053 and $0.0016. These are conservative budget caps, not
+measured charges or diagnostic-accuracy guarantees. Actual charges are normally
+lower. Failed/repeated analyses and evidence collection/hosting are excluded
+from the displayed per-analysis caps. Visitors are not charged for the demo.

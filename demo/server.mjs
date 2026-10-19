@@ -28,7 +28,7 @@ function transaction(fn) {
   } catch (error) { db.exec('ROLLBACK'); throw error; }
 }
 const limiter = {
-  reserve: tokens => transaction(entries => reserve(entries, 'local-preview', tokens, Date.now(), randomUUID())),
+  reserve: budget => transaction(entries => reserve(entries, 'local-preview', budget, Date.now(), randomUUID())),
   settle: (id, usage) => transaction(entries => ({ entries: settle(entries, id, usage) })),
 };
 const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.txt': 'text/plain', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gz': 'application/gzip', '.woff2': 'font/woff2' };

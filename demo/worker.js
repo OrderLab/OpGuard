@@ -2,11 +2,11 @@ import { DurableObject } from 'cloudflare:workers';
 import { handle, reserve, settle } from './core.js';
 
 export class DemoQuota extends DurableObject {
-  async reserve(ip, tokens) {
+  async reserve(ip, budget) {
     return this.ctx.storage.transaction(async tx => {
-      const result = reserve(await tx.get('entries'), ip, tokens, Date.now(), crypto.randomUUID());
+      const result = reserve(await tx.get('entries'), ip, budget, Date.now(), crypto.randomUUID());
       await tx.put('entries', result.entries);
-      return { id: result.id, retry: result.retry };
+      return { id: result.id, retry: result.retry, reason: result.reason };
     });
   }
   async settle(id, usage) {
@@ -24,7 +24,7 @@ export default {
     const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${env.GROQ_API_KEY || ''}:${ip}`));
     const visitor = Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
     try {
-      return await handle(request, env, { reserve: tokens => quota.reserve(visitor, tokens), settle: (id, usage) => quota.settle(id, usage) });
+      return await handle(request, env, { reserve: budget => quota.reserve(visitor, budget), settle: (id, usage) => quota.settle(id, usage) });
     } catch {
       return Response.json({ error: 'The demo is temporarily unavailable.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
     }

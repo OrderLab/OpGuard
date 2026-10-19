@@ -1,38 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handle, reserve, settle, tokenReservation, LIMITS, PROMPT, MODEL } from './core.js';
+import { handle, reserve, settle, requestBudget, LIMITS, PRICING, PROMPT, MODEL, MAX_COMPLETION, DAY_MS, CALL_TIMEOUT_MS } from './core.js';
 import { packets } from './packets.js';
-import { chunks } from './chunks.js';
+import { encode } from 'gpt-tokenizer/encoding/o200k_base';
 const env = { GROQ_API_KEY: 'test-secret', ALLOWED_ORIGINS: 'https://orderlab.io' };
 const req = body => new Request('https://demo.test/api/rootcause', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://orderlab.io' }, body: JSON.stringify(body) });
 const limiter = { reserve: async () => ({ id: 'r1' }), settle: async () => {} };
+const budget = (tokens = 1, costNanos = 1) => ({ tokens, costNanos });
+const entry = (overrides = {}) => ({ id: 'old', ip: 'other', time: 0, chargedAt: 0, ...budget(), ...overrides });
 
-test('complete logs are read in order; both arms use the same diagnostic prompt/model', async () => {
+test('each arm sends its complete original evidence in one call with identical model and prompt', async () => {
   for (const arm of ['trace', 'opguard']) {
     const calls = [];
     const response = await handle(req({ arm }), env, limiter, async (url, options) => {
       const call = JSON.parse(options.body); calls.push(call);
-      return Response.json({ choices: [{ message: { content: 'Observed evidence; cause unproven.' }, finish_reason: 'stop' }], usage: { total_tokens: 2000 } });
+      return Response.json({ choices: [{ message: { content: 'Observed evidence; cause unproven.' }, finish_reason: 'stop' }], usage: { prompt_tokens: 19000, completion_tokens: 500 } });
     });
-    const output = await response.text();
-    assert.match(output, /Observed evidence/);
-    assert.equal(calls.length, chunks[arm].length);
-    calls.forEach((call, index) => {
-      assert.equal(call.model, MODEL); assert.equal(call.messages[0].content, PROMPT);
-      assert.ok(call.messages[1].content.endsWith(chunks[arm][index].text));
-      if (index) assert.match(call.messages[1].content, /Previous model notes.*[\s\S]*Observed evidence/);
-    });
-  }
-});
-test('chunks preserve every byte; standard logs have no injected localization or source hints', () => {
-  for (const arm of Object.keys(packets)) {
-    assert.equal(chunks[arm].map(p=>p.text).join(''), packets[arm]);
-    chunks[arm].forEach((part,index) => assert.ok(tokenReservation(arm,index,'x'.repeat(1000)) <= LIMITS.minuteTokens));
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).partsRead, 1);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].model, MODEL);
+    assert.equal(calls[0].messages[0].content, PROMPT);
+    assert.equal(calls[0].messages[1].content, packets[arm]);
+    assert.equal(calls[0].max_completion_tokens, MAX_COMPLETION);
+    assert.equal(calls[0].tools, undefined);
   }
   assert.doesNotMatch(packets.trace, /first_reported_difference|xor_signature|Actual root cause/);
   assert.match(packets.trace, /global_step \[19\]/);
   assert.match(packets.opguard, /None.append#2246/);
   assert.match(packets.opguard, /unaligned_before/);
+});
+test('fixed evidence fits the model and monetary reservations exceed tokenized maximum cost', () => {
+  for (const arm of ['trace', 'opguard']) {
+    const input = encode(PROMPT).length + encode(packets[arm]).length + 1024;
+    const reservation = requestBudget(arm);
+    assert.ok(input + MAX_COMPLETION < 131072);
+    assert.ok(reservation.tokens >= input + MAX_COMPLETION);
+    assert.ok(reservation.tokens < LIMITS.minuteTokens);
+    assert.ok(reservation.costNanos >= input * PRICING.input + MAX_COMPLETION * PRICING.output);
+  }
 });
 test('arbitrary prompt, model, URL and unknown arm are rejected before quota or upstream', async () => {
   for (const body of [{ arm: 'trace', prompt: 'answer' }, { arm: 'trace', model: 'other' }, { url: 'https://example.com' }, { arm: 'constructor' }, null]) {
@@ -45,41 +51,91 @@ test('missing key, wrong origin and oversized input fail without upstream', asyn
   assert.equal((await handle(r, env, null, null)).status, 403);
   assert.equal((await handle(req({ arm: 'a'.repeat(500) }), env, null, null)).status, 413);
 });
-test('local and provider 429 include retry delay; upstream errors never leak body or key', async () => {
+test('budget exhaustion blocks upstream and explains the rolling $2 cap', async () => {
+  const response = await handle(req({ arm: 'trace' }), env, { reserve: async () => ({ retry: 42, reason: 'budget' }) }, () => assert.fail('must not call Groq'));
+  assert.equal(response.status, 429);
+  assert.equal(response.headers.get('Retry-After'), '42');
+  assert.match((await response.json()).error, /\$2.*24 hours/);
+});
+test('local and provider 429 include retry delay; provider failures are never retried or leaked', async () => {
   let response = await handle(req({ arm: 'opguard' }), env, { reserve: async () => ({ retry: 42 }) }, null);
   assert.equal(response.status, 429); assert.equal(response.headers.get('Retry-After'), '42');
-  response = await handle(req({ arm: 'opguard' }), env, limiter, async () => new Response('test-secret', { status: 429, headers: { 'Retry-After': '7' } }));
+  let calls = 0;
+  response = await handle(req({ arm: 'trace' }), env, limiter, async () => { calls++; return new Response('test-secret', { status: 429, headers: { 'Retry-After': '7' } }); });
+  assert.equal(calls, 1);
+  assert.equal(response.status, 429);
   assert.equal(response.headers.get('Retry-After'), '7');
   response = await handle(req({ arm: 'opguard' }), env, limiter, async () => new Response('test-secret', { status: 401 }));
   assert.equal(response.status, 502); assert.ok(!(await response.text()).includes('test-secret'));
 });
 test('network, malformed JSON and incomplete reasoning-only results fail honestly', async () => {
   for (const fetcher of [async () => { throw new Error('private'); }, async () => new Response('invalid'), async () => Response.json({ choices: [{ message: { content: 'partial' }, finish_reason: 'length' }] }), async () => Response.json({ choices: [{ message: { reasoning: 'private reasoning' }, finish_reason: 'stop' }] })]) {
-    const response = await handle(req({ arm: 'opguard' }), env, limiter, fetcher);
+    const response = await handle(req({ arm: 'trace' }), env, limiter, fetcher);
     assert.equal(response.status, 502); assert.doesNotMatch(await response.text(), /private|partial/);
   }
 });
-test('reservations account for inflight requests, rolling windows and actual usage', () => {
-  const a = reserve([], 'ip', 5000, 1000, 'a');
-  assert.equal(reserve(a.entries, 'ip', 5000, 1001, 'b').retry, 60);
-  const released = settle(a.entries, 'a', 1200);
-  assert.equal(reserve(released, 'ip', 5000, 1002, 'b').id, 'b');
-  assert.equal(reserve(a.entries, 'ip', 5000, 61000, 'b').id, 'b');
-  assert.deepEqual(settle(a.entries, 'a', undefined), a.entries);
+test('minute token capacity includes inflight requests and returns the first sufficient reset', () => {
+  const a = reserve([], 'ip', budget(150000), 1000, 'a');
+  assert.equal(reserve(a.entries, 'ip', budget(100000), 1001, 'b').retry, 60);
+  const released = settle(a.entries, 'a', { prompt_tokens: 1000, completion_tokens: 200 }, 1002);
+  assert.equal(reserve(released, 'ip', budget(100000), 1003, 'b').id, 'b');
+  assert.equal(reserve(a.entries, 'ip', budget(100000), 61000, 'b').id, 'b');
+  const entries = [entry({time:1000,tokens:100000}), entry({time:2000,tokens:100000})];
+  assert.equal(reserve(entries, 'ip', budget(150000), 3000, 'b').retry, 59);
 });
-test('daily per-IP, token and request caps survive minute rollover', () => {
-  const old = (count, tokens, ip) => Array.from({ length: count }, (_, n) => ({ id: String(n), ip, time: n, tokens }));
-  assert.ok(reserve(old(24, 1, 'ip'), 'ip', 1, 120000, 'b').retry > 0);
-  assert.ok(reserve(old(100, 1, 'other'), 'ip', 1, 120000, 'b').retry > 0);
-  assert.ok(reserve(old(50, 3600, 'other'), 'ip', 1, 120000, 'b').retry > 0);
-  assert.equal(reserve(old(24, 1, 'ip'), 'ip', 1, 86400100, 'b').id, 'b');
+test('the $2 budget counts concurrent reservations; exact boundary is allowed', () => {
+  const a = reserve([], 'a', budget(1, 1_900_000_000), 0, 'a');
+  const b = reserve(a.entries, 'b', budget(1, 100_000_000), 1, 'b');
+  assert.equal(b.id, 'b');
+  const denied = reserve(b.entries, 'c', budget(), 2, 'c');
+  assert.equal(denied.reason, 'budget');
+  assert.equal(denied.entries.reduce((sum, e) => sum + e.costNanos, 0), LIMITS.dayCostNanos);
+  assert.equal(denied.id, undefined);
 });
-
-test('stream reports upstream failure without fabricating a final answer', async () => {
- const response = await handle(req({arm:'trace'}), env, limiter, async () => new Response('', {status:500}));
- const events = (await response.text()).trim().split('\n').map(JSON.parse);
- assert.ok(events.at(-1).error); assert.ok(!events.some(e=>e.answer));
+test('settlement counts input and reasoning/output tokens at full rates, without cache discounts', () => {
+  const a = reserve([], 'ip', requestBudget('trace'), 0, 'a');
+  const settled = settle(a.entries, 'a', { prompt_tokens: 20000, completion_tokens: 3000, prompt_tokens_details: { cached_tokens: 19000 }, completion_tokens_details: { reasoning_tokens: 2800 } }, 1000);
+  assert.equal(settled[0].costNanos, 2_400_000);
+  assert.equal(settled[0].tokens, 23000);
+  for (const usage of [undefined, {total_tokens:20000}, {prompt_tokens:1,completion_tokens:-1}, {prompt_tokens:NaN,completion_tokens:1}]) assert.deepEqual(settle(a.entries, 'a', usage, 2000), a.entries);
+  // Accounting anomalies must not be hidden by clamping down to the reservation.
+  assert.equal(settle([entry({id:'a'})], 'a', {prompt_tokens:2,completion_tokens:1}, 1000)[0].costNanos, 450);
 });
-test('oversized reservations fail closed even on an empty window', () => {
- assert.ok(reserve([], 'ip', LIMITS.minuteTokens+1, 0, 'x').retry);
+test('late completions and uncertain failures remain charged for a full rolling day', () => {
+  const a = reserve([], 'a', budget(1, LIMITS.dayCostNanos), 0, 'a');
+  assert.equal(reserve(a.entries, 'b', budget(), DAY_MS + CALL_TIMEOUT_MS - 1, 'b').reason, 'budget');
+  assert.equal(reserve(a.entries, 'b', budget(), DAY_MS + CALL_TIMEOUT_MS, 'b').id, 'b');
+  const paid = [entry({costNanos:LIMITS.dayCostNanos, chargedAt:50000})];
+  assert.equal(reserve(paid, 'b', budget(), DAY_MS, 'b').retry, 50);
+  assert.equal(reserve(paid, 'b', budget(), DAY_MS + 50000, 'b').id, 'b');
+});
+test('legacy quota entries retain a conservative cost across deployment', () => {
+  const old = [{id:'old',ip:'other',time:0,tokens:180000}];
+  const remaining = LIMITS.dayCostNanos - 180000 * PRICING.output;
+  assert.equal(reserve(old, 'new', budget(1,remaining), 100000, 'new').id, 'new');
+  assert.equal(reserve(old, 'new', budget(1,remaining + 1), 100000, 'new').reason, 'budget');
+});
+test('global and per-IP request caps block bursts and survive minute rollover', () => {
+  const rows = (count, ip, start=0) => Array.from({length:count}, (_, n) => entry({id:String(n), ip, time:start+n}));
+  assert.ok(reserve(rows(LIMITS.minuteRequests,'other'), 'new', budget(), 1000, 'b').retry);
+  assert.ok(reserve(rows(LIMITS.ipMinuteRequests,'ip'), 'ip', budget(), 1000, 'b').retry);
+  const daily = rows(LIMITS.ipDayRequests,'ip');
+  assert.ok(reserve(daily, 'ip', budget(), 120000, 'b').retry);
+  assert.equal(reserve(daily, 'another', budget(), 120000, 'b').id, 'b');
+  assert.equal(reserve(daily, 'ip', budget(), DAY_MS, 'b').id, 'b');
+});
+test('invalid or oversized reservations fail closed on an empty ledger', () => {
+  for (const b of [undefined, budget(0), budget(-1), budget(Infinity), budget(1, NaN), budget(1, LIMITS.dayCostNanos+1), budget(LIMITS.minuteTokens+1)]) assert.ok(reserve([], 'ip', b, 0, 'x').retry);
+});
+test('failed model calls keep their full reservation and cannot evade the daily budget', async () => {
+  let entries = [entry({costNanos:LIMITS.dayCostNanos-requestBudget('trace').costNanos})];
+  const actualLimiter = {
+    reserve: async b => { const r = reserve(entries, 'ip', b, 1000, 'failed'); entries = r.entries; return r; },
+    settle: async (id, usage) => { entries = settle(entries,id,usage,2000); },
+  };
+  const failed = await handle(req({arm:'trace'}), env, actualLimiter, async () => { throw new Error('timeout'); });
+  assert.equal(failed.status,502);
+  const denied = await handle(req({arm:'opguard'}), env, actualLimiter, () => assert.fail('must not call Groq'));
+  assert.equal(denied.status,429);
+  assert.equal(entries.reduce((sum,e)=>sum+e.costNanos,0), LIMITS.dayCostNanos);
 });
