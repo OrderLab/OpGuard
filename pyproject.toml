@@ -23,7 +23,7 @@ opguard-tools = "opguard.tools.__main__:main"
 
 [project.urls]
 Repository = "https://github.com/OrderLab/OpGuard"
-Documentation = "https://github.com/OrderLab/OpGuard/tree/main/doc"
+Documentation = "https://github.com/OrderLab/OpGuard/tree/main/docs"
 
 [tool.setuptools]
 py-modules = ["usercustomize"]
