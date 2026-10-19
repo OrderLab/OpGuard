@@ -1,0 +1,4 @@
+
+# Captured logs must retain their original whitespace.
+demo/inputs/trace.txt -whitespace
+demo/evidence/*.log -whitespace

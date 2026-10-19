@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "wrangler": "4.151.1"
+  },
+  "name": "opguard-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node demo/server.mjs",
+    "test": "node --test demo/*.test.mjs",
+    "check:deploy": "wrangler deploy --dry-run --outdir .wrangler/deploy-check",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "gpt-tokenizer": "^4.1.0"
+  }
+}

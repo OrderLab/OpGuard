@@ -1,0 +1,399 @@
+{
+  "kind": "derived_summary_of_same_launch_opguard_queries",
+  "experiment_id": "5dc7374b7a5949caae53ea82da8ee78d",
+  "run_mapping": [
+    {
+      "label": "overlap-off",
+      "export_run": "run1",
+      "capture_id": "1dfec07bd2944f3b992cec2f6e898950",
+      "ranks": [
+        0,
+        1
+      ],
+      "stdout": "standard-logs/overlap-off/stdout.log",
+      "stderr": "standard-logs/overlap-off/stderr.log",
+      "provenance": "provenance/overlap-off.json"
+    },
+    {
+      "label": "overlap-on",
+      "export_run": "run2",
+      "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1",
+      "ranks": [
+        0,
+        1
+      ],
+      "stdout": "standard-logs/overlap-on/stdout.log",
+      "stderr": "standard-logs/overlap-on/stderr.log",
+      "provenance": "provenance/overlap-on.json"
+    }
+  ],
+  "ranks": [
+    {
+      "rank": 0,
+      "artifact": "opguard/perfetto_gpu_000.json.gz",
+      "sha256": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d",
+      "observations": [
+        {
+          "run": "run1",
+          "event_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:19947",
+          "operation": "None.append#2246",
+          "file": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+          "operator_tag_line": 1688,
+          "captured_source_line": 1734,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 0,
+          "io": {
+            "inputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float64",
+                "device": "cuda:0",
+                "xor_signature": [
+                  0,
+                  1077945344,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ],
+            "outputs": []
+          }
+        },
+        {
+          "run": "run2",
+          "event_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:20177",
+          "operation": "None.append#2279",
+          "file": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+          "operator_tag_line": 1688,
+          "captured_source_line": 1736,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 33,
+          "io": {
+            "inputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float64",
+                "device": "cuda:0",
+                "xor_signature": [
+                  0,
+                  1077804032,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ],
+            "outputs": []
+          }
+        }
+      ],
+      "regional_comparison": {
+        "selection_basis": "same_io_slot_candidates",
+        "tensors": [
+          {
+            "left_tensor": [
+              "inputs",
+              0
+            ],
+            "right_tensor": [
+              "inputs",
+              0
+            ],
+            "status": "available",
+            "scheme": "flat-u32-le-v1",
+            "regions": [
+              {
+                "region": 0,
+                "byte_range": [
+                  0,
+                  4
+                ],
+                "left": 0,
+                "right": 0,
+                "fingerprint_xor": 0,
+                "fingerprints_agree": true
+              },
+              {
+                "region": 1,
+                "byte_range": [
+                  4,
+                  8
+                ],
+                "left": 1077945344,
+                "right": 1077804032,
+                "fingerprint_xor": 8247296,
+                "fingerprints_agree": false
+              },
+              {
+                "region": 2,
+                "byte_range": [
+                  8,
+                  8
+                ],
+                "left": 0,
+                "right": 0,
+                "fingerprint_xor": 0,
+                "fingerprints_agree": true
+              },
+              {
+                "region": 3,
+                "byte_range": [
+                  8,
+                  8
+                ],
+                "left": 0,
+                "right": 0,
+                "fingerprint_xor": 0,
+                "fingerprints_agree": true
+              }
+            ],
+            "differing_regions": [
+              1
+            ],
+            "tensor_equality": "not_established",
+            "different_element_count": "not_available",
+            "padding_assessment": "not_determined"
+          }
+        ],
+        "truncated": false,
+        "note": "Region differences localize recorded byte changes, not element counts or padding noise. Matching regions may still contain XOR collisions. Validate semantic correspondence first."
+      }
+    },
+    {
+      "rank": 1,
+      "artifact": "opguard/perfetto_gpu_001.json.gz",
+      "sha256": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562",
+      "observations": [
+        {
+          "run": "run1",
+          "event_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:19857",
+          "operation": "None.pow#2239",
+          "file": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+          "operator_tag_line": 1699,
+          "captured_source_line": 1745,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 0,
+          "io": {
+            "inputs": [],
+            "outputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float32",
+                "device": "cuda:1",
+                "xor_signature": [
+                  1124147200,
+                  0,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 4,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ]
+          }
+        },
+        {
+          "run": "run2",
+          "event_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:20176",
+          "operation": "None.pow#2272",
+          "file": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+          "operator_tag_line": 1699,
+          "captured_source_line": 1747,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 33,
+          "io": {
+            "inputs": [],
+            "outputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float32",
+                "device": "cuda:1",
+                "xor_signature": [
+                  1124478605,
+                  0,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 4,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ]
+          }
+        }
+      ],
+      "regional_comparison": {
+        "selection_basis": "same_io_slot_candidates",
+        "tensors": [
+          {
+            "left_tensor": [
+              "outputs",
+              0
+            ],
+            "right_tensor": [
+              "outputs",
+              0
+            ],
+            "status": "available",
+            "scheme": "flat-u32-le-v1",
+            "regions": [
+              {
+                "region": 0,
+                "byte_range": [
+                  0,
+                  4
+                ],
+                "left": 1124147200,
+                "right": 1124478605,
+                "fingerprint_xor": 462477,
+                "fingerprints_agree": false
+              },
+              {
+                "region": 1,
+                "byte_range": [
+                  4,
+                  4
+                ],
+                "left": 0,
+                "right": 0,
+                "fingerprint_xor": 0,
+                "fingerprints_agree": true
+              },
+              {
+                "region": 2,
+                "byte_range": [
+                  4,
+                  4
+                ],
+                "left": 0,
+                "right": 0,
+                "fingerprint_xor": 0,
+                "fingerprints_agree": true
+              },
+              {
+                "region": 3,
+                "byte_range": [
+                  4,
+                  4
+                ],
+                "left": 0,
+                "right": 0,
+                "fingerprint_xor": 0,
+                "fingerprints_agree": true
+              }
+            ],
+            "differing_regions": [
+              0
+            ],
+            "tensor_equality": "not_established",
+            "different_element_count": "not_available",
+            "padding_assessment": "not_determined"
+          }
+        ],
+        "truncated": false,
+        "note": "Region differences localize recorded byte changes, not element counts or padding noise. Matching regions may still contain XOR collisions. Validate semantic correspondence first."
+      }
+    }
+  ],
+  "limits": [
+    "Observed callsites only; this is not a whole-graph or kernel-level first difference.",
+    "Automatic correspondence is unreviewed; matching fingerprints do not prove tensor equality.",
+    "Each overlap-on first boundary follows 33 unaligned events.",
+    "The observed norm path is downstream evidence, not proof of the precise racing memory operation.",
+    "The standard logs and traces are from the same instrumented launches, not an independent uninstrumented baseline."
+  ]
+}

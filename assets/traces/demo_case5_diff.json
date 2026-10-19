@@ -1,0 +1,39 @@
+{
+  "title": "_linalg.linalg_vector_norm#2144",
+  "status": "diff",
+  "fn": "<torch._C._linalg.linalg_vector_norm>",
+  "file": "/home/yinjie/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/functional.py",
+  "line": 1626,
+  "diff": {
+    "fields": [
+      "outputs"
+    ],
+    "summary": "outputs::xor_signature: 1078077440.0 vs 1077945344.0"
+  },
+  "io": {
+    "inputs": [
+      {
+        "shape": [
+          1024,
+          1024
+        ],
+        "dtype": "torch.float64",
+        "device": "cuda:0",
+        "xor_signature": 0.0,
+        "numel": 1048576
+      }
+    ],
+    "outputs": [
+      {
+        "shape": [],
+        "dtype": "torch.float64",
+        "device": "cuda:0",
+        "xor_signature": 1078077440.0,
+        "numel": 1
+      }
+    ]
+  },
+  "run": "run1",
+  "rank": 0,
+  "search": "run:run1 rank:0 status:diff fn:<torch._C._linalg.linalg_vector_norm>"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "opguard-rootcause",
+  "main": "demo/worker.js",
+  "compatibility_date": "2026-10-19",
+  "vars": { "ALLOWED_ORIGINS": "https://orderlab.io" },
+  "durable_objects": { "bindings": [{ "name": "DEMO_QUOTA", "class_name": "DemoQuota" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DemoQuota"] }]
+}

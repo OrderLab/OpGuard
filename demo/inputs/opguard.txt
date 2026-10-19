@@ -1,0 +1,227 @@
+Two DeepSpeed training runs, run1 overlap_comm=False and run2 overlap_comm=True, use the same workload. Diagnose their numerical divergence.
+{
+  "kind": "first observed differences at captured callsites",
+  "ranks": [
+    {
+      "rank": 0,
+      "observations": [
+        {
+          "run": "run1",
+          "event_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:19947",
+          "operation": "None.append#2246",
+          "operator_tag_line": 1688,
+          "captured_source_line": 1734,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 0,
+          "io": {
+            "inputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float64",
+                "device": "cuda:0",
+                "xor_signature": [
+                  0,
+                  1077945344,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ],
+            "outputs": []
+          },
+          "source_file": "deepspeed/runtime/zero/stage_1_and_2.py"
+        },
+        {
+          "run": "run2",
+          "event_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:20177",
+          "operation": "None.append#2279",
+          "operator_tag_line": 1688,
+          "captured_source_line": 1736,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 33,
+          "io": {
+            "inputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float64",
+                "device": "cuda:0",
+                "xor_signature": [
+                  0,
+                  1077804032,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ],
+                    [
+                      8,
+                      8
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ],
+            "outputs": []
+          },
+          "source_file": "deepspeed/runtime/zero/stage_1_and_2.py"
+        }
+      ]
+    },
+    {
+      "rank": 1,
+      "observations": [
+        {
+          "run": "run1",
+          "event_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:19857",
+          "operation": "None.pow#2239",
+          "operator_tag_line": 1699,
+          "captured_source_line": 1745,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 0,
+          "io": {
+            "inputs": [],
+            "outputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float32",
+                "device": "cuda:1",
+                "xor_signature": [
+                  1124147200,
+                  0,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 4,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ]
+          },
+          "source_file": "deepspeed/runtime/zero/stage_1_and_2.py"
+        },
+        {
+          "run": "run2",
+          "event_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:20176",
+          "operation": "None.pow#2272",
+          "operator_tag_line": 1699,
+          "captured_source_line": 1747,
+          "function": "get_grad_norm_direct",
+          "unaligned_before": 33,
+          "io": {
+            "inputs": [],
+            "outputs": [
+              {
+                "shape": [],
+                "dtype": "torch.float32",
+                "device": "cuda:1",
+                "xor_signature": [
+                  1124478605,
+                  0,
+                  0,
+                  0
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 4,
+                  "byte_ranges": [
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ],
+                    [
+                      4,
+                      4
+                    ]
+                  ]
+                },
+                "numel": 1
+              }
+            ]
+          },
+          "source_file": "deepspeed/runtime/zero/stage_1_and_2.py"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Observed callsites only; this is not a whole-graph or kernel-level first difference.",
+    "Automatic correspondence is unreviewed; matching fingerprints do not prove tensor equality.",
+    "Each overlap-on first boundary follows 33 unaligned events.",
+    "The observed norm path is downstream evidence, not proof of the precise racing memory operation.",
+    "The standard logs and traces are from the same instrumented launches, not an independent uninstrumented baseline."
+  ]
+}

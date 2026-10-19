@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpGuard — OSDI ’26 Best Paper Award Nominee</title>
+  <meta name="description" content="OpGuard, an OSDI ’26 Best Paper Award nominee, pinpoints the first moment large-scale AI training runs go wrong — reducing debugging time from days to minutes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/images/brand/logo.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      var saved = localStorage.getItem('opguard-theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="css/rootcause.css?v=paired-cost-20261019">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--blue" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--green" aria-hidden="true"></div>
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#" class="nav__brand">
+        <img src="assets/images/brand/logo.svg" alt="" class="nav__logo">
+        <span class="brand-wordmark">OpGuard</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#bitwise-alignment">Bitwise Alignment</a>
+        <a href="#trace">Live Trace</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#impact">Impact</a>
+        <a href="https://www.usenix.org/system/files/osdi26-zhou-ziming.pdf" target="_blank" rel="noopener noreferrer">Paper</a>
+        <a href="#cite">Cite</a>
+      </nav>
+      <div class="nav__actions">
+        <a class="nav__source" href="https://github.com/OrderLab/OpGuard" target="_blank" rel="noopener noreferrer" aria-label="Source code on GitHub" title="Source code on GitHub"><svg class="source-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 0 0-3.558 21.923c.563.104.768-.244.768-.542 0-.267-.01-.975-.015-1.914-3.13.68-3.79-1.508-3.79-1.508-.512-1.3-1.25-1.646-1.25-1.646-1.023-.7.078-.686.078-.686 1.13.08 1.725 1.16 1.725 1.16 1.005 1.722 2.637 1.225 3.28.937.102-.728.393-1.225.715-1.507-2.499-.284-5.126-1.25-5.126-5.565 0-1.23.44-2.235 1.16-3.023-.117-.285-.503-1.43.11-2.98 0 0 .945-.303 3.094 1.155A10.78 10.78 0 0 1 12 6.176c.956.004 1.918.129 2.817.378 2.148-1.458 3.091-1.155 3.091-1.155.615 1.55.228 2.695.112 2.98.722.788 1.158 1.793 1.158 3.023 0 4.326-2.631 5.278-5.138 5.557.404.35.765 1.042.765 2.1 0 1.517-.014 2.741-.014 3.113 0 .3.203.65.774.54A11.252 11.252 0 0 0 12 .75Z"/></svg></a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme">
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <a href="#rootcause" class="nav__cta">Try Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__content">
+        <div class="hero__identity" aria-label="OpGuard">
+          <img
+            src="assets/images/brand/logo.svg"
+            alt=""
+            class="hero__logo"
+            aria-hidden="true"
+          >
+          <p class="hero__brand">OpGuard</p>
+        </div>
+        <div class="hero__badge hero__badge--award" role="status">
+          <span class="hero__badge-dot"></span>
+          <span class="hero__badge-label">OSDI ’26</span>
+          <span class="hero__badge-sep" aria-hidden="true"></span>
+          <span class="hero__badge-award">Best Paper Award Nominee</span>
+        </div>
+        <div class="hero__partners" aria-label="Research collaboration">
+          <img src="assets/images/partners/umich.png" alt="University of Michigan" class="hero__partner-logo">
+          <img src="assets/images/partners/orderlab.png" alt="OrderLab" class="hero__partner-logo">
+          <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" class="hero__partner-logo hero__partner-logo--bytedance">
+        </div>
+        <h1 class="hero__title">
+          Catch LLM training bugs<br>
+          <span class="hero__title-accent">at the first divergent op</span>
+        </h1>
+        <p class="hero__subtitle">
+          OpGuard uses bitwise alignment to compare training runs at tensor boundaries,
+          turning vague loss-curve anomalies into precise, actionable evidence.
+          <span class="hero__alignment-note">We’re expanding <strong>beyond bitwise</strong> toward more general, practical alignment.</span>
+        </p>
+        <div class="hero__actions">
+          <a href="#trace" class="btn btn--primary" data-open-tour>Explore Live Trace</a>
+          <a href="https://github.com/OrderLab/OpGuard" class="btn btn--ghost" target="_blank" rel="noopener noreferrer"><svg class="source-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 0 0-3.558 21.923c.563.104.768-.244.768-.542 0-.267-.01-.975-.015-1.914-3.13.68-3.79-1.508-3.79-1.508-.512-1.3-1.25-1.646-1.25-1.646-1.023-.7.078-.686.078-.686 1.13.08 1.725 1.16 1.725 1.16 1.005 1.722 2.637 1.225 3.28.937.102-.728.393-1.225.715-1.507-2.499-.284-5.126-1.25-5.126-5.565 0-1.23.44-2.235 1.16-3.023-.117-.285-.503-1.43.11-2.98 0 0 .945-.303 3.094 1.155A10.78 10.78 0 0 1 12 6.176c.956.004 1.918.129 2.817.378 2.148-1.458 3.091-1.155 3.091-1.155.615 1.55.228 2.695.112 2.98.722.788 1.158 1.793 1.158 3.023 0 4.326-2.631 5.278-5.138 5.557.404.35.765 1.042.765 2.1 0 1.517-.014 2.741-.014 3.113 0 .3.203.65.774.54A11.252 11.252 0 0 0 12 .75Z"/></svg>Source Code</a>
+          <a href="#workflow" class="btn btn--ghost">How It Works</a>
+        </div>
+        <p class="hero__open-source">Open source · Apache-2.0</p>
+        <div class="hero__stats">
+          <div class="stat">
+            <span class="stat__value">5 min</span>
+            <span class="stat__label">vs. 5 days to localize</span>
+          </div>
+          <div class="stat__divider"></div>
+          <div class="stat">
+            <span class="stat__value">20+</span>
+            <span class="stat__label">production issues diagnosed</span>
+          </div>
+          <div class="stat__divider"></div>
+          <div class="stat">
+            <span class="stat__value">bit-exact</span>
+            <span class="stat__label">tensor fingerprint alignment</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rootcause" id="rootcause" aria-labelledby="rootcause-title">
+      <h2 id="rootcause-title">Find the root cause.</h2>
+      <div class="rootcause__grid">
+        <article class="rootcause__card">
+          <header><h3>Standard logs</h3><a href="demo/inputs/trace.txt" target="_blank" rel="noopener">Expand ↗</a></header>
+          <pre>The Zen of Python, by Tim Peters
+
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+…</pre>
+          <div class="rootcause__cost"><strong>~19k input tokens · 8 calls</strong><span>~13× more evidence tokens · budget ≤ $0.010</span></div>
+          <footer><button type="button" data-rootcause="trace" aria-label="Get rootcause from standard logs">Get rootcause</button></footer>
+          <div class="rootcause__answer" id="trace-answer" role="status" aria-live="polite" hidden></div>
+        </article>
+        <article class="rootcause__card rootcause__card--opguard">
+          <header><h3>OpGuard output</h3><a href="demo/inputs/opguard.txt" target="_blank" rel="noopener">Expand ↗</a></header>
+          <pre>First observed difference · rank 0
+get_grad_norm_direct · None.append#2246
+scalar input signatures:
+  run1: [0, 1077945344, 0, 0]
+  run2: [0, 1077804032, 0, 0]
+Unaligned operations before boundary:
+  run1: 0 · run2: 33
+…</pre>
+          <div class="rootcause__cost"><strong>~1.5k input tokens · 1 call</strong><span>Focused evidence · budget ≤ $0.0012</span></div>
+          <footer><button type="button" data-rootcause="opguard" aria-label="Get rootcause from OpGuard output">Get rootcause</button></footer>
+          <div class="rootcause__answer" id="opguard-answer" role="status" aria-live="polite" hidden></div>
+        </article>
+      </div>
+      <details>
+        <summary>Actual root cause</summary>
+        <p>A gradient buffer is overwritten on the default stream before its reduction on another stream finishes. <a href="https://github.com/OrderLab/OpGuard/blob/main/harness/examples/demo_case5/README.md#3-hypothesis-validation-and-known-answer-cross-check">Details ↗</a></p>
+      </details>
+      <p class="rootcause__note">Groq · GPT-OSS 20B · Same model and diagnostic prompt. Same-launch evidence. Full logs read in chunks (a few minutes); OpGuard uses first observed differences. Expand shows the complete input.</p>
+      <p class="rootcause__note">Fixed estimates for this demo. Evidence tokens exclude prompts and reading notes; cost caps include them and maximum output. Inference only, free within quota. <a href="https://console.groq.com/docs/model/openai/gpt-oss-20b" target="_blank" rel="noopener">Groq list prices ↗</a></p>
+    </section>
+
+    <section class="bitwise-section" id="bitwise-alignment">
+      <div class="section-header section-header--center">
+        <span class="section-tag">Key Abstraction</span>
+        <h2>Our key abstraction: bitwise alignment</h2>
+      </div>
+
+      <div class="ba-deck" id="ba-deck" data-step="1" aria-live="polite">
+        <div class="ba-deck__headings">
+          <h3 class="ba-heading is-on" data-step="1">
+            Given the two training runs, view them as a sequence of “points”
+          </h3>
+          <h3 class="ba-heading" data-step="2">
+            Compare the tensors at each point. Must match bit by bit.
+          </h3>
+          <h3 class="ba-heading" data-step="3">
+            First mismatch point becomes a very clean pivot for debugging.
+          </h3>
+        </div>
+
+        <div class="ba" aria-label="Bitwise alignment of buggy and reference runs">
+          <div class="ba__side">
+            <span class="ba__run-label">Buggy run</span>
+            <span class="ba__run-label ba__run-label--ref">Reference run</span>
+          </div>
+
+          <div class="ba__stages">
+            <!-- Stage 1: match fp32 -->
+            <div class="ba-stage">
+              <div class="ba-tensor ba-tensor--pink ba-tensor--col" data-layer="tensor">
+                <i></i><i></i><i></i>
+              </div>
+              <div class="ba-status ba-status--ok" data-layer="diff" aria-label="Match">
+                <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2L36 8v12c0 12-7.5 20-16 22C11.5 40 4 32 4 20V8l16-6z" fill="#2ca02c"/><path d="M12 21l5 5 11-12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="ba-tensor ba-tensor--pink ba-tensor--col" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp32</span>
+              </div>
+            </div>
+
+            <!-- Stage 2: match fp16 -->
+            <div class="ba-stage">
+              <div class="ba-tensor ba-tensor--pink" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+              </div>
+              <div class="ba-status ba-status--ok" data-layer="diff" aria-label="Match">
+                <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2L36 8v12c0 12-7.5 20-16 22C11.5 40 4 32 4 20V8l16-6z" fill="#2ca02c"/><path d="M12 21l5 5 11-12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="ba-tensor ba-tensor--pink" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp16</span>
+              </div>
+            </div>
+
+            <!-- Stage 3: first diverge fp8 -->
+            <div class="ba-stage ba-stage--hot">
+              <div class="ba-callout" data-layer="pivot" aria-hidden="true">first mismatch · pivot</div>
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i data-bad></i><i></i>
+                <i></i><i></i><i></i>
+              </div>
+              <div class="ba-status ba-status--bug" data-layer="diff" aria-label="Bug">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <circle cx="24" cy="24" r="22" fill="#dc2626"/>
+                  <path d="M16 18c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+                  <ellipse cx="24" cy="28" rx="9" ry="10" fill="#fff"/>
+                  <path d="M15 22h-5M33 22h5M14 30h-5M34 30h5M16 36l-4 4M32 36l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="20.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <circle cx="27.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <path d="M24 18v20M20 32h8" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp8</span>
+              </div>
+            </div>
+
+            <!-- Stage 4: propagated diverge -->
+            <div class="ba-stage">
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i data-bad></i><i></i><i data-bad></i>
+                <i></i><i data-bad></i><i></i>
+                <i data-bad></i><i></i><i data-bad></i>
+              </div>
+              <div class="ba-status ba-status--bug" data-layer="diff" aria-label="Bug">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <circle cx="24" cy="24" r="22" fill="#dc2626"/>
+                  <path d="M16 18c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+                  <ellipse cx="24" cy="28" rx="9" ry="10" fill="#fff"/>
+                  <path d="M15 22h-5M33 22h5M14 30h-5M34 30h5M16 36l-4 4M32 36l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="20.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <circle cx="27.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <path d="M24 18v20M20 32h8" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp16</span>
+              </div>
+            </div>
+
+            <div class="ba__timeline" data-layer="tensor" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="ba-deck__controls">
+          <button class="ba-deck__btn" id="ba-prev" type="button" aria-label="Previous step">←</button>
+          <div class="ba-deck__dots" role="tablist" aria-label="Bitwise alignment steps">
+            <button class="ba-deck__dot is-active" type="button" data-step="1" aria-label="Step 1"></button>
+            <button class="ba-deck__dot" type="button" data-step="2" aria-label="Step 2"></button>
+            <button class="ba-deck__dot" type="button" data-step="3" aria-label="Step 3"></button>
+          </div>
+          <button class="ba-deck__btn" id="ba-next" type="button" aria-label="Next step">→</button>
+          <button class="ba-deck__play" id="ba-play" type="button" aria-pressed="true">Pause</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="trace-section" id="trace">
+      <div class="section-header section-header--center">
+        <span class="section-tag">Interactive Demo</span>
+        <h2>Global Alignment Trace</h2>
+        <p>
+          Inspect a real production debugging session. The first divergent operation marks
+          where the bug begins — click any op to inspect tensor-level diffs and jump to source.
+        </p>
+      </div>
+
+      <div class="trace-panel" id="trace-panel" data-trace-tour="panel">
+        <div class="trace-panel__toolbar" data-trace-tour="toolbar">
+          <div class="trace-panel__status" id="trace-status">
+            <span class="trace-panel__spinner"></span>
+            <span>Loading trace…</span>
+          </div>
+          <div class="trace-panel__toolbar-end">
+            <div class="trace-panel__meta" data-trace-tour="meta">
+              <span class="trace-chip">demo_case5</span>
+              <span class="trace-chip trace-chip--muted">Open-source issue</span>
+            </div>
+            <button class="trace-tour-launch" id="trace-tour-launch" type="button" hidden>Guided tour</button>
+          </div>
+        </div>
+        <div class="trace-panel__viewer" data-trace-tour="viewer">
+          <!-- Keep the July 2026 viewer layout used by the guided tour.
+               The rolling release can open Trace Doctor and shift its targets.
+               Recheck all six tour steps before upgrading this pinned build. -->
+          <iframe
+            id="perfetto"
+            title="OpGuard Perfetto Trace Viewer"
+            src="https://ui.perfetto.dev/v57.2-da1d152cf/#!/?mode=embedded"
+            allow="clipboard-read; clipboard-write"
+          ></iframe>
+          <div class="trace-panel__overlay" id="trace-overlay">
+            <div class="trace-panel__overlay-inner">
+              <div class="trace-panel__overlay-ring"></div>
+              <p>Initializing trace viewer…</p>
+              <div class="trace-panel__progress">
+                <div class="trace-panel__progress-bar" id="trace-progress"></div>
+              </div>
+            </div>
+          </div>
+          <aside class="trace-source" id="trace-source" hidden aria-hidden="true">
+            <div class="trace-source__header">
+              <div class="trace-source__heading">
+                <span class="trace-source__label">Source</span>
+                <strong class="trace-source__title" id="trace-source-title"></strong>
+              </div>
+              <span class="trace-source__path" id="trace-source-path"></span>
+            </div>
+            <pre class="trace-source__code" id="trace-source-code" tabindex="0"></pre>
+          </aside>
+          <aside class="trace-source trace-source--diff" id="trace-diff" hidden aria-hidden="true">
+            <div class="trace-source__header">
+              <div class="trace-source__heading">
+                <span class="trace-source__label">Diff</span>
+                <strong class="trace-source__title" id="trace-diff-title"></strong>
+              </div>
+              <span class="trace-source__path" id="trace-diff-path"></span>
+            </div>
+            <div class="trace-diff__body" id="trace-diff-body"></div>
+          </aside>
+        </div>
+
+        <div class="trace-tour" id="trace-tour" hidden aria-hidden="true">
+          <div class="trace-tour__backdrop" id="trace-tour-backdrop"></div>
+          <div class="trace-tour__spotlight" id="trace-tour-spotlight" aria-hidden="true"></div>
+          <div
+            class="trace-tour__card"
+            id="trace-tour-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trace-tour-title"
+            aria-describedby="trace-tour-body"
+          >
+            <span class="trace-tour__progress" id="trace-tour-progress">1 / 6</span>
+            <h3 class="trace-tour__title" id="trace-tour-title"></h3>
+            <p class="trace-tour__body" id="trace-tour-body"></p>
+            <div class="trace-tour__actions">
+              <button class="trace-tour__btn trace-tour__btn--ghost" id="trace-tour-back" type="button">Back</button>
+              <button class="trace-tour__btn trace-tour__btn--primary" id="trace-tour-next" type="button">Next</button>
+              <button class="trace-tour__btn trace-tour__btn--ghost trace-tour__btn--skip" id="trace-tour-skip" type="button">Skip tour</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workflow" id="workflow">
+      <div class="section-header section-header--center">
+        <span class="section-tag">How It Works</span>
+        <h2>OpGuard Workflow</h2>
+        <p>
+          Determinism control → preflight → guarded replay → offline alignment.
+          Watch the build-up one step at a time.
+        </p>
+      </div>
+
+      <div class="wf" id="workflow-deck" data-step="1" aria-live="polite">
+        <div class="wf__canvas">
+          <div class="wf__headings">
+            <h3 class="wf-heading is-on" data-step="1">
+              <span class="wf-heading__n">1</span>
+              Determinism Control
+              <img class="wf-heading__icon" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
+            </h3>
+            <h3 class="wf-heading" data-step="2">
+              <span class="wf-heading__n">2</span>
+              Preflight: (~ 5 iters) Discover Stable Op
+            </h3>
+            <h3 class="wf-heading" data-step="3">
+              <span class="wf-heading__n">3</span>
+              Guarded Replay: Fingerprint at Op boundary
+            </h3>
+            <h3 class="wf-heading" data-step="4">
+              <span class="wf-heading__n">4</span>
+              Offline Alignment
+            </h3>
+          </div>
+
+          <div class="wf__diagram" id="wf-diagram">
+            <!-- Suspect Run -->
+            <div class="wf-run wf-run--suspect">
+              <div class="wf-run__row">
+                <img class="wf-run__shield" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
+                <div class="wf-run__ops">
+                  <div class="wf-op wf-op--v" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>V</span>
+                  </div>
+                  <div class="wf-op wf-op--other"><span>Other Compute</span></div>
+                  <div class="wf-op wf-op--k" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>K</span>
+                  </div>
+                  <div class="wf-op wf-op--attn" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>Attention</span>
+                  </div>
+                </div>
+              </div>
+              <div class="wf-run__label">Suspect Run</div>
+              <div class="wf-fps wf-fps--suspect" data-appear="3">
+                <div class="wf-fp wf-fp--v" data-fp="v" title="V"></div>
+                <div class="wf-fp wf-fp--k" data-fp="k" title="K"></div>
+                <div class="wf-fp wf-fp--attn" data-fp="attn" title="Attention"></div>
+              </div>
+            </div>
+
+            <svg class="wf-align" id="wf-align" data-appear="4" aria-hidden="true"></svg>
+
+            <!-- Reference Run -->
+            <div class="wf-run wf-run--ref">
+              <div class="wf-fps wf-fps--ref" data-appear="3">
+                <div class="wf-fp wf-fp--k" data-fp="k" title="K"></div>
+                <div class="wf-fp wf-fp--v" data-fp="v" title="V"></div>
+                <div class="wf-fp wf-fp--attn" data-fp="attn" title="Attention"></div>
+              </div>
+              <div class="wf-run__label">Reference Run</div>
+              <div class="wf-run__row">
+                <img class="wf-run__shield" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
+                <div class="wf-run__ops">
+                  <div class="wf-op wf-op--other"><span>Other Compute</span></div>
+                  <div class="wf-op wf-op--k" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>K</span>
+                  </div>
+                  <div class="wf-op wf-op--v" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>V</span>
+                  </div>
+                  <div class="wf-op wf-op--attn" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>Attention</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wf__banner" data-appear="4">
+            <img src="assets/images/workflow/native/check-badge.png" alt="" aria-hidden="true">
+            <span><strong>OpGuard</strong> Aligns Diverse Runtime Executions</span>
+          </div>
+        </div>
+
+        <div class="wf__controls">
+          <button class="wf__btn" id="workflow-prev" type="button" aria-label="Previous step">←</button>
+          <div class="wf__dots" role="tablist" aria-label="Workflow steps">
+            <button class="wf__dot is-active" type="button" data-step="1" aria-label="Step 1"></button>
+            <button class="wf__dot" type="button" data-step="2" aria-label="Step 2"></button>
+            <button class="wf__dot" type="button" data-step="3" aria-label="Step 3"></button>
+            <button class="wf__dot" type="button" data-step="4" aria-label="Step 4"></button>
+          </div>
+          <button class="wf__btn" id="workflow-next" type="button" aria-label="Next step">→</button>
+          <button class="wf__play" id="workflow-play" type="button" aria-pressed="true">Pause</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="impact" id="impact">
+      <div class="impact__inner">
+        <div class="impact__content">
+          <span class="section-tag">Production Proven</span>
+          <h2>Days of debugging, reduced to minutes</h2>
+          <p>
+            Deployed at ByteDance, OpGuard diagnosed kernel races, framework mismatches,
+            and hardware-level corruptions that existing checks missed — including a five-day
+            embedding backward race localized in under five minutes.
+          </p>
+        </div>
+
+        <div class="impact-panel impact-panel--timing">
+          <div class="impact-timing__legend" aria-hidden="true">
+            <span class="impact-timing__swatch impact-timing__swatch--manual"></span>
+            <span>Manual</span>
+            <span class="impact-timing__swatch impact-timing__swatch--opguard"></span>
+            <span>OpGuard</span>
+          </div>
+          <div class="impact-timing__chart">
+            <svg class="impact-timing__svg" viewBox="0 0 960 420" role="img" aria-label="Debugging time: Manual versus OpGuard across production bug cases, log scale">
+              <title>Debugging time comparison on a log scale</title>
+              <line class="impact-timing__grid" x1="70" y1="262.3" x2="936" y2="262.3" />
+              <text class="impact-timing__tick" x="60" y="266.3" text-anchor="end">10 min</text>
+              <line class="impact-timing__grid" x1="70" y1="206.2" x2="936" y2="206.2" />
+              <text class="impact-timing__tick" x="60" y="210.2" text-anchor="end">1 h</text>
+              <line class="impact-timing__grid" x1="70" y1="106.6" x2="936" y2="106.6" />
+              <text class="impact-timing__tick" x="60" y="110.6" text-anchor="end">1 day</text>
+              <line class="impact-timing__grid" x1="70" y1="45.7" x2="936" y2="45.7" />
+              <text class="impact-timing__tick" x="60" y="49.7" text-anchor="end">1 week</text>
+              <line class="impact-timing__grid" x1="70" y1="24.0" x2="936" y2="24.0" />
+              <text class="impact-timing__tick" x="60" y="28.0" text-anchor="end">2 weeks</text>
+              <line class="impact-timing__threshold" x1="70" y1="227.9" x2="936" y2="227.9" />
+              <text class="impact-timing__threshold-label" x="932" y="221.9" text-anchor="end">30 min</text>
+              <text class="impact-timing__axis" transform="translate(16 162) rotate(-90)" text-anchor="middle">Debugging time</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="83.7" y="56.2" width="23.6" height="243.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="111.4" y="249.6" width="23.6" height="50.4" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(109.4 314) rotate(-40)" text-anchor="end">Emb-bwd (3080)</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="162.5" y="56.2" width="23.6" height="243.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="190.1" y="284.0" width="23.6" height="16.0" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(188.1 314) rotate(-40)" text-anchor="end">CUDA stream</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="241.2" y="72.2" width="23.6" height="227.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="268.8" y="284.0" width="23.6" height="16.0" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(266.8 314) rotate(-40)" text-anchor="end">FlashAttn det</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="319.9" y="72.2" width="23.6" height="227.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="347.5" y="262.3" width="23.6" height="37.7" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(345.5 314) rotate(-40)" text-anchor="end">NCCL topo</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="398.7" y="24.0" width="23.6" height="276.0" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="426.3" y="227.9" width="23.6" height="72.1" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(424.3 314) rotate(-40)" text-anchor="end">Scatter SDC</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="477.4" y="162.8" width="23.6" height="137.2" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="505.0" y="284.0" width="23.6" height="16.0" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(503.0 314) rotate(-40)" text-anchor="end">MoE hist</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="556.1" y="41.5" width="23.6" height="258.5" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="583.7" y="284.0" width="23.6" height="16.0" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(581.7 314) rotate(-40)" text-anchor="end">Emb-bwd fuse</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="634.8" y="84.9" width="23.6" height="215.1" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="662.5" y="240.6" width="23.6" height="59.4" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(660.5 314) rotate(-40)" text-anchor="end">Offload sync</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="713.6" y="63.2" width="23.6" height="236.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="741.2" y="262.3" width="23.6" height="37.7" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(739.2 314) rotate(-40)" text-anchor="end">Triton bwd</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="792.3" y="56.2" width="23.6" height="243.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="819.9" y="284.0" width="23.6" height="16.0" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(817.9 314) rotate(-40)" text-anchor="end">QKV layout</text>
+
+              <rect class="impact-timing__bar impact-timing__bar--manual" x="871.0" y="72.2" width="23.6" height="227.8" rx="3" />
+              <rect class="impact-timing__bar impact-timing__bar--opguard" x="898.6" y="284.0" width="23.6" height="16.0" rx="3" />
+              <text class="impact-timing__xlabel" transform="translate(896.6 314) rotate(-40)" text-anchor="end">Optim resume</text>
+            </svg>
+          </div>
+          <p class="impact-timing__caption">
+            Production bug cases: manual root-cause time vs OpGuard (log scale). OpGuard stays at or under the 30-minute line.
+          </p>
+        </div>
+
+        <div class="impact__evidence">
+          <div class="impact-panel impact-panel--workflow">
+            <h3>OpGuard changes ByteDance’s internal <span>debugging workflow</span> in production training</h3>
+            <div class="impact-workflow">
+              <div class="impact-workflow__before">
+                <span class="impact-workflow__eyebrow">Before</span>
+                <ul>
+                  <li>Manually compare two runs</li>
+                  <li>Guess which subsystem to check</li>
+                </ul>
+              </div>
+
+              <div class="impact-workflow__arrow" aria-hidden="true">→</div>
+
+              <div class="impact-workflow__after">
+                <span class="impact-workflow__eyebrow impact-workflow__eyebrow--opguard">With OpGuard</span>
+                <div class="impact-workflow__runs" aria-hidden="true">
+                  <div class="impact-workflow__run">
+                    <span class="impact-workflow__run-label">Suspect run</span>
+                    <div class="impact-workflow__cells">
+                      <span></span><span></span><span></span>
+                      <span class="is-mismatch"></span>
+                      <span></span><span></span>
+                    </div>
+                  </div>
+                  <div class="impact-workflow__run">
+                    <span class="impact-workflow__run-label">Reference run</span>
+                    <div class="impact-workflow__cells">
+                      <span></span><span></span><span></span>
+                      <span class="is-match"></span>
+                      <span></span><span></span>
+                    </div>
+                  </div>
+                  <div class="impact-workflow__pivot">
+                    First mismatch: a reliable debugging pivot
+                  </div>
+                </div>
+                <p class="impact-workflow__note">
+                  Then inspect with the visualizer — tensor diffs, call stack, and source at the pivot.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-panel impact-panel--broader">
+            <h3>Bitwise alignment enables <span>broader comparisons</span></h3>
+            <div class="impact-broader">
+              <div class="impact-broader__copy">
+                <p class="impact-broader__lead">No “golden baseline” required</p>
+                <p>
+                  Compare equivalent computation across stacks, configs, and commits —
+                  pick whatever reference run is available for the bug.
+                </p>
+              </div>
+              <div class="impact-broader__viz" aria-label="Where reference runs are selected">
+                <h4>Where are reference runs selected?</h4>
+                <div class="impact-broader__viz-row">
+                  <div class="impact-ref-pie" aria-hidden="true"></div>
+                  <ul class="impact-ref-legend">
+                    <li class="impact-ref-legend__item impact-ref-legend__item--self">
+                      <span></span>
+                      <em>Self-replay</em>
+                      <strong>45%</strong>
+                    </li>
+                    <li class="impact-ref-legend__item impact-ref-legend__item--config">
+                      <span></span>
+                      <em>Config tweak</em>
+                      <strong>25%</strong>
+                    </li>
+                    <li class="impact-ref-legend__item impact-ref-legend__item--cross">
+                      <span></span>
+                      <em>Cross-framework</em>
+                      <strong>20%</strong>
+                    </li>
+                    <li class="impact-ref-legend__item impact-ref-legend__item--commit">
+                      <span></span>
+                      <em>Stable commit</em>
+                      <strong>10%</strong>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-panel impact-panel--quotes">
+            <h3>Expert <span>testimony</span></h3>
+            <div class="impact-quote impact-quote--a">
+              <div class="impact-quote__avatar" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="18" r="9" stroke="currentColor" stroke-width="3"/>
+                  <path d="M12 40c2-9 7-13 12-13s10 4 12 13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M18 37h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="impact-quote__body">
+                <strong>Developer A</strong>
+                <p>
+                  We had been chasing the wrong subsystem for almost a week.
+                  OpGuard showed the exact kernel in under fifteen minutes.
+                </p>
+              </div>
+            </div>
+            <div class="impact-quote impact-quote--b">
+              <div class="impact-quote__body">
+                <strong>Developer B</strong>
+                <p>
+                  Without OpGuard, we would never have noticed that the drift originated
+                  in a single row race. The loss precision is too low and gives us no
+                  clue where to start.
+                </p>
+              </div>
+              <div class="impact-quote__avatar" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="18" r="9" stroke="currentColor" stroke-width="3"/>
+                  <path d="M12 40c2-9 7-13 12-13s10 4 12 13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M18 37h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-panel impact-panel--cases">
+            <h3>Diverse and tricky <span>root causes</span></h3>
+            <div class="impact-cases">
+              <div class="impact-cases__legend" aria-label="Root-cause categories">
+                <div class="impact-category impact-category--logic">
+                  <span></span>
+                  <strong>Wrong model implementation / logic</strong>
+                  <em>7 cases (35%)</em>
+                </div>
+                <div class="impact-category impact-category--race">
+                  <span></span>
+                  <strong>Race conditions</strong>
+                  <em>5 cases (25%)</em>
+                </div>
+                <div class="impact-category impact-category--drift">
+                  <span></span>
+                  <strong>Unexpected numerical drift</strong>
+                  <em>6 cases (30%)</em>
+                </div>
+                <div class="impact-category impact-category--hardware">
+                  <span></span>
+                  <strong>Hardware faults</strong>
+                  <em>2 cases (10%)</em>
+                </div>
+              </div>
+              <div class="impact-cases__chart" aria-label="20 production cases by root-cause categories">
+                <h4>20 Production Cases by Root-cause Categories</h4>
+                <div class="impact-pie">
+                  <span class="impact-pie__label impact-pie__label--logic">7 cases<br>(35%)</span>
+                  <span class="impact-pie__label impact-pie__label--race">5 cases<br>(25%)</span>
+                  <span class="impact-pie__label impact-pie__label--drift">6 cases<br>(30%)</span>
+                  <span class="impact-pie__label impact-pie__label--hardware">2 cases<br>(10%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-panel impact-panel--stacks">
+            <h3>OpGuard supports major production-level <span>training stacks</span></h3>
+            <div class="impact-stacks">
+              <div class="impact-stack-notes">
+                <div class="impact-stack-note">
+                  <span class="impact-stack-note__icon" aria-hidden="true">▦</span>
+                  <p><strong>Internal:</strong> text and VLM pre-training, post-training framework</p>
+                </div>
+                <div class="impact-stack-note">
+                  <span class="impact-stack-note__icon" aria-hidden="true">⌁</span>
+                  <p><strong>Open source:</strong> Megatron-LM, DeepSpeed, GPT-Neox, veRL, etc.</p>
+                </div>
+              </div>
+              <div class="impact-stack-card" aria-label="Supported production-level training stacks">
+                <span>NVIDIA</span>
+                <span>Megatron-LM</span>
+                <span>DeepSpeed</span>
+                <span>PyTorch 2.0</span>
+                <span>PyTorch Compiler</span>
+                <span>veScale</span>
+                <span>veRL</span>
+                <span>PyTorch FSDP</span>
+                <span>GPT-Neox</span>
+                <span>Transformers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cite" id="cite">
+      <div class="cite__inner">
+        <div class="section-header section-header--center">
+          <span class="section-tag">Publication</span>
+          <h2>Cite our paper</h2>
+          <p>
+            OpGuard was presented at OSDI ’26 and is a <strong>Best Paper Award nominee</strong>.
+            If you use OpGuard in your research or systems work, please cite the following paper.
+          </p>
+        </div>
+
+        <div class="cite__card">
+          <div class="cite__meta">
+            <p class="cite__title">
+              OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training
+            </p>
+            <p class="cite__authors">
+              Ziming Zhou, Yinjie Zhao, Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang,
+              Shuguang Wang, Haibin Lin, Peng Huang
+            </p>
+            <p class="cite__venue">
+              Proceedings of the 20th USENIX Symposium on Operating Systems Design and Implementation (OSDI ’26),
+              Seattle, WA, USA, July 2026. USENIX Association.
+            </p>
+            <div class="cite__actions">
+              <a
+                class="btn btn--primary cite__pdf"
+                href="https://www.usenix.org/system/files/osdi26-zhou-ziming.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Read the paper (PDF)</a>
+              <a
+                class="btn btn--ghost"
+                href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming"
+                target="_blank"
+                rel="noopener noreferrer"
+              >OSDI ’26 page</a>
+            </div>
+          </div>
+
+          <div class="cite__bib">
+            <div class="cite__bib-head">
+              <span>BibTeX</span>
+              <button class="cite__copy" id="cite-copy" type="button">Copy</button>
+            </div>
+            <pre class="cite__code" id="cite-bibtex"><code>@inproceedings{OpGuard2026OSDI,
+  author = {Zhou, Ziming and Zhao, Yinjie and Zhu, Hang and Wang, Wenxiao and Bai, Zhihao and Zhang, Yun and Wang, Shuguang and Lin, Haibin and Huang, Peng},
+  title = {{OpGuard}: Bitwise Alignment for Precise and General Debugging of Production {LLM} Training},
+  booktitle = {Proceedings of the 20th USENIX Symposium on Operating Systems Design and Implementation},
+  series = {OSDI '26},
+  month = {July},
+  year = {2026},
+  address = {Seattle, WA, USA},
+  publisher = {USENIX Association},
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <img src="assets/images/brand/logo.svg" alt="OpGuard" class="footer__logo">
+        <p>OpGuard: Bitwise Alignment for Precise and General Debugging of Production LLM Training</p>
+      </div>
+      <div class="footer__credits">
+        <div class="footer__partners" aria-label="Research collaboration">
+          <img src="assets/images/partners/umich.png" alt="University of Michigan" class="footer__partner-logo">
+          <img src="assets/images/partners/orderlab.png" alt="OrderLab" class="footer__partner-logo">
+          <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" class="footer__partner-logo footer__partner-logo--bytedance">
+        </div>
+        <p>University of Michigan CSE · ByteDance</p>
+        <p>Ziming Zhou, Yinjie Zhao, Hang Zhu, Wenxiao Wang, Zhihao Bai, Yun Zhang, Shuguang Wang, Haibin Lin, Ryan Huang</p>
+      </div>
+
+      <aside class="footer__seed">
+        <a class="footer__seed-logo-link" href="https://seed.bytedance.com/en/" target="_blank" rel="noopener noreferrer">
+          <img
+            src="assets/images/partners/bytedance-seed.png"
+            alt="ByteDance Seed"
+            class="footer__seed-logo"
+          >
+        </a>
+        <div class="footer__seed-copy">
+          <h2 class="footer__seed-title">About ByteDance Seed Team</h2>
+          <p>
+            Founded in 2023, ByteDance Seed Team is dedicated to crafting the industry's most
+            advanced AI foundation models. The team aspires to become a world-class research team
+            and make significant contributions to the advancement of science and society.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/demo-config.js"></script>
+  <script src="js/rootcause.js?v=paired-cost-20261019"></script>
+</body>
+</html>
