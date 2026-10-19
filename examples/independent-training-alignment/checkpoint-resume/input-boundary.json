@@ -1,0 +1,553 @@
+{
+  "kind": "derived_reanalysis_of_existing_probe_records",
+  "selected_updates": [
+    1,
+    2,
+    32,
+    33,
+    64
+  ],
+  "rank_correspondence": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      2
+    ]
+  ],
+  "observations": [
+    {
+      "round": 1,
+      "update": 1,
+      "a_global_batch_start": 0,
+      "b_global_batch_start": 0,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 1,
+      "update": 2,
+      "a_global_batch_start": 16,
+      "b_global_batch_start": 16,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 1,
+      "update": 32,
+      "a_global_batch_start": 496,
+      "b_global_batch_start": 496,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 1,
+      "update": 33,
+      "a_global_batch_start": 128,
+      "b_global_batch_start": 512,
+      "compared_microbatches": 8,
+      "differing_microbatches": 8,
+      "first_microbatch_per_dp_rank": [
+        {
+          "dp_rank": 0,
+          "a": {
+            "rows": [
+              "a68c8dde851e37ce",
+              "c60658d8dd97d7e7"
+            ],
+            "targets": 190,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:0",
+                "numel": 1024,
+                "xor_signature": [
+                  3740,
+                  1063,
+                  3609,
+                  1077
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r1-a.batch-rank0.jsonl",
+            "line": 4,
+            "microbatch": 0
+          },
+          "b": {
+            "rows": [
+              "603d0bbe66f0372d",
+              "8037ffc7d6b8a8de"
+            ],
+            "targets": 334,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:0",
+                "numel": 1024,
+                "xor_signature": [
+                  3870,
+                  24,
+                  548,
+                  1279
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r1-b.batch-rank0.jsonl",
+            "line": 45,
+            "microbatch": 0
+          },
+          "differing_regions": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "dp_rank": 1,
+          "a": {
+            "rows": [
+              "b9f84199e98ecfeb",
+              "c4beeec59a678401"
+            ],
+            "targets": 798,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:1",
+                "numel": 1024,
+                "xor_signature": [
+                  3083,
+                  806,
+                  2518,
+                  3460
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r1-a.batch-rank1.jsonl",
+            "line": 4,
+            "microbatch": 0
+          },
+          "b": {
+            "rows": [
+              "73fdc6caef0c23a6",
+              "40491345f4394115"
+            ],
+            "targets": 654,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:2",
+                "numel": 1024,
+                "xor_signature": [
+                  593,
+                  290,
+                  3433,
+                  2134
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r1-b.batch-rank2.jsonl",
+            "line": 45,
+            "microbatch": 0
+          },
+          "differing_regions": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "round": 1,
+      "update": 64,
+      "a_global_batch_start": 624,
+      "b_global_batch_start": 1008,
+      "compared_microbatches": 8,
+      "differing_microbatches": 8,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 2,
+      "update": 1,
+      "a_global_batch_start": 0,
+      "b_global_batch_start": 0,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 2,
+      "update": 2,
+      "a_global_batch_start": 16,
+      "b_global_batch_start": 16,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 2,
+      "update": 32,
+      "a_global_batch_start": 496,
+      "b_global_batch_start": 496,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    },
+    {
+      "round": 2,
+      "update": 33,
+      "a_global_batch_start": 512,
+      "b_global_batch_start": 512,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": [
+        {
+          "dp_rank": 0,
+          "a": {
+            "rows": [
+              "603d0bbe66f0372d",
+              "8037ffc7d6b8a8de"
+            ],
+            "targets": 334,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:0",
+                "numel": 1024,
+                "xor_signature": [
+                  3870,
+                  24,
+                  548,
+                  1279
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r2-a.batch-rank0.jsonl",
+            "line": 4,
+            "microbatch": 0
+          },
+          "b": {
+            "rows": [
+              "603d0bbe66f0372d",
+              "8037ffc7d6b8a8de"
+            ],
+            "targets": 334,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:0",
+                "numel": 1024,
+                "xor_signature": [
+                  3870,
+                  24,
+                  548,
+                  1279
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r2-b.batch-rank0.jsonl",
+            "line": 45,
+            "microbatch": 0
+          },
+          "differing_regions": []
+        },
+        {
+          "dp_rank": 1,
+          "a": {
+            "rows": [
+              "73fdc6caef0c23a6",
+              "40491345f4394115"
+            ],
+            "targets": 654,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:1",
+                "numel": 1024,
+                "xor_signature": [
+                  593,
+                  290,
+                  3433,
+                  2134
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r2-a.batch-rank1.jsonl",
+            "line": 4,
+            "microbatch": 0
+          },
+          "b": {
+            "rows": [
+              "73fdc6caef0c23a6",
+              "40491345f4394115"
+            ],
+            "targets": 654,
+            "input": {
+              "shape": [
+                2,
+                512
+              ],
+              "stats": {
+                "dtype": "torch.int64",
+                "device": "cuda:2",
+                "numel": 1024,
+                "xor_signature": [
+                  593,
+                  290,
+                  3433,
+                  2134
+                ],
+                "xor_sig_mode": "bytes",
+                "xor_sig_layout": {
+                  "scheme": "flat-u32-le-v1",
+                  "regions": 4,
+                  "logical_nbytes": 8192,
+                  "byte_ranges": [
+                    [
+                      0,
+                      2048
+                    ],
+                    [
+                      2048,
+                      4096
+                    ],
+                    [
+                      4096,
+                      6144
+                    ],
+                    [
+                      6144,
+                      8192
+                    ]
+                  ]
+                }
+              }
+            },
+            "capture": "r2-b.batch-rank2.jsonl",
+            "line": 45,
+            "microbatch": 0
+          },
+          "differing_regions": []
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "update": 64,
+      "a_global_batch_start": 1008,
+      "b_global_batch_start": 1008,
+      "compared_microbatches": 8,
+      "differing_microbatches": 0,
+      "first_microbatch_per_dp_rank": []
+    }
+  ],
+  "limits": [
+    "This is a sampled input boundary, not an automatic whole-graph first-diff.",
+    "Equal XOR fingerprints do not prove tensor equality.",
+    "Round 2 applied several repairs together; it is not a resume-only intervention."
+  ]
+}

@@ -1,0 +1,49 @@
+NCCL version 2.27.7+cuda13.0
+`loss_type=None` was set in the config but it is unrecognised.Using the default loss: `ForCausalLMLoss`.
+`loss_type=None` was set in the config but it is unrecognised.Using the default loss: `ForCausalLMLoss`.
+{'loss': 8.3564, 'grad_norm': 19.83450698852539, 'learning_rate': 7.5e-05, 'epoch': 0.015625}
+{'loss': 8.3616, 'grad_norm': 19.19040870666504, 'learning_rate': 0.00015, 'epoch': 0.03125}
+{'loss': 7.5093, 'grad_norm': 8.69559383392334, 'learning_rate': 0.000225, 'epoch': 0.046875}
+{'loss': 7.2901, 'grad_norm': 3.65820050239563, 'learning_rate': 0.0003, 'epoch': 0.0625}
+{'loss': 7.5636, 'grad_norm': 7.0520477294921875, 'learning_rate': 0.000299794430213186, 'epoch': 0.078125}
+{'loss': 7.1843, 'grad_norm': 2.990335702896118, 'learning_rate': 0.00029917828430524096, 'epoch': 0.09375}
+{'loss': 6.9253, 'grad_norm': 2.3771567344665527, 'learning_rate': 0.00029815325108927063, 'epoch': 0.109375}
+{'loss': 6.8976, 'grad_norm': 1.5317363739013672, 'learning_rate': 0.0002967221401100708, 'epoch': 0.125}
+{'loss': 6.8293, 'grad_norm': 1.6354767084121704, 'learning_rate': 0.0002948888739433602, 'epoch': 0.140625}
+{'loss': 6.688, 'grad_norm': 1.2490421533584595, 'learning_rate': 0.00029265847744427303, 'epoch': 0.15625}
+{'loss': 6.744, 'grad_norm': 1.1311002969741821, 'learning_rate': 0.00029003706397458023, 'epoch': 0.171875}
+{'loss': 6.5583, 'grad_norm': 1.7177962064743042, 'learning_rate': 0.0002870318186463901, 'epoch': 0.1875}
+{'loss': 6.5263, 'grad_norm': 1.625180959701538, 'learning_rate': 0.00028365097862825513, 'epoch': 0.203125}
+{'loss': 6.3567, 'grad_norm': 1.425281047821045, 'learning_rate': 0.0002799038105676658, 'epoch': 0.21875}
+{'loss': 6.3241, 'grad_norm': 0.956743597984314, 'learning_rate': 0.0002758005851918136, 'epoch': 0.234375}
+{'loss': 6.2883, 'grad_norm': 1.588767409324646, 'learning_rate': 0.0002713525491562421, 'epoch': 0.25}
+{'eval_loss': 6.288972854614258, 'eval_runtime': 0.4457, 'eval_samples_per_second': 71.792, 'eval_steps_per_second': 17.948, 'epoch': 0.25}
+{'loss': 6.1458, 'grad_norm': 1.0288223028182983, 'learning_rate': 0.0002665718942185456, 'epoch': 0.265625}
+{'loss': 6.209, 'grad_norm': 0.7634456753730774, 'learning_rate': 0.00026147172382160914, 'epoch': 0.28125}
+{'loss': 5.9899, 'grad_norm': 0.8045721054077148, 'learning_rate': 0.00025606601717798207, 'epoch': 0.296875}
+{'loss': 6.172, 'grad_norm': 0.7998926043510437, 'learning_rate': 0.0002503695909538287, 'epoch': 0.3125}
+{'loss': 6.1283, 'grad_norm': 0.8672335743904114, 'learning_rate': 0.0002443980586574756, 'epoch': 0.328125}
+{'loss': 5.9924, 'grad_norm': 0.8410018086433411, 'learning_rate': 0.00023816778784387094, 'epoch': 0.34375}
+{'loss': 6.0995, 'grad_norm': 0.5803694128990173, 'learning_rate': 0.00023169585525225405, 'epoch': 0.359375}
+{'loss': 5.933, 'grad_norm': 0.665459156036377, 'learning_rate': 0.000225, 'epoch': 0.375}
+{'loss': 5.9781, 'grad_norm': 0.664903461933136, 'learning_rate': 0.00021809857496093199, 'epoch': 0.390625}
+{'loss': 5.8569, 'grad_norm': 0.834618330001831, 'learning_rate': 0.00021101049646137003, 'epoch': 0.40625}
+{'loss': 5.941, 'grad_norm': 0.7741449475288391, 'learning_rate': 0.000203755192431795, 'epoch': 0.421875}
+{'loss': 5.8883, 'grad_norm': 0.776701033115387, 'learning_rate': 0.0001963525491562421, 'epoch': 0.4375}
+{'loss': 5.8802, 'grad_norm': 0.6535152792930603, 'learning_rate': 0.0001888228567653781, 'epoch': 0.453125}
+{'loss': 5.8808, 'grad_norm': 0.6632381677627563, 'learning_rate': 0.00018118675362266385, 'epoch': 0.46875}
+{'loss': 5.9918, 'grad_norm': 0.6189768314361572, 'learning_rate': 0.00017346516975603462, 'epoch': 0.484375}
+{'loss': 5.8942, 'grad_norm': 0.5701473951339722, 'learning_rate': 0.000165679269490148, 'epoch': 0.5}
+{'eval_loss': 6.042740821838379, 'eval_runtime': 0.4333, 'eval_samples_per_second': 73.852, 'eval_steps_per_second': 18.463, 'epoch': 0.5}
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py:675: FutureWarning: FSDP.state_dict_type() and FSDP.set_state_dict_type() are being deprecated. Please use APIs, get_state_dict() and set_state_dict(), which can support different parallelisms, FSDP1, FSDP2, DDP. API doc: https://pytorch.org/docs/stable/distributed.checkpoint.html#torch.distributed.checkpoint.state_dict.get_state_dict .Tutorial: https://pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html .
+  warnings.warn(
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py:675: FutureWarning: FSDP.state_dict_type() and FSDP.set_state_dict_type() are being deprecated. Please use APIs, get_state_dict() and set_state_dict(), which can support different parallelisms, FSDP1, FSDP2, DDP. API doc: https://pytorch.org/docs/stable/distributed.checkpoint.html#torch.distributed.checkpoint.state_dict.get_state_dict .Tutorial: https://pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html .
+  warnings.warn(
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py:675: FutureWarning: FSDP.state_dict_type() and FSDP.set_state_dict_type() are being deprecated. Please use APIs, get_state_dict() and set_state_dict(), which can support different parallelisms, FSDP1, FSDP2, DDP. API doc: https://pytorch.org/docs/stable/distributed.checkpoint.html#torch.distributed.checkpoint.state_dict.get_state_dict .Tutorial: https://pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html .
+  warnings.warn(
+{'train_runtime': 13.6004, 'train_samples_per_second': 75.292, 'train_steps_per_second': 4.706, 'train_loss': 6.512013450264931, 'epoch': 0.5}
+{'eval_loss': 6.042740821838379, 'eval_runtime': 0.4525, 'eval_samples_per_second': 70.712, 'eval_steps_per_second': 17.678, 'epoch': 0.5}
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py:675: FutureWarning: FSDP.state_dict_type() and FSDP.set_state_dict_type() are being deprecated. Please use APIs, get_state_dict() and set_state_dict(), which can support different parallelisms, FSDP1, FSDP2, DDP. API doc: https://pytorch.org/docs/stable/distributed.checkpoint.html#torch.distributed.checkpoint.state_dict.get_state_dict .Tutorial: https://pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html .
+  warnings.warn(
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/torch/distributed/distributed_c10d.py:4876: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  warnings.warn(  # warn only once

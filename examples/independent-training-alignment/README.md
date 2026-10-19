@@ -81,6 +81,12 @@ The [diagnosis ledger](evidence/diagnoses.json) records all six primary mechanis
 
 ## Replay the recorded evidence on CPU
 
+The [checkpoint-resume case](checkpoint-resume/README.md) now includes the original
+merged stdout/stderr logs for rounds 1 and 2, their launch records and hashes, and
+a replay of the update-33 input mismatch (A starts at row 128; B at row 512).
+The ordinary logs already show A's epoch moving backward across restart; the case
+documents that clue alongside the more precise input observations.
+
 From the OpGuard repository root, with Python 3.11 or newer:
 
 ```bash
