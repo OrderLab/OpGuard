@@ -1,0 +1,91 @@
+{
+  "grading_rule": "L3 accepts a decisive executed-semantics/state argument; it does not require isolated final-loss attribution.",
+  "mechanisms": [
+    {
+      "id": "A_DP_MEAN",
+      "role": "primary",
+      "level": "L3",
+      "mechanism": "Rank-local causal-token means under unequal valid-target counts, followed by FSDP averaging, differ from the global token objective.",
+      "evidence": "R1 update1 local target counts2424/2904, local denominators2432/2912, B global5328; native Trainer scaling and FSDP division metadata. R2/R3 denominator5328 on both ranks and matched effective losses.",
+      "first_explicit_written_diagnosis": "command0026 journal before round2",
+      "patch_command": "0026",
+      "first_tested_run": "0027 round2 A",
+      "repair": "average_tokens_across_devices=true; tested jointly with shift-count and resume corrections.",
+      "causal_scope": "Decisive effective-objective/count argument plus joint repair; no isolated per-root trajectory effect estimate."
+    },
+    {
+      "id": "A_SHIFT_COUNT",
+      "role": "auxiliary",
+      "level": "L3",
+      "mechanism": "Counted unshifted nonignored labels although causal CE discards the first label of each row.",
+      "evidence": "Eight extra labels per local accumulation window:2432 versus2424 and2912 versus2904. Retained patch counts labels[...,1:].",
+      "first_explicit_written_diagnosis": "command0026 journal before round2",
+      "patch_command": "0026",
+      "first_tested_run": "0027 round2 A",
+      "repair": "Shift-aware denominator, tested with global aggregation and resume correction.",
+      "causal_scope": "Auxiliary observable explanation; not promoted to an independently material primary."
+    },
+    {
+      "id": "A_RESUME_BATCH_SKIP",
+      "role": "primary",
+      "level": "L3",
+      "mechanism": "Optimizer update progress32 used as microbatch skip32 instead of32*4=128.",
+      "evidence": "R1 update33 A batch starts128, B512; corrected A512 and final1008. Full row-hash sequences plus target counts disambiguate repeated rows. OpGuard paired input fingerprints differ after restart in R1 and agree in R2/R3.",
+      "first_explicit_written_diagnosis": "command0026 journal before round2",
+      "patch_command": "0026",
+      "first_tested_run": "0027 round2 A",
+      "repair": "Multiply skipped batches by gradient_accumulation_steps.",
+      "causal_scope": "Direct data-progress contradiction and corrected sampled batches; joint first-stage repair."
+    },
+    {
+      "id": "B_GRAD_NORM_AVG",
+      "role": "primary",
+      "level": "L3",
+      "mechanism": "AVG instead of SUM aggregates squared norms over the distributed optimizer global process group, halving L2 norm for four ranks.",
+      "evidence": "Native DistributedOptimizer.get_grad_stats_parallel_group returns None (default world); actual native launch has four workers. First B reported norm9.897 becomes19.793 after SUM, before any nonzero update; unchanged initial loss8.38272. Corrected A/B norms agree within logged precision.",
+      "first_explicit_written_diagnosis": "commands0025 source,0026 journal",
+      "patch_command": "0026",
+      "first_tested_run": "0029 round2 B",
+      "repair": "AVG→SUM; clipping threshold remains1.0.",
+      "causal_scope": "Concrete source/group argument plus first-gradient norm intervention. No dedicated group-size probe; four-rank scope follows the recorded native launch and selected default-world implementation, not TP size alone."
+    },
+    {
+      "id": "B_COSINE_HORIZON",
+      "role": "primary",
+      "level": "L3",
+      "mechanism": "Cosine elapsed time excludes four warmup updates but decay denominator retains the full64.",
+      "evidence": "At update32 next LR B0.0001792635 versus A0.00016567926949; denominator64→60 yields corrected next-LR differences≤4.9156243e-11 across64 native records.",
+      "first_explicit_written_diagnosis": "command0026 journal before round2",
+      "patch_command": "0026",
+      "first_tested_run": "0029 round2 B",
+      "repair": "lr_decay_steps-lr_warmup_steps, preserving configured horizon and warmup.",
+      "causal_scope": "Closed-form schedule contradiction plus all-update logged schedule validation; joint repair."
+    },
+    {
+      "id": "A_GELU_BACKWARD",
+      "role": "primary",
+      "level": "L3",
+      "mechanism": "Exact GELU forward paired with tanh-approximation backward.",
+      "evidence": "Configured source has approximate=tanh in backward; command0033 changes to none before A0034. A round3 versus unchanged B round2 step32 model RMS drops from2.36684e-6 to1.24908e-8.",
+      "first_explicit_written_diagnosis": "commands0031/0032 source,0033 journal",
+      "patch_command": "0033",
+      "first_tested_run": "0034 round3 A",
+      "repair": "Backward approximate=none, preserving exact forward.",
+      "causal_scope": "Decisive derivative inconsistency plus a focused pre-restart repair comparison. Native A nondeterminism remains; reduction is evidence, not proof that every residual has one source."
+    },
+    {
+      "id": "B_STEP_ALIAS",
+      "role": "primary",
+      "level": "L3",
+      "mechanism": "Resume loader assigns one mutable step Tensor to every Torch AdamW parameter state; per-parameter increments corrupt bias correction.",
+      "evidence": "Command0036 CPU reads show step32 then2496; command0037 shows shared assignment,2496=32+77*32 on examined rank. Clone patch0038 precedes B0039; R3 saved group steps32 then64 on both TP checkpoint ranks.",
+      "first_explicit_written_diagnosis": "commands0036/0037 evidence,0038 journal",
+      "patch_command": "0038",
+      "first_tested_run": "0039 round3 B",
+      "repair": "s[step]=step.clone() inside native restore loop.",
+      "causal_scope": "Decisive mutable-state argument plus tested repair.77 is a rank-specific inferred count, not a claim for all DP shards; full optimizer moments/RNG were not compared."
+    }
+  ],
+  "false_positive_note": "Ordinary investigator 9f9be39907e7 incorrectly described eval as 32 variable-length rows. The frozen input has 64 full-length rows; that extra explanation was rejected, not counted among the four mechanisms.",
+  "source_review_sha256": "c5c38a41a029ea781c5e26e50f902104d72a1d52d864a107b85176840083032e"
+}

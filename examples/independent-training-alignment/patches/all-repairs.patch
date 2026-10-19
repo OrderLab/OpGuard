@@ -1,0 +1,72 @@
+--- configs/run_a.json
++++ configs/run_a.json
+@@ -53,5 +53,5 @@
+   "activation_checkpointing": true,
+   "train_lengths": "assets/train_lengths.npy",
+   "eval_lengths": "assets/eval_lengths.npy",
+-  "average_tokens_across_devices": false
++  "average_tokens_across_devices": true
+ }
+--- stack_a/vendor/transformers/trainer.py
++++ stack_a/vendor/transformers/trainer.py
+@@ -2429,6 +2429,7 @@
+             epochs_trained = int(self.state.global_step // num_update_steps_per_epoch)
+             if not args.ignore_data_skip:
+                 steps_trained_in_current_epoch = self.state.global_step % (num_update_steps_per_epoch)
++                steps_trained_in_current_epoch *= args.gradient_accumulation_steps
+             else:
+                 steps_trained_in_current_epoch = 0
+ 
+@@ -5183,7 +5184,7 @@
+         if len(batch_samples) > 0 and "labels" in batch_samples[0]:
+             # For now we don't support object detection
+             try:
+-                num_items_in_batch = sum([(batch["labels"].ne(-100)).sum() for batch in batch_samples])
++                num_items_in_batch = sum([(batch["labels"][..., 1:].ne(-100)).sum() for batch in batch_samples])
+             except (TypeError, AttributeError):
+                 pass
+ 
+--- stack_a/vendor/transformers/activations.py
++++ stack_a/vendor/transformers/activations.py
+@@ -65,7 +65,7 @@
+     @staticmethod
+     def backward(ctx, grad_output):
+         (input,) = ctx.saved_tensors
+-        return torch.ops.aten.gelu_backward.default(grad_output, input, approximate="tanh")
++        return torch.ops.aten.gelu_backward.default(grad_output, input, approximate="none")
+ 
+ 
+ class GELUActivation(nn.Module):
+--- stack_b/vendor/Megatron-LM/megatron/core/optimizer_param_scheduler.py
++++ stack_b/vendor/Megatron-LM/megatron/core/optimizer_param_scheduler.py
+@@ -151,7 +151,7 @@
+             return max(min_lr, lr)
+ 
+         num_steps_ = self.num_steps - self.lr_warmup_steps
+-        decay_steps_ = self.lr_decay_steps
++        decay_steps_ = self.lr_decay_steps - self.lr_warmup_steps
+         decay_ratio = float(num_steps_) / float(decay_steps_)
+         assert decay_ratio >= 0.0
+         assert decay_ratio <= 1.0
+--- stack_b/vendor/Megatron-LM/megatron/core/optimizer/clip_grads.py
++++ stack_b/vendor/Megatron-LM/megatron/core/optimizer/clip_grads.py
+@@ -128,7 +128,7 @@
+                 total_norm, op=torch.distributed.ReduceOp.SUM, group=data_parallel_group
+             )
+         torch.distributed.all_reduce(
+-            total_norm, op=torch.distributed.ReduceOp.AVG, group=grad_stats_parallel_group
++            total_norm, op=torch.distributed.ReduceOp.SUM, group=grad_stats_parallel_group
+         )
+         total_norm = total_norm.item() ** (1.0 / norm_type)
+ 
+--- stack_b/vendor/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py
++++ stack_b/vendor/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py
+@@ -672,7 +672,7 @@
+ 
+             for s in state_dict_state.values():
+                 # Native PyTorch state dict requires step (i.e., iteration).
+-                s["step"] = step
++                s["step"] = step.clone()
+ 
+         # Optimizer.
+         self.optimizer.load_state_dict(

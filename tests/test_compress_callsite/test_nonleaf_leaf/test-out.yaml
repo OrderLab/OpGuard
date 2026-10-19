@@ -1,0 +1,137 @@
+{
+  "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py:131 in forward": {
+    "count": 640,
+    "callstacks": [
+      [
+        [
+          "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+          177,
+          "main"
+        ],
+        [
+          "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+          155,
+          "train"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/modules/module.py",
+          1511,
+          "_wrapped_call_impl"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/deepspeed/utils/nvtx.py",
+          15,
+          "wrapped_fn"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/deepspeed/runtime/engine.py",
+          1855,
+          "forward"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/modules/module.py",
+          1511,
+          "_wrapped_call_impl"
+        ],
+        [
+          "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+          131,
+          "forward"
+        ]
+      ]
+    ],
+    "ops": [
+      "_ZN2at6native18elementwise_kernelILi128ELi4EZNS0_22gpu_kernel_impl_nocastINS0_15CUDAFunctor_addIN3c104HalfEEEEEvRNS_18TensorIteratorBaseERKT_EUliE_EEviT1_",
+      "_ZN2at6native29vectorized_elementwise_kernelILi4ENS0_15CUDAFunctor_addIN3c104HalfEEENS_6detail5ArrayIPcLi3EEEEEviT0_T1_"
+    ],
+    "streams": [
+      [
+        0,
+        7
+      ],
+      [
+        1,
+        7
+      ]
+    ],
+    "stream_counts": {
+      "0:7": 320,
+      "1:7": 320
+    }
+  },
+  "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/functional.py:2237 in embedding": {
+    "count": 3840,
+    "callstacks": [
+      [
+        [
+          "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+          177,
+          "main"
+        ],
+        [
+          "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+          155,
+          "train"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/modules/module.py",
+          1511,
+          "_wrapped_call_impl"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/deepspeed/utils/nvtx.py",
+          15,
+          "wrapped_fn"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/deepspeed/runtime/engine.py",
+          1855,
+          "forward"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/modules/module.py",
+          1511,
+          "_wrapped_call_impl"
+        ],
+        [
+          "/home/example/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+          131,
+          "forward"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/modules/module.py",
+          1511,
+          "_wrapped_call_impl"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/modules/sparse.py",
+          163,
+          "forward"
+        ],
+        [
+          "/home/example/miniconda3/envs/opguard_b/lib/python3.10/site-packages/torch/nn/functional.py",
+          2237,
+          "embedding"
+        ]
+      ]
+    ],
+    "ops": [
+      "_ZN2at6native29vectorized_elementwise_kernelILi4ENS0_11FillFunctorIN3c104HalfEEENS_6detail5ArrayIPcLi1EEEEEviT0_T1_",
+      "_ZN2at6native44_GLOBAL__N__50c743a2_11_Indexing_cu_89862edb21indexSelectLargeIndexIN3c104HalfEljLi2ELi2ELin2ELb1EEEvNS_4cuda6detail10TensorInfoIT_T1_EESA_NS7_IT0_S9_EEiiS9_S9_l"
+    ],
+    "streams": [
+      [
+        0,
+        7
+      ],
+      [
+        1,
+        7
+      ]
+    ],
+    "stream_counts": {
+      "0:7": 1920,
+      "1:7": 1920
+    }
+  }
+}

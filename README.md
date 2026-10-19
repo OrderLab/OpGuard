@@ -1,25 +1,62 @@
 <div align="center">
-  <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="360" />
-
-  <p><strong>Bitwise Alignment for Precise and General Debugging of Production LLM Training</strong></p>
-
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/images/brand/logo-wordmark-dark.svg">
+    <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="320">
+  </picture>
+  <p><strong>Debug training differences with your AI agent.</strong></p>
   <p>
-    <a href="https://orderlab.io/OpGuard/"><strong>Website</strong></a>
-    ·
-    <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming"><strong>OSDI ’26 · Best Paper Award Nominee</strong></a>
-    ·
-    <a href="assets/docs/paper-preprint.pdf"><strong>Paper</strong></a>
-    ·
-    <a href="#contact">Contact</a>
+    <a href="https://orderlab.io/OpGuard/">Website</a> ·
+    <a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26 Paper</a> ·
+    <a href="https://orderlab.io/OpGuard/#trace">Live Demo</a> ·
+    <a href="harness/">Agent Harness</a>
   </p>
 </div>
 
----
+Give your coding agent two training runs. OpGuard helps it find where their computations diverge and inspect the evidence.
 
-OpGuard is a debugging system for large-scale LLM training. When two training runs diverge, it uses **bitwise alignment** to compare them at tensor boundaries and pinpoint the **first divergent operator**—turning vague loss-curve anomalies into precise, actionable evidence.
+<a href="harness/doc/Usage.md#agent-integration">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/quickstart-dark.gif">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/quickstart.gif">
+    <img alt="Install OpGuard, ask Codex or Claude Code, and read an evidence-backed root-cause report" src="docs/assets/quickstart.gif" width="960">
+  </picture>
+</a>
 
-In production use at ByteDance, OpGuard has reduced root-cause localization from **days** of manual effort to **minutes**.
+*Illustrated workflow. Bring your own coding agent.*
 
+## Get started
+
+The source release is available now. PyPI packages are not published yet.
+
+```bash
+git clone https://github.com/OrderLab/OpGuard.git
+cd OpGuard
+
+# In your training environment, with the appropriate PyTorch build installed
+python -m pip install .
+opguard doctor
+
+# For your coding agent, in an isolated environment
+uv tool install ./harness
+```
+
+[Installation options and native CUDA builds →](docs/Installation.md)
+
+Then ask your coding agent:
+
+> Use OpGuard to investigate why these two training runs differ: `./run-a/train.py` and `./run-b/train.py`.
+> My training Python is `/path/to/train-env/bin/python`.
+> Read `opguard-harness tools` for the available tools, and explain your findings with evidence.
+
+Works with coding agents that can run shell commands. [Agent setup and tool calls →](harness/doc/Usage.md#agent-integration)
+
+## Impact
+
+Deployed at ByteDance, OpGuard has helped diagnose **20+ production issues**, including kernel races and silent data corruption. The paper reports investigations shortened from **days to minutes**. [Read the results →](https://www.usenix.org/conference/osdi26/presentation/zhou-ziming)
+
+**OSDI ’26 · Best Paper Award nominee.** [Project overview →](https://orderlab.io/OpGuard/)
+
+[Installation](docs/Installation.md) · [CLI guide](docs/CLI.md) · [Examples](examples/README.md) · [Apache-2.0](LICENSE)
 
 ## Paper
 
@@ -47,40 +84,12 @@ In production use at ByteDance, OpGuard has reduced root-cause localization from
 
 </details>
 
+For **SDC machine detection**—identifying GPUs that silently corrupt training computations—see [*SDCs in the Wild: Characterizing and Diagnosing SDC-Defective GPUs in Production LLM Training* (OSDI ’26)](https://www.usenix.org/conference/osdi26/presentation/zheng). The paper introduces **SDCHunter**, which replays the triggering training workload and input data to detect defective GPUs in production clusters.
 
-## What’s on this site
+## Contributing
 
-| Section | Description |
-| --- | --- |
-| **Bitwise alignment** | Core abstraction for comparing training runs |
-| **Live trace demo** | Explore divergence evidence in a Perfetto-style viewer |
-| **Workflow** | How OpGuard fits into production debugging |
-| **Impact** | Production case studies and timing results |
-
-
-
-## Contact
-
-Source code and internal tooling are **not publicly released**.
-
-For questions about the paper, demos, or access inquiries, please **email the authors** listed above.
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md). The website and live demo remain in this repository alongside the Python packages.
 
 ## About ByteDance Seed Team
 
-<p align="center">
-  <a href="https://seed.bytedance.com/en/">
-    <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" width="220" />
-  </a>
-</p>
-
-Founded in 2023, ByteDance Seed Team is dedicated to crafting the industry's most advanced AI foundation models. The team aspires to become a world-class research team and make significant contributions to the advancement of science and society.
-
----
-
-<p align="center">
-  <img src="assets/images/brand/logo-wordmark.svg" alt="OpGuard" width="180" />
-  <br />
-  <sub><a href="https://www.usenix.org/conference/osdi26/presentation/zhou-ziming">OSDI ’26</a></sub>
-</p>
+Founded in 2023, the ByteDance Seed Team develops advanced AI foundation models. It aims to advance science and benefit society through world-class research.

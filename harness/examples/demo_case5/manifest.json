@@ -1,0 +1,21 @@
+{
+  "case": "demo_case5",
+  "evaluation": "known_answer_walkthrough_not_blind",
+  "artifacts": [
+    {
+      "name": "trace.json.gz",
+      "url": "https://orderlab.io/OpGuard/assets/traces/demo_case5.json.gz?v=track-names",
+      "sha256": "817bfa4b756bcac73e3d83892da1fee3a72bd5ab58c0a5b1e0900277dacdae51"
+    },
+    {
+      "name": "source.json",
+      "url": "https://orderlab.io/OpGuard/assets/traces/demo_case5_source.json",
+      "sha256": "41c745eddfe68c6800cfd16d4ebea4a1fd95b054b3c4b5902fe8b486a7524876"
+    },
+    {
+      "name": "diff.json",
+      "url": "https://orderlab.io/OpGuard/assets/traces/demo_case5_diff.json",
+      "sha256": "1a4d6e79d99ac888f0bf05b57386a6a475503e92f5a4f183d7201a39e771cc92"
+    }
+  ]
+}

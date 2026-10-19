@@ -1,0 +1,11 @@
+--- stack_b/vendor/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py
++++ stack_b/vendor/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py
+@@ -672,7 +672,7 @@
+ 
+             for s in state_dict_state.values():
+                 # Native PyTorch state dict requires step (i.e., iteration).
+-                s["step"] = step
++                s["step"] = step.clone()
+ 
+         # Optimizer.
+         self.optimizer.load_state_dict(

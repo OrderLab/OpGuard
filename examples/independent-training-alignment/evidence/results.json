@@ -1,0 +1,209 @@
+{
+  "candidate": "55bea12d3b48",
+  "experiment": "independent-stacks-20261019/revision3",
+  "primary_total": 6,
+  "auxiliary_total": 1,
+  "workload": {
+    "parameters": 42286080,
+    "layers": 12,
+    "hidden": 512,
+    "sequence_length": 512,
+    "train_rows": 1024,
+    "eval_rows": 64,
+    "updates": 64,
+    "restart_after_update": 32,
+    "global_batch": 16,
+    "microbatch": 2,
+    "accumulation": 4,
+    "precision": "FP32",
+    "dropout": 0,
+    "a": "Transformers Trainer / Accelerate / FSDP1 full_shard DP2",
+    "b": "Native Megatron-LM pretrain TP2 DP2 distributed optimizer with TorchAdamW fallback",
+    "native_implementations_independent": true
+  },
+  "ordinary": [
+    {
+      "id": "9f9be39907e7",
+      "paired_reruns": 1,
+      "primary_identified": 4,
+      "auxiliary_identified": 1,
+      "missing_primary": [
+        "A_GELU_BACKWARD",
+        "B_STEP_ALIAS"
+      ],
+      "tested_repairs": [],
+      "diagnostic_byte_upper": 837571,
+      "seconds": 760.127543926239,
+      "budget_compliant": true
+    },
+    {
+      "id": "590da47d5ebc",
+      "paired_reruns": 1,
+      "primary_identified": 4,
+      "auxiliary_identified": 1,
+      "missing_primary": [
+        "A_GELU_BACKWARD",
+        "B_STEP_ALIAS"
+      ],
+      "tested_repairs": [],
+      "diagnostic_byte_upper": 986098,
+      "seconds": 705.9486515522003,
+      "budget_compliant": true
+    }
+  ],
+  "manual_iterative": {
+    "id": "8e427fe3e933",
+    "paired_reruns": 3,
+    "primary_identified": 5,
+    "primary_repairs_executed": 4,
+    "gelu_repair_after_last_run": true,
+    "missing_primary": [
+      "B_STEP_ALIAS"
+    ],
+    "actual_opguard_use": false,
+    "diagnostic_byte_upper": 1018393,
+    "declarations_complete": false,
+    "final_model_rms64": 1.6807211835318144e-05
+  },
+  "opguard_iterative": {
+    "id": "b0e8d3b247de",
+    "paired_reruns": 3,
+    "primary_identified": 6,
+    "primary_repairs_executed": 6,
+    "auxiliary_identified": 1,
+    "diagnostic_byte_upper": 970808,
+    "diagnostic_self_accounted": 828213,
+    "seconds": 1019.1717429161072,
+    "budget_compliant": true,
+    "actual_opguard_use": true,
+    "sites_per_round": [
+      6,
+      6,
+      6
+    ],
+    "automatic_graph_alignment": false,
+    "post_probe_cleanup_training_rerun": false
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "differing_input_pairs": 16,
+      "input_pairs": 40,
+      "model_rms32": 0.00031141350288676806,
+      "model_rms64": 0.000402141372773334,
+      "eval_a": 5.987406522035599,
+      "eval_b": 5.9771503515672775,
+      "emitted_records": 726,
+      "tensor_summaries": 120
+    },
+    {
+      "round": 2,
+      "differing_input_pairs": 0,
+      "input_pairs": 40,
+      "model_rms32": 2.3668394353254097e-06,
+      "model_rms64": 1.6808510328578894e-05,
+      "eval_a": 5.981938883662224,
+      "eval_b": 5.980232179048243,
+      "emitted_records": 726,
+      "tensor_summaries": 120
+    },
+    {
+      "round": 3,
+      "differing_input_pairs": 0,
+      "input_pairs": 40,
+      "model_rms32": 1.2490823070195234e-08,
+      "model_rms64": 1.6745840402388026e-08,
+      "eval_a": 5.981992483139038,
+      "eval_b": 5.981992673034071,
+      "emitted_records": 726,
+      "tensor_summaries": 120
+    }
+  ],
+  "focus": {
+    "gelu_backward": {
+      "before_step32_rms": 2.3668394353254097e-06,
+      "after_a_fix_against_unchanged_b_step32_rms": 1.2490823070195234e-08,
+      "after_a_fix_against_unchanged_b_step64_rms": 1.6662282248324926e-05,
+      "fix": "exact GELU backward, matching exact forward",
+      "evidence_source": "source semantics and checkpoint-value comparison; no captured GELU operator trace"
+    },
+    "adam_step_alias": {
+      "saved_step_before_restart": 32,
+      "bad_saved_step_after_restart": 2496,
+      "rank_specific_parameter_states": 77,
+      "expected_final_step": 64,
+      "repaired_b_group_steps": [
+        [
+          64.0,
+          64.0
+        ],
+        [
+          64.0,
+          64.0
+        ]
+      ],
+      "fix": "clone the restored step tensor per parameter",
+      "evidence_source": "native loader source, CPU checkpoint reads and corrected training; not automatic fingerprint attribution"
+    }
+  },
+  "final_model": {
+    "elements": 42286080,
+    "tensors": 149,
+    "exact_tensors": 0,
+    "rms": 1.6745840397696046e-08,
+    "relative_l2": 7.063182873047097e-07,
+    "max_abs": 3.065820783376694e-05,
+    "worst_parameters": [
+      [
+        3.065820783376694e-05,
+        "transformer.wte.weight"
+      ],
+      [
+        9.051492042999598e-06,
+        "transformer.h.0.attn.c_attn.bias"
+      ],
+      [
+        5.708754713396047e-07,
+        "transformer.h.1.attn.c_attn.bias"
+      ],
+      [
+        4.973262548446655e-07,
+        "transformer.wpe.weight"
+      ],
+      [
+        3.650784492492676e-07,
+        "transformer.h.0.attn.c_attn.weight"
+      ],
+      [
+        3.5762786865234375e-07,
+        "transformer.h.0.ln_1.weight"
+      ],
+      [
+        2.658925950527191e-07,
+        "transformer.h.5.attn.c_attn.weight"
+      ],
+      [
+        2.5578370355106017e-07,
+        "transformer.h.2.attn.c_attn.bias"
+      ]
+    ]
+  },
+  "final_eval_abs_gap": 1.8989503303146194e-07,
+  "nondeterminism": {
+    "present": true,
+    "mechanism": "A embedding backward uses mathematically equivalent CUDA FP32 index_add_ atomic accumulation",
+    "counted_as_bug": false,
+    "localized_by_investigators": false,
+    "remaining_differences_uniquely_attributed": false
+  },
+  "claim_scope": {
+    "supported": "OpGuard fingerprints plus ordinary source/state analysis supported a bounded iterative investigation that repaired all six registered mechanisms and achieved numerical agreement in this task.",
+    "not_established": [
+      "OpGuard is necessary for the last two defects",
+      "Incremental tool benefit under equal run budgets and repair objectives",
+      "Automatic full-graph correspondence or six-root localization",
+      "Bitwise model or complete optimizer/RNG equality",
+      "General diagnostic success rate"
+    ]
+  }
+}

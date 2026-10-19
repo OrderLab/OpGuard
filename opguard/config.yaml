@@ -1,0 +1,45 @@
+inspector_ignore_fields:
+  flux_combine:
+    - outputs
+    - kwargs.outputs
+  flux_dispatch:
+    - outputs
+    - kwargs.outputs
+  flux_pre_comm_index:
+    - outputs
+  all_gather_v_backward:
+    - outputs
+  all_gather_v_forward:
+    - outputs
+  dsp_all2all:
+    - outputs
+  "Flash2Attn_backward_ext*":
+    - outputs
+  all_to_all_single:
+    - args
+    - outputs
+  forward_gpu_no_cpy:
+    - outputs
+  "*_no_cpy":
+    - outputs
+    - kwargs.outputs
+  ndtimeline:
+    - outputs
+    - kwargs.outputs
+    - args
+  resize_:
+    - outputs
+  cpu:
+    - outputs
+    - kwargs.outputs
+  varlen_bwd:
+    - outputs[-1].stats.xor_signature
+    - inputs.args[-1].stats.xor_signature
+  varlen_fwd:
+    - outputs[-1].stats.xor_signature
+  empty:
+    - outputs
+  empty_like:
+    - outputs
+  new_empty:
+    - outputs

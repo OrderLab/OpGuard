@@ -1,0 +1,8 @@
+instrumentations:
+  - function: "rmsnorm_backward"
+    class: "FakeModel"
+    method: "forward"
+    tag_names: ["ln2"]
+  - function: "flash_attn_backward_func"
+    class: "FakeModel"
+    method: "backward"

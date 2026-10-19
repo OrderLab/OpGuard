@@ -1,0 +1,274 @@
+{
+  "a3_b2_32": {
+    "elements": 42286080,
+    "changed_elements": 37892222,
+    "max_abs": 2.6490772143006325e-05,
+    "rms": 1.2490823070195234e-08,
+    "worst": [
+      [
+        "transformer.wte.weight",
+        2.6490772143006325e-05,
+        3.8113376313959875e-08
+      ],
+      [
+        "transformer.h.0.attn.c_attn.bias",
+        8.50171363708796e-06,
+        8.16063918504709e-07
+      ],
+      [
+        "transformer.h.1.attn.c_attn.bias",
+        5.109078529130784e-07,
+        7.297180924987767e-08
+      ],
+      [
+        "transformer.wpe.weight",
+        3.501772880554199e-07,
+        2.0185515672545736e-08
+      ],
+      [
+        "transformer.h.0.attn.c_attn.weight",
+        2.775341272354126e-07,
+        2.578488519706725e-08
+      ],
+      [
+        "transformer.h.0.ln_1.weight",
+        2.384185791015625e-07,
+        5.1349583089687755e-08
+      ],
+      [
+        "transformer.h.0.ln_2.weight",
+        2.384185791015625e-07,
+        4.9351309610500074e-08
+      ],
+      [
+        "transformer.h.10.ln_1.weight",
+        2.384185791015625e-07,
+        2.968567879965385e-08
+      ]
+    ]
+  },
+  "a_steps_32": [
+    32.0
+  ],
+  "a_groups_32": [
+    {
+      "weight_decay": 0.1,
+      "lr": 0.000165679269490148,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "initial_lr": 0.0003
+    },
+    {
+      "weight_decay": 0.0,
+      "lr": 0.000165679269490148,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "initial_lr": 0.0003
+    }
+  ],
+  "b_optimizer_32": {},
+  "b_groups_32": [
+    {
+      "wd_mult": 1.0,
+      "lr_mult": 1.0,
+      "is_expert_parallel": false,
+      "is_decoupled_lr": false,
+      "max_lr": 0.0003,
+      "min_lr": 0.0,
+      "lr": 0.000165679269490148,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.1,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "step": 32.0
+    },
+    {
+      "wd_mult": 0.0,
+      "lr_mult": 1.0,
+      "is_expert_parallel": false,
+      "is_decoupled_lr": false,
+      "max_lr": 0.0003,
+      "min_lr": 0.0,
+      "lr": 0.000165679269490148,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.0,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "step": 32.0
+    }
+  ],
+  "a3_b2_64": {
+    "elements": 42286080,
+    "changed_elements": 42034857,
+    "max_abs": 0.000795900821685791,
+    "rms": 1.6662282248324926e-05,
+    "worst": [
+      [
+        "transformer.wte.weight",
+        0.000795900821685791,
+        2.44428019928619e-05
+      ],
+      [
+        "lm_head.weight",
+        0.00014910241588950157,
+        3.7955223511780575e-05
+      ],
+      [
+        "transformer.h.0.attn.c_attn.weight",
+        0.0001305416226387024,
+        2.1569400823449203e-05
+      ],
+      [
+        "transformer.h.2.attn.c_attn.weight",
+        0.00012565776705741882,
+        2.124043484923272e-05
+      ],
+      [
+        "transformer.ln_f.weight",
+        0.0001138448715209961,
+        6.047533596988463e-05
+      ],
+      [
+        "transformer.h.0.mlp.c_fc.weight",
+        0.00010447017848491669,
+        2.1418099822040137e-05
+      ],
+      [
+        "transformer.h.0.mlp.c_proj.weight",
+        9.772129124030471e-05,
+        1.7741035390225135e-05
+      ],
+      [
+        "transformer.h.0.attn.c_proj.weight",
+        9.67859523370862e-05,
+        1.6366193036714948e-05
+      ]
+    ]
+  },
+  "a_steps_64": [
+    64.0
+  ],
+  "a_groups_64": [
+    {
+      "weight_decay": 0.1,
+      "lr": 0.0,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "initial_lr": 0.0003
+    },
+    {
+      "weight_decay": 0.0,
+      "lr": 0.0,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "initial_lr": 0.0003
+    }
+  ],
+  "b_optimizer_64": {},
+  "b_groups_64": [
+    {
+      "wd_mult": 1.0,
+      "lr_mult": 1.0,
+      "is_expert_parallel": false,
+      "is_decoupled_lr": false,
+      "max_lr": 0.0003,
+      "min_lr": 0.0,
+      "lr": 0.0,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.1,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "step": 2496.0
+    },
+    {
+      "wd_mult": 0.0,
+      "lr_mult": 1.0,
+      "is_expert_parallel": false,
+      "is_decoupled_lr": false,
+      "max_lr": 0.0003,
+      "min_lr": 0.0,
+      "lr": 0.0,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.0,
+      "amsgrad": false,
+      "maximize": false,
+      "foreach": null,
+      "capturable": false,
+      "differentiable": false,
+      "fused": null,
+      "decoupled_weight_decay": true,
+      "step": 2496.0
+    }
+  ]
+}

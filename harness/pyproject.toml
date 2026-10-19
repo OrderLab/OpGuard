@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opguard-harness"
+version = "0.1.0"
+description = "Diagnostic skills and supporting agent tools for OpGuard"
+requires-python = ">=3.10"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/OrderLab/OpGuard"
+Documentation = "https://github.com/OrderLab/OpGuard/blob/main/harness/doc/Usage.md"
+
+[project.scripts]
+opguard-harness = "opguard_harness.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["opguard_harness*"]

@@ -1,0 +1,22 @@
+{
+  "method": "Coordinator reads retained round3 records only. Last native evaluation call:16 local microbatches per DP rank; 2 rows per microbatch. A mean losses are target-weighted; B NLL sums are divided by the same target count. No model execution.",
+  "expected_rows": 64,
+  "row_identity_check": "Multiset of SHA-256 prefixes used by investigator, checked against all supplied eval rows; not claimed a collision-free proof.",
+  "a": {
+    "microbatches": 32,
+    "examples": 64,
+    "targets": 32704,
+    "all_target_counts_1022": true,
+    "row_multiset_matches_supplied": true,
+    "reconstructed_nll": 5.981992483139038
+  },
+  "b": {
+    "microbatches": 32,
+    "examples": 64,
+    "targets": 32704,
+    "all_target_counts_1022": true,
+    "row_multiset_matches_supplied": true,
+    "reconstructed_nll": 5.981992673034071
+  },
+  "absolute_difference": 1.8989503303146194e-07
+}
