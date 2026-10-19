@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handle, reserve, settle, requestBudget, LIMITS, PRICING, PROMPT, MODEL, MAX_COMPLETION, DAY_MS, CALL_TIMEOUT_MS } from './core.js';
-import { packets } from './packets.js';
+import { packets, capturedLocations } from './packets.js';
 import { encode } from 'gpt-tokenizer/encoding/o200k_base';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -19,7 +19,9 @@ test('each arm sends its complete original evidence in one call with identical m
       return Response.json({ choices: [{ message: { content: 'Observed evidence; cause unproven.' }, finish_reason: 'stop' }], usage: { prompt_tokens: 19000, completion_tokens: 500 } });
     });
     assert.equal(response.status, 200);
-    assert.equal((await response.json()).partsRead, 1);
+    const data = await response.json();
+    assert.equal(data.partsRead, 1);
+    assert.deepEqual(data.sourceLocations, arm === 'opguard' ? capturedLocations : undefined);
     assert.equal(calls.length, 1);
     assert.equal(calls[0].model, MODEL);
     assert.equal(calls[0].messages[0].content, PROMPT);
@@ -74,6 +76,8 @@ test('standard logs get recorded versions; only OpGuard gets captured source and
     }
   }
   const report=JSON.parse(packets.opguard.split(marker)[1]);
+  assert.equal(capturedLocations.length, 4);
+  assert.deepEqual(capturedLocations, report.ranks.flatMap(rank => rank.observations.map(observed => ({rank: rank.rank, source_file: observed.source_file, line: observed.captured_source_line}))));
   for(const rank of report.ranks) for(const observed of rank.observations) {
     assert.equal(observed.source_at_observation[0].line,observed.captured_source_line);
     assert.ok(observed.source_at_observation[0].text.includes(String(observed.operator_tag_line)));

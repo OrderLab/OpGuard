@@ -1,4 +1,4 @@
-import { packets } from './packets.js';
+import { packets, capturedLocations } from './packets.js';
 
 export const MODEL = 'openai/gpt-oss-20b';
 export const PROMPT = 'Diagnose the training divergence from the supplied evidence. In at most 250 words, separate: observed localization; root-cause hypothesis; missing proof. Cite code locations as the supplied file path followed by :LINE. If source is provided, name the exact observed file, line and expression, and follow relevant data producers and mutations upstream to explain a plausible mechanism with code citations. Distinguish the first observed difference from the causal operation. If source is absent, do not invent source contents or line numbers; identify the next evidence needed. No source-search tool is available in this demo; do not claim to have searched or verified external code. Do not assume there is only one configuration difference or infer missing launch commands. Source definitions do not prove runtime branch execution. Unaligned event counts alone do not establish causality. Export timestamps are not GPU timing. XOR signatures are fingerprints, not tensor values: equality does not prove equal inputs and differences do not measure numerical error. If no causal line is established, say so without discarding any observed line localization.';
@@ -124,5 +124,5 @@ export async function handle(request, env, limiter, fetcher = fetch) {
   await limiter.settle(reservation.id, result.usage);
   const answer = result.choices?.[0]?.message?.content?.trim();
   if (!answer || result.choices[0].finish_reason === 'length') return reply(502, { error: 'The model did not finish an answer within the demo budget. Please try again.' });
-  return reply(200, { answer, model: MODEL, partsRead: 1 });
+  return reply(200, { answer, model: MODEL, partsRead: 1, ...(body.arm === 'opguard' ? { sourceLocations: capturedLocations } : {}) });
 }

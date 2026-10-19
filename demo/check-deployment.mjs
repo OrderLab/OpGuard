@@ -61,6 +61,10 @@ for (const check of checks) {
     assert.equal(result.partsRead, 1, JSON.stringify(result));
     assert.equal(result.model, 'openai/gpt-oss-20b');
     assert.ok(result.answer?.length > 0);
+    if (check.body.arm === 'opguard') {
+      assert.equal(result.sourceLocations?.length, 4);
+      assert.deepEqual(result.sourceLocations.map(location => location.line), [1734, 1736, 1745, 1747]);
+    } else assert.equal(result.sourceLocations, undefined);
     console.log(JSON.stringify({ arm: check.body.arm, ...result }));
   } else console.log(`${check.method} ${check.status}: passed`);
 }

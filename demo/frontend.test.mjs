@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('../js/rootcause.js', import.meta.url), 'utf8');
-async function run(events, jsonResponse = null) {
+async function run(events, jsonResponse = null, arm = 'trace') {
  const history = [];
  const links = [];
  const createElement = tag => {
@@ -13,7 +13,7 @@ async function run(events, jsonResponse = null) {
  };
  let calls = 0;
  const result = {hidden:true, replaceChildren(){this.textContent='';}, append(value){this.textContent += typeof value === 'string' ? value : value.textContent;}, setAttribute(){}, set textContent(v){this.value=v;history.push(v);}, get textContent(){return this.value;}};
- const button = {dataset:{rootcause:'trace'}, addEventListener(_,fn){this.click=fn;}};
+ const button = {dataset:{rootcause:arm}, addEventListener(_,fn){this.click=fn;}};
  const module = {querySelectorAll(){return [button];}};
  const stream = new ReadableStream({start(c){const bytes=new TextEncoder().encode(events.map(e=>JSON.stringify(e)+'\n').join('')); for(let i=0;i<bytes.length;i+=7)c.enqueue(bytes.slice(i,i+7));c.close();}});
  vm.runInNewContext(source,{document:{querySelector(){return module;},getElementById(){return result;},createTextNode(t){return t;},createElement},location:{hostname:'orderlab.io',search:''},window:{OPGUARD_DEMO_API:'https://demo.test/api/rootcause'},fetch:async()=>{calls++; return jsonResponse ? Response.json(jsonResponse.body,{status:jsonResponse.status}) : new Response(stream,{headers:{'content-type':'application/x-ndjson'}});},AbortSignal,URLSearchParams,TextDecoder});
@@ -45,4 +45,13 @@ test('source citations link only to known local captured files and valid line nu
  assert.deepEqual(x.links.map(a=>a.href),['demo/sources/run2-stage_1_and_2.html#L1736','demo/sources/run1-stage_1_and_2.html#L1734']);
  assert.ok(x.links.every(a=>a.target==='_blank' && a.rel==='noopener'));
  assert.match(x.result.textContent,/javascript:alert\(1\)/);
+});
+test('OpGuard displays captured locations even when the model omits file citations',async()=>{
+ const payload = {status:200,body:{answer:'Observed at line 1734.',sourceLocations:[{rank:0,source_file:'run1/deepspeed/runtime/zero/stage_1_and_2.py',line:1734}]}};
+ const x=await run([],payload,'opguard');
+ assert.match(x.result.textContent,/Captured callsites \(from the trace\)/);
+ assert.deepEqual(x.links.map(a=>a.href),['demo/sources/run1-stage_1_and_2.html#L1734']);
+ const baseline=await run([],payload);
+ assert.equal(baseline.links.length,0);
+ assert.doesNotMatch(baseline.result.textContent,/Captured callsites/);
 });

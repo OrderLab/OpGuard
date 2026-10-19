@@ -107,6 +107,9 @@ line numbers and the original operator tags. For example, rank 0's tag 1688 maps
 to captured lines 1734/1736, and rank 1's tag 1699 to 1745/1747. Source hashes verify
 the original captured snapshots; public viewers and numbered model inputs normalize
 run labels without changing line counts. The viewers support `#L<number>` links.
+The API attaches all four observed source locations to OpGuard answers, so the UI
+can link to the trace's recorded callsites even when a model omits full citations.
+These locations are labeled as captured evidence, independently of the hypothesis.
 
 The right arm retains the 33 unaligned operations before each run2 boundary and
 unverified correspondence limitations. These are first observed captured callsites,

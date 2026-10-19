@@ -65,6 +65,14 @@
           result.textContent = (data.error || 'Analysis failed. Please try again.') + (data.retryAfter ? ` Retry in ${data.retryAfter} seconds.` : '');
         } else {
           renderAnswer(result, data.answer);
+          if (button.dataset.rootcause === 'opguard' && Array.isArray(data.sourceLocations)) {
+            const locations = document.createElement('p');
+            locations.append(document.createTextNode('\nCaptured callsites (from the trace):\n'));
+            for (const location of data.sourceLocations) {
+              appendCitations(locations, `Rank ${location.rank}: ${location.source_file}:${location.line}\n`);
+            }
+            result.append(locations);
+          }
         }
       } catch { result.textContent = 'Could not reach the model. Please try again.'; }
       finally {
