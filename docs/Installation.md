@@ -1,6 +1,6 @@
 # Installation
 
-OpGuard runs inside the training environment; the harness can live in a separate agent environment. Both require Python 3.10+. They share this repository but remain two independently installed packages: `opguard` at the root and `opguard-harness` in [harness/](../harness/). `opguard` is distributed as a PyPI source package. The harness is currently installed from this repository.
+OpGuard runs inside the training environment; the harness can live in a separate agent environment. Both require Python 3.10+. They share this repository but remain two independently installed and versioned packages: `opguard` at the root and `opguard-harness` in [harness/](../harness/). PyPI releases contain the `opguard` source distribution and the harness's pure-Python wheel and source distribution. Neither package requires a source checkout for installation.
 
 ```bash
 # Linux: install CUDA-enabled PyTorch and CUDA/CUPTI development tools first.
@@ -11,7 +11,9 @@ uv pip install --no-build-isolation --no-binary=opguard opguard
 opguard doctor --require-native
 
 # Agent environment: isolated tool installation, no Torch dependency.
-uv tool install ./harness  # from a checkout of OrderLab/OpGuard
+uv tool install opguard-harness
+# Or install into an existing agent virtual environment:
+python -m pip install opguard-harness
 opguard-harness tools
 ```
 
@@ -100,7 +102,7 @@ Replace `10.0` with the intended GPU architectures. `OPGUARD_TRACING_BUILD` enab
 
 ## Validate release artifacts
 
-The universal wheel below is for explicit CPU-only testing; do not publish it as the default PyPI artifact. Publish the sdist and distribute validated native wheels separately.
+The `opguard` universal wheel below is for explicit CPU-only testing; do not publish it as the default PyPI artifact. Publish its sdist and distribute validated native wheels separately. The separate `opguard-harness` package has no native extensions; its universal wheel and sdist are both published to PyPI.
 
 ```bash
 python -m pip install build

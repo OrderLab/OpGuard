@@ -26,21 +26,18 @@ Give your coding agent two training runs. OpGuard helps it find where their comp
 
 ## Get started
 
-Install the `opguard` source distribution from [PyPI](https://pypi.org/project/opguard/). Python 3.10+ is required. The agent harness is installed separately from this repository.
+Install from PyPI with Python 3.10+. The training environment needs CUDA-enabled PyTorch and CUDA/CUPTI development tools.
 
 ```bash
-# Linux: CUDA-enabled PyTorch, CUDA toolkit and CUPTI development files required
+# Training environment (Linux)
 python -m pip install "setuptools>=77.0.3" "packaging>=24.2" wheel ninja
-python -m pip install --no-build-isolation --no-binary=opguard opguard==0.1.0
-opguard doctor --require-native
+python -m pip install --no-build-isolation opguard
 
-# For your coding agent, in an isolated environment
-git clone https://github.com/OrderLab/OpGuard.git
-cd OpGuard
-uv tool install ./harness
+# Agent environment
+python -m pip install opguard-harness
 ```
 
-[Installation options and native CUDA builds →](docs/Installation.md)
+[Installation details →](docs/Installation.md)
 
 Then ask your coding agent:
 

@@ -66,10 +66,12 @@ The current backend generates Perfetto reports, not a numerical verdict:
 
 Harness requires Python 3.10+ on Linux or macOS and has no runtime dependencies.
 
-Published tool installation (after release):
+Install from PyPI without cloning the repository:
 
 ```bash
 uv tool install opguard-harness
+# Or install into an existing agent virtual environment:
+python -m pip install opguard-harness
 opguard-harness tools
 ```
 
@@ -77,7 +79,9 @@ uv installs the same wheel as pip into an isolated tool environment; it does not
 need a local Torch or OpGuard installation. Invoke its executable from your agent.
 If your adapter imports `TOOLS` and `dispatch`, instead use
 `python -m pip install opguard-harness` in the adapter's Python environment.
-Before publication, pass a locally built wheel to either installer.
+
+The harness is versioned and released independently of the training package; see
+[Publishing](../../docs/Publishing.md).
 
 Editable installation for development:
 

@@ -14,7 +14,9 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'OrderLab/OpGuard'
+    if: >-
+      github.repository == 'OrderLab/OpGuard' &&
+      (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     env:
       OPGUARD_TRACING_BUILD: '0'
