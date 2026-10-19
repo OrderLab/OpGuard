@@ -43,10 +43,6 @@
       previousId = answer.id;
       result.dataset.answerId = answer.id;
       renderAnswer(result, answer.answer);
-      const notice = document.createElement('p');
-      notice.className = 'rootcause__answer-label';
-      notice.textContent = `${bank.notice} · ${answers.indexOf(answer) + 1}/${answers.length}`;
-      result.prepend(notice);
       button.textContent = 'Show another example';
       button.setAttribute('aria-label', `Show another ${button.dataset.rootcause === 'opguard' ? 'OpGuard' : 'standard-log'} example diagnosis`);
     });

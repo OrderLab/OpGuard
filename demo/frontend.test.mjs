@@ -19,11 +19,11 @@ function run({arm='opguard',search='',bank=cachedAnswers,random=()=>0}={}){
  vm.runInNewContext(source,{document:{querySelector(){return module;},getElementById(){return result;},createTextNode(t){return t;},createElement},location:{hostname:'',search},window:{OPGUARD_DEMO_ANSWERS:bank,OPGUARD_DEMO_API:'https://must-not-call.test'},fetch(){networkCalls++;throw new Error('No network allowed');},URLSearchParams,Math:{random,floor:Math.floor}});
  return{result,button,links,attrs,get networkCalls(){return networkCalls;}};
 }
-test('both arms work offline, label cached examples, and avoid immediate repeats',()=>{
+test('both arms work offline, show answers without the repeated notice, and avoid immediate repeats',()=>{
  for(const arm of ['trace','opguard']){
   const x=run({arm});const seen=new Set();let previous;
   for(let i=0;i<12;i++){
-   x.button.click();assert.equal(x.result.hidden,false);assert.match(x.result.textContent,/Reviewed example.*no live model call/);
+   x.button.click();assert.equal(x.result.hidden,false);assert.doesNotMatch(x.result.textContent,/Reviewed example.*no live model call/);
    assert.notEqual(x.result.dataset.answerId,previous);previous=x.result.dataset.answerId;seen.add(previous);
    assert(cachedAnswers.arms[arm].some(a=>a.id===previous));
   }
