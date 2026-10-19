@@ -3,11 +3,12 @@
 OpGuard runs inside the training environment; the harness can live in a separate agent environment. Both require Python 3.10+. They share this repository but remain two independently installed packages: `opguard` at the root and `opguard-harness` in [harness/](../harness/). The commands below describe the published packages; until a release is published, install from source or local wheels.
 
 ```bash
-# Training environment: install the appropriate PyTorch build first.
-python -m pip install opguard
+# Linux: install CUDA-enabled PyTorch and CUDA/CUPTI development tools first.
+python -m pip install "setuptools>=77.0.3" "packaging>=24.2" wheel ninja
+python -m pip install --no-build-isolation --no-binary=opguard opguard
 # Equivalent alternative in the active virtual environment:
-uv pip install opguard
-opguard doctor
+uv pip install --no-build-isolation --no-binary=opguard opguard
+opguard doctor --require-native
 
 # Agent environment: isolated tool installation, no Torch dependency.
 uv tool install opguard-harness
@@ -18,16 +19,16 @@ pip and uv install the same distributions. OpGuard declares Torch >=2.4 and NumP
 
 The harness calls the local backend subprocess specified by `backend: ["/training/venv/bin/python", "-m", "opguard.tools"]`. Training launchers and each rank must use a compatible OpGuard revision. Tool schemas and CLI calls work without a source checkout; optional [agent skills](../harness/skills/) can be read or copied separately. See the [uv tool environment documentation](https://docs.astral.sh/uv/concepts/tools/) and [uv pip installation documentation](https://docs.astral.sh/uv/pip/packages/).
 
-## What the base package includes
+## Installation capabilities
 
-| Capability | Default wheel | Native wheel / source build |
+| Capability | Explicit CPU-only build | Default native build |
 | --- | --- | --- |
 | Backend protocol, instrumentation, comparison, Perfetto reports | Yes | Yes |
 | Python / TorchDispatch callsite capture | Yes | Yes |
 | CPU and GPU tensor fingerprints | Tensor-operation fallback | CUDA XOR acceleration on GPU |
 | CUPTI capture and native CUDA-API callsites | No | Requires loadable extensions, driver and capture permissions |
 
-The default wheel is pure Python. Neither pip nor uv compiles GPU extensions during a normal installation, even if CUDA happens to be installed. GPU fallback adds tensor operations and temporary allocations; it emits a one-time message when used. Missing native callsite backends are reported when capture starts. Python observations do not replace native kernel visibility.
+Source installation builds CUDA XOR and both native callsite libraries by default. Missing build prerequisites fail installation. A matching prebuilt native wheel needs no compilation. CPU-only tests require explicitly setting both `OPGUARD_TRACING_BUILD=0` and `OPGUARD_CALLSITE_TRACER=0` when building. GPU fallback adds tensor operations and temporary allocations; it emits a one-time message when used. Missing native callsite backends are reported when capture starts. Python observations do not replace native kernel visibility.
 
 ## Inspect an installation
 
@@ -45,7 +46,7 @@ The CUDA-API interposer must be loaded before the workload resolves CUDA symbols
 
 ## Native wheels
 
-Use the universal wheel on the package index for the default installation. Publish native wheels as explicit release attachments, with separate build tags such as `1torch291cu130x1c1` (Torch 2.9.1, Torch CUDA 13.0, XOR and callsite extensions enabled). They contain the same `opguard` package. Do not put conflicting Torch/CUDA builds on the default index: [wheel compatibility tags](https://packaging.python.org/en/latest/specifications/binary-distribution-format/) encode Python/ABI/platform, not Torch/CUDA, and a build tag is only an identifier.
+Publish the source distribution for default native builds. Do not publish the CPU-only universal wheel to the default index: pip would prefer it and skip compilation. Publish native wheels as explicit release attachments, with separate build tags such as `1torch291cu130x1c1` (Torch 2.9.1, Torch CUDA 13.0, XOR and callsite extensions enabled). They contain the same `opguard` package. Do not put conflicting Torch/CUDA builds on the default index: [wheel compatibility tags](https://packaging.python.org/en/latest/specifications/binary-distribution-format/) encode Python/ABI/platform, not Torch/CUDA, and a build tag is only an identifier.
 
 Select a wheel matching Python, CPU architecture, Torch release, Torch CUDA, C++ ABI, system runtime libraries and the compiled GPU architectures. Install it in the existing training environment:
 
@@ -75,14 +76,15 @@ For development and environments needing source changes:
 ```bash
 git clone https://github.com/OrderLab/OpGuard.git
 cd OpGuard
-python -m pip install -e .
-opguard doctor
+python -m pip install "setuptools>=77.0.3" "packaging>=24.2" wheel ninja
+python -m pip install --no-build-isolation -e .
+opguard doctor --require-native
 
 # Install the agent tool in its own environment from the same checkout.
 uv tool install ./harness
 ```
 
-Editable and ordinary source installs use the same base package. Native acceleration is an explicit Linux build with the target training Python/Torch, CUDA development toolkit, CUPTI headers/libraries, Python headers and C++ compiler:
+Editable and ordinary source installs build native extensions by default. Native builds require Linux with the target training Python/Torch, CUDA development toolkit, CUPTI headers/libraries, Python headers and C++ compiler:
 
 ```bash
 python -m pip install 'setuptools>=77.0.3' 'packaging>=24.2' wheel ninja
@@ -94,9 +96,11 @@ opguard doctor --require-native
 
 Replace `10.0` with the intended GPU architectures. `OPGUARD_TRACING_BUILD` enables XOR; `OPGUARD_CALLSITE_TRACER` at build time enables both native callsite libraries. At runtime the latter enables callsite capture. Set `CUDA_HOME` and `CXX` if needed. Requested extensions must build successfully; missing prerequisites or compiler/linker failures abort the installation instead of silently delivering a partial package.
 
-[pip build isolation](https://pip.pypa.io/en/stable/reference/build-system/) hides the training Torch from the build backend. Base builds need no Torch. Native builds require `--no-build-isolation` so they use your installed Torch; provision the build dependencies first. Native editable installs use the same flags plus `-e .`.
+[pip build isolation](https://pip.pypa.io/en/stable/reference/build-system/) hides the training Torch from the build backend. Explicit CPU-only builds need no Torch. Native builds require `--no-build-isolation` so they use your installed Torch; provision the build dependencies first. Native editable installs use the same flags plus `-e .`. Both extensions default to enabled; explicitly setting either build flag to `0` disables that component. Check inherited environment variables before installing, especially the dual-purpose `OPGUARD_CALLSITE_TRACER` flag.
 
 ## Validate release artifacts
+
+The universal wheel below is for explicit CPU-only testing; do not publish it as the default PyPI artifact. Publish the sdist and distribute validated native wheels separately.
 
 ```bash
 python -m pip install build

@@ -32,9 +32,10 @@ The source release is available now. PyPI packages are not published yet.
 git clone https://github.com/OrderLab/OpGuard.git
 cd OpGuard
 
-# In your training environment, with the appropriate PyTorch build installed
-python -m pip install .
-opguard doctor
+# Linux: CUDA-enabled PyTorch, CUDA toolkit and CUPTI development files required
+python -m pip install "setuptools>=77.0.3" "packaging>=24.2" wheel ninja
+python -m pip install --no-build-isolation .
+opguard doctor --require-native
 
 # For your coding agent, in an isolated environment
 uv tool install ./harness

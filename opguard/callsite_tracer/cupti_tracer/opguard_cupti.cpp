@@ -138,7 +138,7 @@ static void dbg_dump_stack(const std::vector<Frame>& st, const char* prefix) {
 // ------------------- globals -------------------
 static std::mutex g_mutex;
 
-static bool g_callbacks_enabled = false;  // set true if subscribe() succeeds
+static std::atomic<bool> g_callbacks_enabled{false};  // set true if subscribe() succeeds
 static CUpti_SubscriberHandle g_sub = nullptr;
 static bool g_started = false;
 
@@ -173,10 +173,19 @@ struct RT_cudaGraphInstantiate_params   { void** pGraphExec; void* graph; void* 
 struct RT_cudaGraphLaunch_params        { void* graphExec; void* stream; };
 
 
+// Dispatch snapshots are copied while Python owns the GIL. CUDA callbacks on
+// this thread can read them without acquiring Python or a process-wide lock.
+struct StackTag {
+  uint64_t id;
+  int device;
+  CUstream stream;
+  std::vector<Frame> stack;
+};
+static thread_local std::vector<StackTag> t_stack_tags;
+static std::atomic<uint64_t> g_next_tag{1};
+
 // ------------------- utilities -------------------
-static bool get_stream_id_for(CUstream h, uint32_t* out_sid) {
-  CUcontext ctx = nullptr;
-  if (cuCtxGetCurrent(&ctx) != CUDA_SUCCESS || ctx == nullptr) return false;
+static bool get_stream_id_for(CUstream h, uint32_t* out_sid, CUcontext ctx = nullptr) {
 #if defined(CUPTI_API_VERSION) && (CUPTI_API_VERSION >= 13)  // CUDA 11+
   CUptiResult r = cuptiGetStreamId(ctx, h, out_sid);  // maps CUstream -> activity streamId
   return r == CUPTI_SUCCESS;
@@ -185,10 +194,16 @@ static bool get_stream_id_for(CUstream h, uint32_t* out_sid) {
 #endif
 }
 
-// best-effort Python stack walker (uses GIL)
+// Never acquire the GIL from a CUDA callback: the caller may hold a CUDA /
+// framework lock that another Python thread is waiting for while owning the GIL.
+// Prefer the dispatch snapshot, including when PyTorch released the GIL.
 static std::vector<Frame> get_python_stack() {
   std::vector<Frame> out;  // we’ll return root->leaf
-  PyGILState_STATE gstate = PyGILState_Ensure();
+  if (!t_stack_tags.empty()) return t_stack_tags.back().stack;
+  if (!Py_IsInitialized() || !PyGILState_Check()) return out;
+  // Preserve an exception already pending at API EXIT.
+  PyObject *exc_type, *exc_value, *exc_tb;
+  PyErr_Fetch(&exc_type, &exc_value, &exc_tb);
   PyThreadState* tstate = PyThreadState_Get();
   if (tstate) {
 #if PY_VERSION_HEX >= 0x030B0000
@@ -214,7 +229,7 @@ static std::vector<Frame> get_python_stack() {
       f = prev;
     }
   }
-  PyGILState_Release(gstate);
+  PyErr_Restore(exc_type, exc_value, exc_tb);
   std::reverse(out.begin(), out.end());   // normalize to root→leaf
   return out;
 }
@@ -236,7 +251,6 @@ static void CUPTIAPI api_cb(void*, CUpti_CallbackDomain domain,
   if (!enter && !exit) return;
 
   const bool want_py_stack = g_capture_py_stack.load(std::memory_order_relaxed);
-  int dev = 0; cuCtxGetDevice(&dev);
 
   // ---------------- DRIVER API (safe subset) ----------------
   if (domain == CUPTI_CB_DOMAIN_DRIVER_API) {
@@ -260,6 +274,7 @@ static void CUPTIAPI api_cb(void*, CUpti_CallbackDomain domain,
         return;
       }
       case CUPTI_DRIVER_TRACE_CBID_cuStreamEndCapture: {
+        if (!exit) break;
         auto* p = (const cuStreamEndCapture_params*)info->functionParams;
         CUstream h = p ? p->hStream : nullptr;
         CUgraph  g = (p && p->phGraph) ? *p->phGraph : nullptr;
@@ -282,6 +297,7 @@ static void CUPTIAPI api_cb(void*, CUpti_CallbackDomain domain,
         }
         // Dump captured node stacks with line numbers
         if (dbg_on() && g) {
+        std::lock_guard<std::mutex> lk(g_mutex);
           auto it2 = g_graph_to_node_stacks.find(g);
           if (it2 != g_graph_to_node_stacks.end()) {
             const auto& stacks = it2->second;
@@ -374,7 +390,7 @@ static void CUPTIAPI api_cb(void*, CUpti_CallbackDomain domain,
     }
 
     // EndCapture (EXIT: read *pGraph)
-    if (strncmp(fn, "cudaStreamEndCapture", 20) == 0) {
+    if (exit && strncmp(fn, "cudaStreamEndCapture", 20) == 0) {
       auto* p = (const RT_cudaStreamEndCapture_params*)info->functionParams;
       CUstream h = p ? (CUstream)p->stream : nullptr;
       CUgraph  g = (p && p->pGraph) ? (CUgraph)(*p->pGraph) : nullptr;
@@ -395,6 +411,7 @@ static void CUPTIAPI api_cb(void*, CUpti_CallbackDomain domain,
         }
       }
       if (dbg_on() && g) {
+        std::lock_guard<std::mutex> lk(g_mutex);
         auto it2 = g_graph_to_node_stacks.find(g);
         if (it2 != g_graph_to_node_stacks.end()) {
           const auto& stacks = it2->second;
@@ -428,29 +445,22 @@ static void CUPTIAPI api_cb(void*, CUpti_CallbackDomain domain,
     }
 
     // GraphLaunch (ENTER: primary arming; allow default stream 0)
-    if (strncmp(fn, "cudaGraphLaunch", 15) == 0) {
+    if (enter && strncmp(fn, "cudaGraphLaunch", 15) == 0) {
       auto* p = (const RT_cudaGraphLaunch_params*)info->functionParams;
       CUgraphExec exec = p ? (CUgraphExec)p->graphExec : nullptr;
       CUstream    h    = p ? (CUstream)p->stream     : nullptr;
 
-      int dev = 0; cuCtxGetDevice(&dev);
       uint32_t sid = 0;
-      bool armed = false;
 
-      if (h && get_stream_id_for(h, &sid)) {
+      uint32_t device_id = 0;
+      const bool have_device = cuptiGetDeviceId(info->context, &device_id) == CUPTI_SUCCESS;
+      const int dev = (int)device_id;
+      if (have_device && get_stream_id_for(h, &sid, info->context)) {
         std::lock_guard<std::mutex> lk(g_mutex);
-        // g_replay_by_sid[{dev, sid}] = ReplayProgress{exec, /*graph*/nullptr, /*next_idx*/0};
         StreamIdKey key{dev, sid};
         // reset sticky from previous replay on this stream (fresh window)
         g_last_stack_by_sid.erase(key);
         g_replay_by_sid[key] = ReplayProgress{exec, /*graph*/nullptr, /*next_idx*/0};
-        armed = true;
-      } else if (!h) {
-        // Legacy default stream: activity commonly reports SID=7
-        sid = 7;
-        std::lock_guard<std::mutex> lk(g_mutex);
-        g_replay_by_sid[{dev, sid}] = ReplayProgress{exec, /*graph*/nullptr, /*next_idx*/0};
-        armed = true;
       }
 
       if (dbg_on()) {
@@ -874,6 +884,51 @@ static PyObject* py_tag_stream(PyObject*, PyObject* args) {
   Py_RETURN_NONE;
 }
 
+// Matched by trace.py's dispatch try/finally. No CUDA calls here: a tag
+// describes the launching host scope, and correlation IDs carry it to activity.
+static PyObject* py_tag_stream_push(PyObject*, PyObject* args) {
+  int device;
+  unsigned long long stream;
+  PyObject* py_stack;
+  const char* op = nullptr;
+  if (!PyArg_ParseTuple(args, "iKO|s", &device, &stream, &py_stack, &op)) return nullptr;
+  PyObject* seq = PySequence_Fast(py_stack, "stack must be a sequence");
+  if (!seq) return nullptr;
+  std::vector<Frame> stack;
+  for (Py_ssize_t i = 0; i < PySequence_Fast_GET_SIZE(seq); ++i) {
+    PyObject* row = PySequence_Fast(PySequence_Fast_GET_ITEM(seq, i), "frame must be a sequence");
+    if (!row) { Py_DECREF(seq); return nullptr; }
+    if (PySequence_Fast_GET_SIZE(row) != 3) {
+      Py_DECREF(row); Py_DECREF(seq);
+      return PyErr_Format(PyExc_ValueError, "frame must contain file, line, function");
+    }
+    const char* file = PyUnicode_AsUTF8(PySequence_Fast_GET_ITEM(row, 0));
+    long line = PyLong_AsLong(PySequence_Fast_GET_ITEM(row, 1));
+    const char* func = PyUnicode_AsUTF8(PySequence_Fast_GET_ITEM(row, 2));
+    if (!file || !func || PyErr_Occurred()) { Py_DECREF(row); Py_DECREF(seq); return nullptr; }
+    stack.push_back(Frame{file, (int)line, func});
+    Py_DECREF(row);
+  }
+  Py_DECREF(seq);
+  uint64_t id = g_next_tag.fetch_add(1, std::memory_order_relaxed);
+  PyObject* result = PyLong_FromUnsignedLongLong(id);
+  if (!result) return nullptr;
+  t_stack_tags.push_back(StackTag{id, device, (CUstream)(uintptr_t)stream, std::move(stack)});
+  return result;
+}
+
+static PyObject* py_tag_stream_pop(PyObject*, PyObject* args) {
+  int device;
+  unsigned long long stream, id;
+  if (!PyArg_ParseTuple(args, "iKK", &device, &stream, &id)) return nullptr;
+  if (t_stack_tags.empty() || t_stack_tags.back().id != id ||
+      t_stack_tags.back().device != device ||
+      t_stack_tags.back().stream != (CUstream)(uintptr_t)stream)
+    return PyErr_Format(PyExc_ValueError, "stream tags must be popped on their owner thread in LIFO order");
+  t_stack_tags.pop_back();
+  Py_RETURN_NONE;
+}
+
 static PyObject* py_set_py_stack_capture(PyObject*, PyObject* args) {
   int on = 1;
   if (!PyArg_ParseTuple(args, "|p", &on)) return nullptr;
@@ -886,6 +941,8 @@ static PyMethodDef Methods[] = {
   {"start",      (PyCFunction)py_start,      METH_VARARGS, "Start CUPTI tracing to a file"},
   {"start_mem",  (PyCFunction)py_start_mem,  METH_VARARGS, "Start CUPTI tracing in memory (optional buffer limit)"},
   {"drain",      (PyCFunction)py_drain,      METH_VARARGS, "Drain up to N events from memory queue -> list[dict]"},
+  {"tag_stream_push", (PyCFunction)py_tag_stream_push, METH_VARARGS, "Push a host-thread dispatch stack snapshot"},
+  {"tag_stream_pop", (PyCFunction)py_tag_stream_pop, METH_VARARGS, "Pop a host-thread dispatch stack snapshot"},
   {"tag_stream", (PyCFunction)py_tag_stream, METH_VARARGS, "Tag (device, stream) with a Python stack"},
   {"stop",       (PyCFunction)py_stop,       METH_NOARGS,  "Stop CUPTI tracing"},
   {"flush", (PyCFunction)py_flush, METH_NOARGS, "Flush CUPTI activity buffers and file"},

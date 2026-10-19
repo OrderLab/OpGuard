@@ -1,4 +1,4 @@
-"""Optional Linux native builds. Pure Python builds never import Torch."""
+"""Default Linux CUDA builds. Explicit CPU-only builds never import Torch."""
 import json
 import os
 import platform
@@ -11,20 +11,20 @@ from pathlib import Path
 
 from setuptools import Extension, setup
 
-xor_enabled = os.environ.get("OPGUARD_TRACING_BUILD", "0") == "1"
-callsite_enabled = os.environ.get("OPGUARD_CALLSITE_TRACER", "0") == "1"
+xor_enabled = os.environ.get("OPGUARD_TRACING_BUILD", "1") == "1"
+callsite_enabled = os.environ.get("OPGUARD_CALLSITE_TRACER", "1") == "1"
 ext_modules, cmdclass, options = [], {}, {}
 
 if xor_enabled or callsite_enabled:
     if platform.system() != "Linux":
-        raise RuntimeError("OpGuard native extensions currently support Linux only; omit native build flags for the base package.")
+        raise RuntimeError("OpGuard native extensions currently support Linux only; set both OPGUARD_TRACING_BUILD=0 and OPGUARD_CALLSITE_TRACER=0 for an explicit CPU-only build.")
     try:
         import torch
         from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CUDA_HOME
     except ImportError as exc:
         raise RuntimeError(
             "Native builds require Torch in the build environment. Install the training Torch first, "
-            "then build with --no-build-isolation. Omit native build flags for the base package."
+            "then build with --no-build-isolation. Set both OPGUARD_TRACING_BUILD=0 and OPGUARD_CALLSITE_TRACER=0 for an explicit CPU-only build."
         ) from exc
     if not torch.version.cuda or not CUDA_HOME:
         raise RuntimeError("Native builds require CUDA-enabled Torch and the CUDA toolkit; set CUDA_HOME.")
