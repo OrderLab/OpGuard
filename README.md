@@ -43,6 +43,7 @@ run2: [0, 1077804032, 0, 0]
 Unaligned before boundary: 0 / 33
 …</pre></td>
 </tr>
+<tr><td>~19k input tokens · 8 calls<br>Budget ≤ $0.010</td><td>~1.5k input tokens · 1 call<br>Budget ≤ $0.0012</td></tr>
 <tr><td align="center"><a href="https://orderlab.io/OpGuard/?analyze=trace#rootcause"><kbd>Get rootcause</kbd></a></td><td align="center"><a href="https://orderlab.io/OpGuard/?analyze=opguard#rootcause"><kbd>Get rootcause</kbd></a></td></tr>
 </table>
 
@@ -53,7 +54,7 @@ A gradient buffer is overwritten on the default stream before its reduction on a
 
 </details>
 
-*Groq · GPT-OSS 20B · Same model and diagnostic prompt; same-launch evidence. Full logs read in eight parts (a few minutes); OpGuard uses first observed differences.*
+*Groq · GPT-OSS 20B · Same model and diagnostic prompt; same-launch evidence. Full logs read in eight parts (a few minutes); OpGuard uses first observed differences. Fixed inference budget caps at [Groq list prices](https://console.groq.com/docs/model/openai/gpt-oss-20b), including prompts, reading notes and maximum output; free within quota.*
 
 ## Get started
 
