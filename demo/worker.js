@@ -18,6 +18,7 @@ export class DemoQuota extends DurableObject {
 
 export default {
   async fetch(request, env) {
+    if (env.DEMO_MODE !== 'live') return handle(request, env);
     // One shared object makes global limits atomic across regions and isolates.
     const quota = env.DEMO_QUOTA.getByName('groq-demo-v1');
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';

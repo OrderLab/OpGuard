@@ -1,8 +1,6 @@
 (() => {
   const module = document.querySelector('#rootcause');
   if (!module) return;
-  const local = ['localhost', '127.0.0.1'].includes(location.hostname);
-  const endpoint = local ? '/api/rootcause' : (window.OPGUARD_DEMO_API || '');
   function appendCitations(container, text) {
     for (const part of text.split(/(run[12]\/deepspeed\/runtime\/zero\/stage_1_and_2\.py:\d+)/g)) {
       const match = /^(run[12])\/deepspeed\/runtime\/zero\/stage_1_and_2\.py:(\d+)$/.exec(part);
@@ -17,7 +15,7 @@
   }
   function renderAnswer(container, text) {
     container.replaceChildren();
-    // Small, safe inline formatter: model text never enters innerHTML.
+    // Small, safe inline formatter: answer text never enters innerHTML.
     for (const part of text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)) {
       if (part.startsWith('**') && part.endsWith('**')) {
         const strong = document.createElement('strong');
@@ -28,63 +26,34 @@
       } else appendCitations(container, part);
     }
   }
+  const bank = window.OPGUARD_DEMO_ANSWERS;
   for (const button of module.querySelectorAll('[data-rootcause]')) {
     const result = document.getElementById(`${button.dataset.rootcause}-answer`);
-    let retryAt = 0;
-    button.addEventListener('click', async () => {
+    let previousId;
+    button.addEventListener('click', () => {
       result.hidden = false;
-      if (retryAt > Date.now()) {
-        result.textContent = `Please try again in ${Math.ceil((retryAt - Date.now()) / 1000)} seconds.`;
+      const answers = bank?.arms?.[button.dataset.rootcause];
+      if (!Array.isArray(answers) || !answers.length) {
+        result.textContent = 'The example answers could not be loaded. Please reload the page.';
         return;
       }
-      if (!endpoint) { result.textContent = 'Live analysis is not connected on this deployment yet.'; return; }
-      button.disabled = true;
-      button.textContent = 'Analyzing…';
-      result.textContent = 'Reading the evidence…';
-      result.setAttribute('aria-busy', 'true');
-      try {
-        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arm: button.dataset.rootcause }), signal: AbortSignal.timeout(75000) });
-        let data;
-        if (response.headers.get('content-type')?.includes('application/x-ndjson')) {
-          const reader = response.body.getReader(); const decoder = new TextDecoder(); let pending = '';
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            pending += decoder.decode(value, { stream: true });
-            let end;
-            while ((end = pending.indexOf('\n')) >= 0) {
-              const update = JSON.parse(pending.slice(0, end)); pending = pending.slice(end + 1);
-              if (update.progress) result.textContent = update.progress;
-              else data = update;
-            }
-          }
-          if (!data) throw new Error('Incomplete response');
-        } else data = await response.json();
-        if (!response.ok || data.error) {
-          if ((response.status === 429 || data.status === 429) && data.retryAfter) retryAt = Date.now() + data.retryAfter * 1000;
-          result.textContent = (data.error || 'Analysis failed. Please try again.') + (data.retryAfter ? ` Retry in ${data.retryAfter} seconds.` : '');
-        } else {
-          renderAnswer(result, data.answer);
-          if (button.dataset.rootcause === 'opguard' && Array.isArray(data.sourceLocations)) {
-            const locations = document.createElement('p');
-            locations.append(document.createTextNode('\nCaptured callsites (from the trace):\n'));
-            for (const location of data.sourceLocations) {
-              appendCitations(locations, `Rank ${location.rank}: ${location.source_file}:${location.line}\n`);
-            }
-            result.append(locations);
-          }
-        }
-      } catch { result.textContent = 'Could not reach the model. Please try again.'; }
-      finally {
-        button.disabled = false;
-        button.textContent = 'Get rootcause';
-        result.setAttribute('aria-busy', 'false');
-      }
+      const alternatives = answers.filter(answer => answer.id !== previousId);
+      const choices = alternatives.length ? alternatives : answers;
+      const answer = choices[Math.floor(Math.random() * choices.length)];
+      previousId = answer.id;
+      result.dataset.answerId = answer.id;
+      renderAnswer(result, answer.answer);
+      const notice = document.createElement('p');
+      notice.className = 'rootcause__answer-label';
+      notice.textContent = `${bank.notice} · ${answers.indexOf(answer) + 1}/${answers.length}`;
+      result.prepend(notice);
+      button.textContent = 'Show another example';
+      button.setAttribute('aria-label', `Show another ${button.dataset.rootcause === 'opguard' ? 'OpGuard' : 'standard-log'} example diagnosis`);
     });
   }
-  // README links open the same page and run only the explicitly selected arm.
+  // README links open the same page and show only the explicitly selected example.
   const requestedArm = new URLSearchParams(location.search).get('analyze');
   if (['trace', 'opguard'].includes(requestedArm)) {
-    module.querySelector(`[data-rootcause="${requestedArm}"]`).click();
+    module.querySelector(`[data-rootcause="${requestedArm}"]`)?.click();
   }
 })();

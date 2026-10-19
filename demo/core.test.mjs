@@ -5,7 +5,7 @@ import { packets, capturedLocations } from './packets.js';
 import { encode } from 'gpt-tokenizer/encoding/o200k_base';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-const env = { GROQ_API_KEY: 'test-secret', ALLOWED_ORIGINS: 'https://orderlab.io' };
+const env = { DEMO_MODE: 'live', GROQ_API_KEY: 'test-secret', ALLOWED_ORIGINS: 'https://orderlab.io' };
 const req = body => new Request('https://demo.test/api/rootcause', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://orderlab.io' }, body: JSON.stringify(body) });
 const limiter = { reserve: async () => ({ id: 'r1' }), settle: async () => {} };
 const budget = (tokens = 1, costNanos = 1) => ({ tokens, costNanos });
@@ -111,7 +111,7 @@ test('arbitrary prompt, model, URL and unknown arm are rejected before quota or 
   }
 });
 test('missing key, wrong origin and oversized input fail without upstream', async () => {
-  assert.equal((await handle(req({ arm: 'opguard' }), {}, null, null)).status, 503);
+  assert.equal((await handle(req({ arm: 'opguard' }), {DEMO_MODE:'live'}, null, null)).status, 503);
   const r = req({ arm: 'opguard' }); r.headers.set('Origin', 'https://evil.test');
   assert.equal((await handle(r, env, null, null)).status, 403);
   assert.equal((await handle(req({ arm: 'a'.repeat(500) }), env, null, null)).status, 413);
@@ -203,4 +203,18 @@ test('failed model calls keep their full reservation and cannot evade the daily 
   const denied = await handle(req({arm:'opguard'}), env, actualLimiter, () => assert.fail('must not call Groq'));
   assert.equal(denied.status,429);
   assert.equal(entries.reduce((sum,e)=>sum+e.costNanos,0), LIMITS.dayCostNanos);
+});
+
+test('cached is the default and never needs a key, quota access, or an upstream call', async()=>{
+ const forbidden={reserve(){assert.fail('cached response reserved paid quota');},settle(){assert.fail('cached response modified paid quota');}};
+ for(const mode of [undefined,'cached','typo'])for(const arm of ['trace','opguard']){
+  const response=await handle(req({arm}),{DEMO_MODE:mode},forbidden,()=>assert.fail('cached response called Groq'));
+  assert.equal(response.status,200);const body=await response.json();assert.equal(body.mode,'cached');assert.equal(body.inferenceCalls,0);assert.equal(body.model,undefined);assert.match(body.answer,/Reviewed example/);assert.ok(body.answerId);assert.equal(body.sourceLocations?.length,arm==='opguard'?4:undefined);
+ }
+});
+test('per-reservation model prices remain correct for existing ledger entries',()=>{
+ for(const pricing of [{input:75,output:300},{input:150,output:600},{input:800,output:4000}]){
+  const result=settle([entry({pricing})],'old',{prompt_tokens:100,completion_tokens:20},1000)[0];
+  assert.equal(result.costNanos,100*pricing.input+20*pricing.output);
+ }
 });

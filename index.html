@@ -17,7 +17,7 @@
       document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
-  <link rel="stylesheet" href="css/rootcause.css?v=paired-cost-20261019">
+  <link rel="stylesheet" href="css/rootcause.css?v=reviewed-examples-20261019">
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -125,7 +125,7 @@ Flat is better than nested.
 Sparse is better than dense.
 Readability counts.
 …</pre>
-          <div class="rootcause__cost"><strong>~18.7k input tokens · 1 call</strong><span>Logs + recorded versions · budget ≤ $0.0054</span></div>
+          <div class="rootcause__cost"><strong>Cached diagnosis · no model call</strong><span>Logs + recorded versions · 3 reviewed examples</span></div>
           <footer><button type="button" data-rootcause="trace" aria-label="Get rootcause from standard logs">Get rootcause</button></footer>
           <div class="rootcause__answer" id="trace-answer" role="status" aria-live="polite" hidden></div>
         </article>
@@ -140,7 +140,7 @@ Unaligned operations before boundary:
   run1: 0 · run2: 33
 …</pre>
           <p class="rootcause__source">First-diff source: <a href="demo/sources/run1-stage_1_and_2.html#L1734" target="_blank" rel="noopener">run1:1734</a> · <a href="demo/sources/run2-stage_1_and_2.html#L1736" target="_blank" rel="noopener">run2:1736</a></p>
-          <div class="rootcause__cost"><strong>~3.7k input tokens · 1 call</strong><span>Observations + surrounding code + versions · budget ≤ $0.0023</span></div>
+          <div class="rootcause__cost"><strong>Cached diagnosis · no model call</strong><span>Trace + logs + captured source · 3 reviewed examples</span></div>
           <footer><button type="button" data-rootcause="opguard" aria-label="Get rootcause from OpGuard output">Get rootcause</button></footer>
           <div class="rootcause__answer" id="opguard-answer" role="status" aria-live="polite" hidden></div>
         </article>
@@ -149,8 +149,8 @@ Unaligned operations before boundary:
         <summary>Actual root cause</summary>
         <p>A gradient buffer is overwritten on the default stream before its reduction on another stream finishes. <a href="https://github.com/OrderLab/OpGuard/blob/main/harness/examples/demo_case5/README.md#3-hypothesis-validation-and-known-answer-cross-check">Details ↗</a></p>
       </details>
-      <p class="rootcause__note">Groq · GPT-OSS 20B · Same model and diagnostic prompt. Both inputs include recorded environment versions. OpGuard includes first observed differences and ±20 lines of surrounding code, with overlapping excerpts merged. No launch commands supplied. Each analysis reads its complete input in one call, without external source search. Expand shows the full evidence sent to the model.</p>
-      <p class="rootcause__note">Conservative inference budgets include prompts and maximum output; actual usage may be lower. Free to try, with shared usage limits. <a href="https://console.groq.com/docs/model/openai/gpt-oss-20b" target="_blank" rel="noopener">Groq list prices ↗</a></p>
+      <p class="rootcause__note">Reviewed example diagnoses for this fixed case. Each click randomly selects a cached variation, with no live model call or inference charge. The OpGuard explanations use the trace, recorded logs and linked full source.</p>
+      <p class="rootcause__note">These are curated explanations, not unedited model responses or an accuracy benchmark. Expand opens the recorded evidence; source links open the captured code at the cited line.</p>
     </section>
 
     <section class="bitwise-section" id="bitwise-alignment">
@@ -856,7 +856,7 @@ Unaligned operations before boundary:
   </footer>
 
   <script src="js/app.js"></script>
-  <script src="js/demo-config.js"></script>
-  <script src="js/rootcause.js?v=paired-cost-20261019"></script>
+  <script src="js/rootcause-answers.js?v=reviewed-examples-20261019"></script>
+  <script src="js/rootcause.js?v=reviewed-examples-20261019"></script>
 </body>
 </html>

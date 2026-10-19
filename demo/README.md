@@ -1,138 +1,89 @@
-# Root-cause comparison
+# Reviewed root-cause examples
 
-Two fixed evidence inputs are sent independently to Groq GPT-OSS 20B. Each arm
-uses one request containing its complete input, with the same diagnostic prompt,
-model, reasoning setting, and 3,072-token completion cap. The browser sends only
-an arm identifier; it cannot choose prompts, models, URLs, or token limits.
-The reference answer is separate HTML and never sent to Groq.
-Both arms receive the recorded environment versions (including PyTorch,
-DeepSpeed, Accelerate, NumPy, CUDA and driver). The standard-log arm receives
-no captured source or preselected suspect code. Only the OpGuard arm receives
-20 lines before and after each first observed difference, with overlapping source
-windows merged per snapshot and captured line numbers preserved.
-Neither arm has a source-search tool: this is an evidence-input comparison using
-single model calls, not a benchmark of an agent searching dependency repositories.
-Dependency commits are unknown, and no commit or Megatron dependency is invented.
+The public demo serves three reviewed examples per arm. Clicking **Get rootcause**
+selects an answer locally; later clicks randomly choose a different answer from
+the previous one. The browser makes no API or model request. This also works when
+opening `index.html` directly from disk.
 
-## Local preview and verification
+These are curated explanations of the fixed capture, not verbatim model outputs
+or an accuracy benchmark. Prior model trials sometimes named the buffer-reuse
+mechanism but mixed configuration branches and source line numbers. Those errors
+were corrected during source review; the website does not present the edited
+answers as fresh autonomous diagnoses.
 
-Requires Node 24 or newer. The local server uses built-in SQLite. Install the
-pinned development dependencies with `pnpm install --frozen-lockfile`, then run:
+`answer-bank.json` is the editable source of truth. `build-cached-answers.mjs`
+checks source hashes and every declared code anchor, then generates:
+
+- `../js/rootcause-answers.js`: the browser's bundled data.
+- `cached-answers.js`: the compatibility API's matching data.
+
+The standard-log examples describe the recorded numerical/configuration
+observations and their limits. The OpGuard examples use those logs, the trace,
+and the complete captured source. They distinguish the norm-append symptom from
+buffer reuse during the same backward pass. The copy, index change, reduction
+use, one-way wait, and later epilogue synchronization have checked source links.
+Source reasoning does not itself prove the GPU completion order in a new run.
+
+## Build and test
 
 ```sh
-node demo/server.mjs /absolute/path/to/private/.dev.vars
-pnpm test
-pnpm run check:deploy
+node demo/build-cached-answers.mjs
+node --test demo/*.test.mjs
+node demo/server.mjs
 ```
 
-The private file contains `GROQ_API_KEY=...`; keep it outside the public directory
-and restrict permissions to `600`. The server binds to `127.0.0.1:8937`, serves an
-explicit allowlist of public paths, and persists quota reservations in ignored
-`.demo-state/quota.sqlite`. It does not log keys, prompts, or model answers.
+Tests cover offline clicks, random variants without immediate repeats, deep
+links, safe rendering, source anchors, generated-data consistency, cached API
+responses with no quota/model access, and the existing paid-mode budget. The
+SQLite Durable Object integration test proves cached responses remain available
+with an exhausted ledger and do not reset or release that ledger.
 
-Tests verify evidence isolation, captured-source hashes and line mappings, clickable
-citations, exact full-evidence delivery, spend accounting, rate windows, failures,
-and actual SQLite Durable Object concurrency and persistence across runtime restarts.
-The integration test starts an isolated local Cloudflare runtime; it never calls Groq.
-`python3 demo/build_packets.py` rebuilds the evidence packets from pinned artifacts.
+`build_packets.py` still builds the original fixed live-experiment inputs. These
+legacy packets are separate from the curated answer bank and are not read by the
+public browser when displaying cached examples. “Expand” opens recorded evidence;
+source links open the full captured files, not merely the small legacy excerpts.
 
-## Paid deployment
+## Deployment
 
-API: `https://opguard-rootcause.opguard-website.workers.dev/api/rootcause`.
-The browser configuration points to this API; localhost uses the local backend.
-The Groq organization must have Developer pay-as-you-go enabled. Its confirmed
-GPT-OSS 20B limit on 2026-10-19 is 250,000 tokens/minute and 1,000 requests/minute.
-The previous free plan cannot accept the full log packet in one request.
+`wrangler.jsonc` sets `DEMO_MODE=cached`. The Worker returns cached examples for
+older clients still posting `{ "arm": "trace" }` or `{ "arm": "opguard" }`.
+Each response explicitly identifies itself as a reviewed example, reports
+`mode: "cached"` and `inferenceCalls: 0`, and makes no Groq call. It does not need
+an API key or access the quota Durable Object in cached mode.
 
-The website stays on GitHub Pages (`webpage` branch). Deploy only the API to
-Cloudflare with `pnpm run deploy`. The existing Worker holds `GROQ_API_KEY` in its
-secret store; do not put credentials in frontend assets or committed files.
-For initial authentication, `pnpm exec wrangler login --device --scopes account:read user:read workers_scripts:write`
-authorizes the intended account. Provision a missing secret with
-`pnpm exec wrangler secret put GROQ_API_KEY` and enter it privately.
+```sh
+pnpm exec wrangler deploy --dry-run
+pnpm exec wrangler deploy
+node demo/check-deployment.mjs https://opguard-rootcause.opguard-website.workers.dev/api/rootcause
+```
 
-After deployment, `node demo/check-deployment.mjs <api-url>` checks CORS,
-request validation, and both live arms (two real model calls, subject to the same
-budget). `pnpm exec wrangler deployments list` shows the active version.
-Publish `webpage` separately to update the public labels and browser timeout.
+The deployment check expects cached responses; it must not be used as a paid
+model benchmark. The website is published from the `webpage` branch.
 
-## $2 per rolling 24 hours
+## Retained live experiment path
 
-One persistent SQLite Durable Object (`groq-demo-v1`) is shared by all Worker
-instances and regions. Before any Groq call, an atomic transaction reserves the
-maximum possible inference cost. A request that would exceed **$2 during any
-rolling 24-hour window** receives HTTP 429 without calling Groq.
+Paid calls require an explicit server-side `DEMO_MODE=live`. Missing or unknown
+mode values default to cached responses. There is no browser switch that enables
+paid inference. The shared generic prompt in `diagnostic-guide.js` describes
+OpGuard fields and source investigation, but it does not include the case answer.
+The live path remains experimental; cached example quality is not evidence of
+its diagnostic accuracy.
 
-Accounting uses integer nano-USD at the 2026-10-19 GPT-OSS 20B prices:
-$0.075/M input tokens and $0.30/M completion tokens, including reasoning.
-Input reservation uses the UTF-8 byte count of the fixed prompt and entire packet
-plus 1,024 tokens of framing headroom, capped at the model's 131,072-token input
-context bound; output conservatively reserves all 3,072 allowed tokens on top.
-Tests also tokenize both complete packets to verify that input plus output fits.
-Cached inputs are conservatively charged at the full input rate.
+The original `groq-demo-v1` Durable Object and its persisted entries are retained.
+Before each paid request, an atomic transaction reserves its worst-case input
+and output cost. Requests that would exceed **$2 in a rolling 24 hours** are
+rejected before contacting Groq. Failed or unaccounted calls keep their full
+reservations. Successful calls settle input plus completion/reasoning usage at
+full rates, with no cache discounts. Existing reservations with other model
+prices keep their recorded rates during settlement.
 
-Successful calls settle to provider-reported input and completion usage. Missing
-or invalid usage, timeouts, upstream 429s and other failures retain the full
-reservation. No automatic upstream retries are performed. A successful charge
-expires 24 hours after settlement; uncertain calls retain reservations for 24
-hours plus the 60-second call deadline. Existing pre-upgrade entries remain in
-the same ledger and are conservatively valued at the higher output token price.
-Quota storage failures block the request rather than bypassing the budget.
+The retained GPT-OSS 20B path uses 3,072 output tokens and prices of $0.075/M input
+and $0.30/M output, as verified on 2026-10-19. Reservations use a conservative
+UTF-8 byte input bound plus framing, capped at the model context limit. Other
+limits remain 240,000 tokens/minute, 120 requests/minute globally, and 6/minute
+and 200/day per IP. Storage failures fail closed. The cap applies to this demo's
+Groq inference, not hosting or unrelated account usage.
 
-Additional rolling limits: 240,000 reserved tokens/minute, 120 requests/minute
-globally, 6 requests/minute per hashed IP, and 200 requests/24 hours per hashed IP.
-The IP digest remains stable across deployments with the same Groq secret. The
-$2 limit covers this demo's Groq inference at the pinned rates, not other apps
-using the organization or hosting/tax charges. Price/model changes require
-reviewing the accounting constants. No provider monthly cap replaces this local
-per-call gate; Groq's monthly spend reporting can lag by 10–15 minutes.
-
-## Evidence provenance
-
-Inputs come from main commit 146d6bb523cf8364bbf2788cb319aef1a46f966b,
-harness/examples/demo_case5/paired-capture-20261019.
-The four complete console streams and OpGuard summaries share the same capture IDs.
-`demo/evidence/manifest.json` pins the imported files; build_packets.py verifies hashes.
-No launch command, patch, reference answer, or statement that only one configuration
-differs is added to either packet. Run labels are normalized to run1/run2 in the
-derived inputs, preserving all original log records and their order. Configuration
-values printed by the application remain in the logs.
-Separate stdout/stderr cannot be interleaved retrospectively. Expand shows the entire
-packet; the page preview is only a few lines. Neither arm uses intermediate summaries.
-
-`demo/evidence/source-manifest.json` pins two exact `sourceFiles` entries extracted
-from the rank-0 trace. Only surrounding source windows are supplied to the OpGuard
-arm, selected mechanically from the observed callsites without using the known
-root cause. A window covers ±20 lines, clipped at file boundaries; overlapping or
-adjacent windows merge per snapshot. In this case, four observations merge into
-two windows: run1 lines 1714–1765 and run2 lines 1716–1767 (104 lines total).
-Complete snapshots remain available for hash verification and manual viewing;
-they are never included in the model input. The selected ranges are recorded in
-`demo/evidence-stats.json` and checked against the captured source in tests.
-Source line numbers include instrumentation, so they differ from upstream package
-line numbers and the original operator tags. For example, rank 0's tag 1688 maps
-to captured lines 1734/1736, and rank 1's tag 1699 to 1745/1747. Source hashes verify
-the original captured snapshots; public viewers and numbered model inputs normalize
-run labels without changing line counts. The viewers support `#L<number>` links.
-The API attaches all four observed source locations to OpGuard answers, so the UI
-can link to the trace's recorded callsites even when a model omits full citations.
-These locations are labeled as captured evidence, independently of the hypothesis.
-
-The right arm retains the 33 unaligned operations before each run2 boundary and
-unverified correspondence limitations. These are first observed captured callsites,
-not whole-graph first differences or proof of stream ordering/buffer reuse.
-Ordinary logs may suggest the cause; OpGuard alone does not prove it. Live model
-answers can be wrong. The reference cause remains a separate disclosure.
-
-## Cost labels
-
-Complete evidence inputs are 18,689 tokens for logs + versions and 3,725 for
-OpGuard observations + surrounding source + versions, measured with o200k_base.
-The shared system prompt adds 222 tokens. Both arms use one request. The
-conservative per-call reservations are 61,625 versus 20,869 total tokens
-(input bound, framing, and maximum output).
-Their maximum reserved inference costs are $0.005313075 and $0.002256375, rounded
-up in the UI to $0.0054 and $0.0023. These are conservative budget caps, not
-measured charges or diagnostic-accuracy guarantees. Actual charges are normally
-lower. Failed/repeated analyses and evidence collection/hosting are excluded
-from the displayed per-analysis caps. Visitors are not charged for the demo.
+Secrets remain in the Worker's secret store. Never reset quota state to make a
+test run fit the budget. No top-up or budget increase is required for cached
+examples.

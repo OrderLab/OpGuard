@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "node demo/server.mjs",
+    "build:answers": "node demo/build-cached-answers.mjs",
     "test": "node --test demo/*.test.mjs",
     "check:deploy": "wrangler deploy --dry-run --outdir .wrangler/deploy-check",
     "deploy": "wrangler deploy"

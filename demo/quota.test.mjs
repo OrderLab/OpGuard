@@ -11,16 +11,17 @@ const { Miniflare, convertV4MiniflareOptions } = createRequire(require.resolve('
 test('real SQLite Durable Object serializes concurrent spend and preserves it across restarts', async () => {
   const storage = await mkdtemp(path.join(tmpdir(), 'opguard-quota-test-'));
   const modules = [{ type:'ESModule', path:'test.js', contents: `
-    import { DemoQuota } from './worker.js';
+    import worker, { DemoQuota } from './worker.js';
     export { DemoQuota };
     export default { async fetch(request, env) {
       const body = await request.json();
+      if (body.action === 'cached') return worker.fetch(new Request('http://quota.test/api/rootcause', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({arm:'opguard'})}), env);
       const quota = env.DEMO_QUOTA.getByName('groq-demo-v1');
       return Response.json(body.action === 'settle'
         ? await quota.settle(body.id, body.usage) ?? {}
         : await quota.reserve(body.ip, body.budget));
     }};` }];
-  for (const file of ['worker.js','core.js','packets.js']) modules.push({type:'ESModule',path:file,contents:await readFile(new URL(file,import.meta.url),'utf8')});
+  for (const file of ['worker.js','core.js','packets.js','diagnostic-guide.js','cached-answers.js']) modules.push({type:'ESModule',path:file,contents:await readFile(new URL(file,import.meta.url),'utf8')});
   const options = convertV4MiniflareOptions({name:'quota-test', modules, compatibilityDate:'2026-10-19', durableObjects:{DEMO_QUOTA:{className:'DemoQuota',useSQLite:true}}});
   options.resourcePersistencePath = storage;
   let mf;
@@ -36,6 +37,10 @@ test('real SQLite Durable Object serializes concurrent spend and preserves it ac
     await mf.dispose();
     mf = new Miniflare(options);
     assert.equal((await call({ip:'after-restart',budget:{tokens:1,costNanos:1}})).reason,'budget');
+    const cached = await call({action:'cached'});
+    assert.equal(cached.mode,'cached');
+    assert.equal(cached.inferenceCalls,0);
+    assert.equal((await call({ip:'after-cached',budget:{tokens:1,costNanos:1}})).reason,'budget');
     // Only known provider usage releases a reservation; missing usage releases none.
     await call({action:'settle',id:accepted[0].id});
     assert.equal((await call({ip:'unknown-usage',budget:{tokens:1,costNanos:1}})).reason,'budget');

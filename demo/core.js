@@ -1,7 +1,9 @@
+import { cachedAnswers } from './cached-answers.js';
+import { DIAGNOSTIC_PROMPT } from './diagnostic-guide.js';
 import { packets, capturedLocations } from './packets.js';
 
 export const MODEL = 'openai/gpt-oss-20b';
-export const PROMPT = 'Diagnose the training divergence from the supplied evidence. In at most 250 words, separate: observed localization; root-cause hypothesis; missing proof. Cite code locations as the supplied file path followed by :LINE. If source is provided, name the exact observed file, line and expression, and explain what the supplied surrounding code establishes. Distinguish a code-supported hypothesis from missing upstream context; do not invent code outside the excerpt. Distinguish the first observed difference from the causal operation. If source is absent, do not invent source contents or line numbers; identify the next evidence needed. No source-search tool is available in this demo; do not claim to have searched or verified external code. Do not assume there is only one configuration difference or infer missing launch commands. Source definitions do not prove runtime branch execution. Unaligned event counts alone do not establish causality. Export timestamps are not GPU timing. XOR signatures are fingerprints, not tensor values: equality does not prove equal inputs and differences do not measure numerical error. If no causal line is established, say so without discarding any observed line localization.';
+export const PROMPT = DIAGNOSTIC_PROMPT;
 export const MAX_COMPLETION = 3072;
 export const CONTEXT_TOKENS = 131072;
 export const CALL_TIMEOUT_MS = 60000;
@@ -65,7 +67,8 @@ export function settle(entries, id, usage, now = Date.now()) {
   const input = usage?.prompt_tokens;
   const output = usage?.completion_tokens;
   if (!Number.isSafeInteger(input) || input < 1 || !Number.isSafeInteger(output) || output < 0 || !Number.isSafeInteger(input + output)) return entries;
-  const costNanos = input * PRICING.input + output * PRICING.output;
+  const pricing = entries.find(entry => entry.id === id)?.pricing ?? PRICING;
+  const costNanos = input * pricing.input + output * pricing.output;
   if (!Number.isSafeInteger(costNanos)) return entries;
   return entries.map(entry => entry.id === id ? { ...entry, tokens: input + output, costNanos, chargedAt: now } : entry);
 }
@@ -97,6 +100,16 @@ export async function handle(request, env, limiter, fetcher = fetch) {
     body = JSON.parse(raw + decoder.decode());
   } catch { return reply(400, { error: 'Invalid JSON.' }); }
   if (!body || Object.keys(body).length !== 1 || !['trace', 'opguard'].includes(body.arm)) return reply(400, { error: 'Choose trace or opguard.' });
+  // Cached is the default. Only an explicit server setting can enable paid calls.
+  if (env.DEMO_MODE !== 'live') {
+    const answers = cachedAnswers.arms[body.arm];
+    const chosen = answers[Math.floor(Math.random() * answers.length)];
+    return reply(200, {
+      mode: 'cached', answerId: chosen.id, inferenceCalls: 0,
+      answer: cachedAnswers.notice + '\n\n' + chosen.answer,
+      ...(body.arm === 'opguard' ? { sourceLocations: capturedLocations } : {}),
+    });
+  }
   if (!env.GROQ_API_KEY) return reply(503, { error: 'Live analysis is not configured yet.' });
   if (request.signal.aborted) return reply(499, { error: 'Analysis cancelled.' });
   const reservation = await limiter.reserve(requestBudget(body.arm));

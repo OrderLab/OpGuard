@@ -36,7 +36,7 @@ http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, localOrigin);
     if (url.pathname === '/api/rootcause') {
-      const response = await handle(new Request(url, { method: req.method, headers: req.headers, ...(req.method !== 'GET' && req.method !== 'HEAD' ? { body: Readable.toWeb(req), duplex: 'half' } : {}) }), { GROQ_API_KEY: process.env.GROQ_API_KEY, ALLOWED_ORIGINS: `${localOrigin},http://localhost:${port}` }, limiter);
+      const response = await handle(new Request(url, { method: req.method, headers: req.headers, ...(req.method !== 'GET' && req.method !== 'HEAD' ? { body: Readable.toWeb(req), duplex: 'half' } : {}) }), { DEMO_MODE: process.env.DEMO_MODE, GROQ_API_KEY: process.env.GROQ_API_KEY, ALLOWED_ORIGINS: `${localOrigin},http://localhost:${port}` }, limiter);
       res.writeHead(response.status, Object.fromEntries(response.headers));
       res.end(Buffer.from(await response.arrayBuffer()));
       return;
