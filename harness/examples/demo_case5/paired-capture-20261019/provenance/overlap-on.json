@@ -1,0 +1,81 @@
+{
+  "label": "overlap-on",
+  "export_run": "run2",
+  "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1",
+  "console_launch": {
+    "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1",
+    "phase": "trace",
+    "started_utc": "2026-10-19T13:19:32.489588+00:00",
+    "cwd": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on",
+    "command": [
+      "/opt/tiger/mariana/.venv_opguard/bin/python",
+      "-m",
+      "torch.distributed.run",
+      "--standalone",
+      "--nproc-per-node=2",
+      "-m",
+      "opguard.tools.worker",
+      "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output/worker.json",
+      "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/bootstrap.py"
+    ],
+    "heattrace": "enabled by default",
+    "stdout": "stdout.log",
+    "stderr": "stderr.log",
+    "streams": "Complete separate streams; no filtering, tee, or postprocessing.",
+    "finished_utc": "2026-10-19T13:19:44.146497+00:00",
+    "returncode": 0,
+    "files": [
+      {
+        "path": "stdout.log",
+        "bytes": 22519,
+        "sha256": "7bcad107c5eec161067e2d93b9a0106c094ecac570ff203c4688ffb85317fae5"
+      },
+      {
+        "path": "stderr.log",
+        "bytes": 5298,
+        "sha256": "82abf2cecd55be14d8933d010bc788407691ff7f07d0950d1069c2a2a459505e"
+      }
+    ]
+  },
+  "worker_request": {
+    "output": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output",
+    "phase": "trace",
+    "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1"
+  },
+  "rank_receipts": [
+    {
+      "protocol_version": 1,
+      "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1",
+      "phase": "trace",
+      "rank": 0,
+      "owner": "a2bd4a8e20ccf421-rank000000",
+      "checkpoint": {
+        "sequence": 1
+      }
+    },
+    {
+      "protocol_version": 1,
+      "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1",
+      "phase": "trace",
+      "rank": 1,
+      "owner": "a2bd4a8e20ccf421-rank000001",
+      "checkpoint": {
+        "sequence": 1
+      }
+    }
+  ],
+  "backend_response": {
+    "protocol_version": 1,
+    "ok": true,
+    "result": {
+      "output": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output",
+      "capture_id": "7f6062dc9f3f444d8ff9ee1d33da84a1",
+      "phase": "trace",
+      "ranks": [
+        0,
+        1
+      ],
+      "receipts": 2
+    }
+  }
+}

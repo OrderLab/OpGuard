@@ -5,6 +5,11 @@ blind agent benchmark or a locally reproduced GPU race. The user supplied the
 answer; the embedded source also includes a proposed repair. Generic skills and
 readers contain no case-specific diagnosis rule.
 
+A new [paired capture](paired-capture-20261019/README.md) provides complete
+stdout/stderr and two-rank OpGuard exports from the **same instrumented launches**.
+Use that set together for a paired demonstration; its capture IDs, raw transport
+bundles, queries and CPU verification are included.
+
 Complete native [stdout/stderr from a new two-GPU rerun](standard-logs/rerun-20261019/README.md)
 are now available for overlap enabled and disabled. These are separately captured
 2026-10-19 runs, not the missing original console logs of the historical trace.

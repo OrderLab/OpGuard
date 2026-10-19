@@ -1,0 +1,215 @@
+{
+  "compares": "Printed decimal native training metrics from the paired trace launches.",
+  "metrics": {
+    "overlap-off": [
+      {
+        "step": 0,
+        "loss": 0.139528513,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 1,
+        "loss": 0.00953674316,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 2,
+        "loss": 0.000167429447,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 3,
+        "loss": 0.017284289,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 4,
+        "loss": 0.0800657868,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 5,
+        "loss": 0.0393968225,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 6,
+        "loss": 0.026358664,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 7,
+        "loss": 0.232495368,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 8,
+        "loss": 0.680947304,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 9,
+        "loss": 0.125664711,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 10,
+        "loss": 0.00123596191,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 11,
+        "loss": 0.386364222,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 12,
+        "loss": 0.263357401,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 13,
+        "loss": 0.314075947,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 14,
+        "loss": 0.0901025683,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 15,
+        "loss": 0.00583940744,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 16,
+        "loss": 0.0467894077,
+        "grad_norm": 0.00197029114
+      },
+      {
+        "step": 17,
+        "loss": 0.00145053864,
+        "grad_norm": 0.00138282776
+      },
+      {
+        "step": 18,
+        "loss": 0.219383374,
+        "grad_norm": 0.000346183777
+      },
+      {
+        "step": 19,
+        "loss": 0.12809968,
+        "grad_norm": 0.00147438049
+      }
+    ],
+    "overlap-on": [
+      {
+        "step": 0,
+        "loss": 0.139528513,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 1,
+        "loss": 0.00953674316,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 2,
+        "loss": 0.000167429447,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 3,
+        "loss": 0.017284289,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 4,
+        "loss": 0.0800657868,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 5,
+        "loss": 0.0393968225,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 6,
+        "loss": 0.026358664,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 7,
+        "loss": 0.232495368,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 8,
+        "loss": 0.680947304,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 9,
+        "loss": 0.125664711,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 10,
+        "loss": 0.00123596191,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 11,
+        "loss": 0.386364222,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 12,
+        "loss": 0.263357401,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 13,
+        "loss": 0.314075947,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 14,
+        "loss": 0.0901025683,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 15,
+        "loss": 0.00583940744,
+        "grad_norm": 0.0
+      },
+      {
+        "step": 16,
+        "loss": 0.0467894077,
+        "grad_norm": 0.00204745238
+      },
+      {
+        "step": 17,
+        "loss": 0.00145053864,
+        "grad_norm": 0.00151081756
+      },
+      {
+        "step": 18,
+        "loss": 0.219383374,
+        "grad_norm": 0.00111055549
+      },
+      {
+        "step": 19,
+        "loss": 0.129150391,
+        "grad_norm": 0.00158956705
+      }
+    ]
+  },
+  "different_steps": [
+    16,
+    17,
+    18,
+    19
+  ]
+}

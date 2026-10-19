@@ -1,0 +1,74 @@
+{
+  "label": "demo-case5-paired-stdout-stderr-and-opguard",
+  "input_id": "original-embedded-workload-seed42-two-ranks-20-steps",
+  "backend": [
+    "/opt/tiger/mariana/.venv_opguard/bin/python",
+    "-m",
+    "opguard.tools"
+  ],
+  "local_root": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/staging",
+  "timeout_seconds": 900,
+  "max_stage_attempts": 1,
+  "baseline": {
+    "cwd": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off",
+    "script": "bootstrap.py",
+    "launcher": [
+      "/opt/tiger/mariana/.venv_opguard/bin/python",
+      "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/capture_launcher.py"
+    ],
+    "args": [],
+    "ranks": [
+      0,
+      1
+    ],
+    "env": {
+      "PYTHONPATH": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps",
+      "PYTHONUNBUFFERED": "1",
+      "CUDA_VISIBLE_DEVICES": "0,1",
+      "CUDA_DEVICE_MAX_CONNECTIONS": "32",
+      "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+      "OMP_NUM_THREADS": "1",
+      "NCCL_DEBUG": "WARN",
+      "ACCELERATE_USE_DEEPSPEED": "true",
+      "ACCELERATE_MIXED_PRECISION": "fp16",
+      "ACCELERATE_GRADIENT_ACCUMULATION_STEPS": "1",
+      "ACCELERATE_DEEPSPEED_CONFIG_FILE": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deepspeed.json",
+      "OPGUARD_CALLSITE_CUPTI": "0",
+      "OPGUARD_CALLSITE_CUDAAPI": "0",
+      "OPGUARD_CALLSITE_INCLUDE_CPU": "1",
+      "OPGUARD_TRACE_DUMP_MODE": "summary",
+      "OPGUARD_XOR_REGIONAL": "4"
+    }
+  },
+  "candidate": {
+    "cwd": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on",
+    "script": "bootstrap.py",
+    "launcher": [
+      "/opt/tiger/mariana/.venv_opguard/bin/python",
+      "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/capture_launcher.py"
+    ],
+    "args": [],
+    "ranks": [
+      0,
+      1
+    ],
+    "env": {
+      "PYTHONPATH": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps",
+      "PYTHONUNBUFFERED": "1",
+      "CUDA_VISIBLE_DEVICES": "0,1",
+      "CUDA_DEVICE_MAX_CONNECTIONS": "32",
+      "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+      "OMP_NUM_THREADS": "1",
+      "NCCL_DEBUG": "WARN",
+      "ACCELERATE_USE_DEEPSPEED": "true",
+      "ACCELERATE_MIXED_PRECISION": "fp16",
+      "ACCELERATE_GRADIENT_ACCUMULATION_STEPS": "1",
+      "ACCELERATE_DEEPSPEED_CONFIG_FILE": "/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deepspeed.json",
+      "OPGUARD_CALLSITE_CUPTI": "0",
+      "OPGUARD_CALLSITE_CUDAAPI": "0",
+      "OPGUARD_CALLSITE_INCLUDE_CPU": "1",
+      "OPGUARD_TRACE_DUMP_MODE": "summary",
+      "OPGUARD_XOR_REGIONAL": "4"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/_distutils_hack/__init__.py:53: UserWarning: Reliance on distutils from stdlib is deprecated. Users must rely on setuptools to provide the distutils module. Avoid importing distutils or import setuptools first, and avoid setting SETUPTOOLS_USE_DISTUTILS=stdlib. Register concerns at https://github.com/pypa/setuptools/issues/new?template=distutils-deprecation.yml
+  warnings.warn(
+/opt/tiger/mariana/.venv_opguard/lib/python3.11/site-packages/_distutils_hack/__init__.py:53: UserWarning: Reliance on distutils from stdlib is deprecated. Users must rely on setuptools to provide the distutils module. Avoid importing distutils or import setuptools first, and avoid setting SETUPTOOLS_USE_DISTUTILS=stdlib. Register concerns at https://github.com/pypa/setuptools/issues/new?template=distutils-deprecation.yml
+  warnings.warn(
+/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @autocast_custom_fwd
+/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @autocast_custom_bwd
+/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:47: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @autocast_custom_fwd
+/opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/linear.py:66: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @autocast_custom_bwd
+[W1019 21:19:36.087727907 ProcessGroupNCCL.cpp:924] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+[W1019 21:19:36.095211100 ProcessGroupNCCL.cpp:924] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+[OpGuard]: meta_vars 0-154589-154589 init (size=2)[OpGuard]: meta_vars 1-154590-154590 init (size=2)
+
+[INFO] Execution traces: /opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output/exec_trace, Source files: /opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output/exec_trace/source_files[INFO] Execution traces: /opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output/exec_trace, Source files: /opt/tiger/mariana/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/candidate-trace-1/output/exec_trace/source_files
+
+/opt/tiger/mariana/OpGuard/opguard/wrapped_ops.py:37: UserWarning: torch.range is deprecated and will be removed in a future release because its behavior is inconsistent with Python's range builtin. Instead, use torch.arange, which produces values in [start, end).
+  return original_fn(args[0], *args[1:], **kwargs)
+/opt/tiger/mariana/OpGuard/opguard/wrapped_ops.py:37: UserWarning: Using a target size (torch.Size([1])) that is different to the input size (torch.Size([])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return original_fn(args[0], *args[1:], **kwargs)
+/opt/tiger/mariana/OpGuard/opguard/wrapped_ops.py:37: UserWarning: torch.range is deprecated and will be removed in a future release because its behavior is inconsistent with Python's range builtin. Instead, use torch.arange, which produces values in [start, end).
+  return original_fn(args[0], *args[1:], **kwargs)
+/opt/tiger/mariana/OpGuard/opguard/wrapped_ops.py:37: UserWarning: Using a target size (torch.Size([1])) that is different to the input size (torch.Size([])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return original_fn(args[0], *args[1:], **kwargs)
+[OpGuard]: trace buffer 1-154590-154590 force dump all traces and tensors
+[OpGuard]: trace buffer 0-154589-154589 force dump all traces and tensors
+[rank1]:[W1019 21:19:42.583687854 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[rank0]:[W1019 21:19:42.874193324 ProcessGroupNCCL.cpp:1524] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank0]:[W1019 21:19:42.148923702 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[W1019 21:19:43.121688478 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

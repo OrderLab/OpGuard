@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "case": "demo_case5",
+  "experiment_id": "5dc7374b7a5949caae53ea82da8ee78d",
+  "same_launch_console_and_trace": true,
+  "trace_launches": 2,
+  "ranks_per_launch": 2,
+  "native_steps_per_launch": 20,
+  "raw_console_bytes": 55637,
+  "runtime": {
+    "python": "3.11.2",
+    "torch": "2.9.1+cu130",
+    "cuda_build": "13.0",
+    "driver": "580.126.20",
+    "deepspeed": "0.14.2",
+    "accelerate": "0.29.3",
+    "numpy": "1.26.4",
+    "gpu": "2 x NVIDIA GB200"
+  },
+  "instrumentation_scope": "discovered in-checkout Python callsites; tensor summaries; native kernel tracing disabled",
+  "comparison_verdict": "not_evaluated",
+  "whole_graph_first_diff_claimed": false,
+  "all_original_source_files_restored": true,
+  "replayed_query_count": 14,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4348,
+      "sha256": "82daa826fed3e4ccd6378ef00209cf18e5a4c5dc80657c997a635d23f1b483de"
+    },
+    {
+      "path": "metrics.json",
+      "bytes": 3953,
+      "sha256": "9e32b1c1731137cce1c21dab1d75feaf6387110dc8266eb1ce100c2276d23706"
+    },
+    {
+      "path": "opguard/perfetto_gpu_000.json.gz",
+      "bytes": 2133172,
+      "sha256": "dae87f3d682b986d4fcb8eae80c29062a1c78a60d2316ddd84b52ddaeb00bab1"
+    },
+    {
+      "path": "opguard/perfetto_gpu_001.json.gz",
+      "bytes": 2009926,
+      "sha256": "87d17c6f5b98e270fc0168b844374debf0a6a3a2d173d5c4259f0f7edf3e8472"
+    },
+    {
+      "path": "opguard-output.json",
+      "bytes": 12008,
+      "sha256": "eb997fcc7705df32e8b6b9559c4701aec4b685d3e3abfac2ed5f9beaaa009466"
+    },
+    {
+      "path": "provenance/capture_launcher.py",
+      "bytes": 1826,
+      "sha256": "f1fba278dadb170e595fa6b2d40b8d1bc876bfbaeb35158c262a33cf9f843d20"
+    },
+    {
+      "path": "provenance/overlap-off.json",
+      "bytes": 2541,
+      "sha256": "7a19e0fc99b82c14c99a6f0d5e835a8942b1021ab204dc425a8f3f0d2497740b"
+    },
+    {
+      "path": "provenance/overlap-on.json",
+      "bytes": 2541,
+      "sha256": "754cbce1fdadd8312717b432ae5fa6d407fbcc2fb8e3656000220ff09e4e891e"
+    },
+    {
+      "path": "provenance/protocol.json",
+      "bytes": 1071,
+      "sha256": "fd83a72a4f5010e023eb4b36dbcda20f49fb2dece3b307b2a19a450e727f3bb2"
+    },
+    {
+      "path": "provenance/query-catalog.json",
+      "bytes": 6271,
+      "sha256": "a35ba154986e914aa83916bc7fa4361d2ea3b037d69b63dabe6000b4a0fabd12"
+    },
+    {
+      "path": "provenance/source-restoration.json",
+      "bytes": 2277,
+      "sha256": "3e1ea5453ff5004df2325d365f800242d92cd189a078e3abf1f128adb9e5e100"
+    },
+    {
+      "path": "provenance/spec.json",
+      "bytes": 2737,
+      "sha256": "c5e5c5fae88e06e47a62d44acbaebc06381ef8680a9f7ac10a32068c0a9d8754"
+    },
+    {
+      "path": "queries/rank0-compare_events.json",
+      "bytes": 4005,
+      "sha256": "d933be2de6d68b598f2cda78549f8c2af075bb9c2d324aa45525125cd7dc3f27"
+    },
+    {
+      "path": "queries/rank0-first_diff.json",
+      "bytes": 7753,
+      "sha256": "673ab41c936851a516af3882d6da16f4389005f753d3fd7ee3b4d41eaa2d0ddc"
+    },
+    {
+      "path": "queries/rank0-run1-inspect_event.json",
+      "bytes": 10317,
+      "sha256": "2c0a158af3a2595c1fd87d6b73654af9f474434d3f0e4d1b21a9ddd7915e99d3"
+    },
+    {
+      "path": "queries/rank0-run1-mapped-code_context.json",
+      "bytes": 5202,
+      "sha256": "10cf0886d0cc62ef354d5900a64408ec92b79f7e8fb5e8d0c4c1d39dfa896220"
+    },
+    {
+      "path": "queries/rank0-run2-inspect_event.json",
+      "bytes": 10341,
+      "sha256": "cd5ecf2f0282da24c31b8f4d7a9b79d2c71c95d9448117e54e8762695d74fcf7"
+    },
+    {
+      "path": "queries/rank0-run2-mapped-code_context.json",
+      "bytes": 5201,
+      "sha256": "c7b242e29fe925491d7bf49b84a37b15fa4c25ca04a34d7f6fb4e2aa9cbe3a85"
+    },
+    {
+      "path": "queries/rank0-trace_summary.json",
+      "bytes": 4158,
+      "sha256": "43c9112d7534db22308aa864137838ce32bc9ed1871ed6957c5df91a6ee11d7f"
+    },
+    {
+      "path": "queries/rank1-compare_events.json",
+      "bytes": 3982,
+      "sha256": "46437bdf06b0c0743bb7dad5c70f921d804d507588055ef29b3c8ce7ed690516"
+    },
+    {
+      "path": "queries/rank1-first_diff.json",
+      "bytes": 7699,
+      "sha256": "fca7ae7c54fd66a02db0b8927fd029478b186efcbd4f75592bcbdc43ad79c4ea"
+    },
+    {
+      "path": "queries/rank1-run1-inspect_event.json",
+      "bytes": 10282,
+      "sha256": "ca179398894a37f6edd07aa8bdb2792b6e53fa9caa586042b5e4124ecfbf4db3"
+    },
+    {
+      "path": "queries/rank1-run1-mapped-code_context.json",
+      "bytes": 5202,
+      "sha256": "7d1ce9b2ae884a63030f7124afa0b55cb579ad0a11bd61a2ea199269c2738a63"
+    },
+    {
+      "path": "queries/rank1-run2-inspect_event.json",
+      "bytes": 10306,
+      "sha256": "371e7e66aecc45e19f79948e906d91cf01cfd21035dd03203d81d6476548e52f"
+    },
+    {
+      "path": "queries/rank1-run2-mapped-code_context.json",
+      "bytes": 5201,
+      "sha256": "a50368230eb006ea204d89a37a9157feb1be5a4babb9c7a7e3c2a10ec72622c4"
+    },
+    {
+      "path": "queries/rank1-trace_summary.json",
+      "bytes": 4158,
+      "sha256": "297b7e32098132ff6d832055c1319fd3f4f8585023219b1167108da9ab376880"
+    },
+    {
+      "path": "raw-captures.tar.gz",
+      "bytes": 1348096,
+      "sha256": "117ec94f12e4aa15f16bb052c72e5bc9f9b6ef19aba989977c13ec16583091ce"
+    },
+    {
+      "path": "standard-logs/overlap-off/stderr.log",
+      "bytes": 5298,
+      "sha256": "0d1b8670327e75af4d0d6a613d17478e62347a54d896c3e14f222219abfa4cbc"
+    },
+    {
+      "path": "standard-logs/overlap-off/stdout.log",
+      "bytes": 22522,
+      "sha256": "10cf48d87a039d2a98584e03e059c34ca117291c89a5b0a521058bdacf210c52"
+    },
+    {
+      "path": "standard-logs/overlap-on/stderr.log",
+      "bytes": 5298,
+      "sha256": "82abf2cecd55be14d8933d010bc788407691ff7f07d0950d1069c2a2a459505e"
+    },
+    {
+      "path": "standard-logs/overlap-on/stdout.log",
+      "bytes": 22519,
+      "sha256": "7bcad107c5eec161067e2d93b9a0106c094ecac570ff203c4688ffb85317fae5"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 5414,
+      "sha256": "19619abd255344e3a3a94dc07fe125263a589d51a61721badd651d8a576ea36a"
+    }
+  ]
+}

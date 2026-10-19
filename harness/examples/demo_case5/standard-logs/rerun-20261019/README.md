@@ -1,5 +1,8 @@
 # Demo 5: native stdout and stderr from a new rerun
 
+For logs and OpGuard output collected in the same launches, use the
+[subsequent paired capture](../../paired-capture-20261019/README.md).
+
 These are complete, separate stdout/stderr captures from two successful
 two-GPU runs on 2026-10-19. Each run executes all 20 training steps (0–19).
 
