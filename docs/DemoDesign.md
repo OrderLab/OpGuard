@@ -10,7 +10,7 @@ The OpGuard packet selects first observed captured-callsite differences on both 
 retaining unaligned counts and correspondence limitations. No selected source hint is added.
 The historical four-event baseline has been replaced.
 
-Groq GPT-OSS 20B reads complete logs in six sequential parts with rolling model notes
+Groq GPT-OSS 20B reads complete logs in eight sequential parts with rolling model notes
 and streams progress while waiting for free quota. OpGuard uses one call. Both share
 the diagnostic prompt, but this is not an equal-call-budget benchmark. Summaries may
 lose detail. Expand links to the full evidence packet; previews are only a few lines.

@@ -53,7 +53,7 @@ A gradient buffer is overwritten on the default stream before its reduction on a
 
 </details>
 
-*Groq · GPT-OSS 20B · Same model and diagnostic prompt; same-launch evidence. Full logs read in six parts (a few minutes); OpGuard uses first observed differences.*
+*Groq · GPT-OSS 20B · Same model and diagnostic prompt; same-launch evidence. Full logs read in eight parts (a few minutes); OpGuard uses first observed differences.*
 
 ## Get started
 
