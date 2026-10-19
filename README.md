@@ -22,8 +22,6 @@ Give your coding agent two training runs. OpGuard helps it find where their comp
   </picture>
 </a>
 
-*Illustrated workflow. Bring your own coding agent.*
-
 ## Get started
 
 Install from PyPI with Python 3.10+. The training environment needs CUDA-enabled PyTorch and CUDA/CUPTI development tools.
