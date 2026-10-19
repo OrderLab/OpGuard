@@ -1,0 +1,5 @@
+# Project-specific instrumentation is opt-in. Supply your own config.
+instrumentations: []
+meta_vars: []
+entry: []
+callsite_tracer: []

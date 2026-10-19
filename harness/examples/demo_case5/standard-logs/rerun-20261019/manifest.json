@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "case": "demo_case5",
+  "kind": "new_native_stdout_stderr_rerun",
+  "historical_trace_and_logs_same_launch": false,
+  "provenance": {
+    "source_issue": "https://github.com/deepspeedai/DeepSpeed/issues/5545",
+    "historical_trace_sha256": "817bfa4b756bcac73e3d83892da1fee3a72bd5ab58c0a5b1e0900277dacdae51",
+    "embedded_source_path": "/home/yinjie/opguard_buglist/deepspeed/overlap_comm_data_race_5545/debug.py",
+    "embedded_source_sha256": "b98ce8f50b864d729f7fc0aeee3c6f6f05dfc6b46723bdd9b9eb828e07e40347",
+    "workload_sha256": "3e39b61048c32ed5ed047bbd0d1b5adae4b6a701b3fe54cd44cd64688527efcf",
+    "ast_matches_embedded_source_after_removing_opguard_wrappers": true,
+    "source_transformations": [
+      "Normalize original issue code CRLF to LF."
+    ],
+    "config_transformations": [
+      "Use the issue configuration; reference changes only zero_optimization.overlap_comm to false."
+    ],
+    "historical_launch_args_available": false,
+    "historical_stdout_stderr_available": false,
+    "new_runs_are_not_the_historical_trace_runs": true
+  },
+  "runtime": {
+    "python": "3.11.2",
+    "torch": "2.9.1+cu130",
+    "cuda_build": "13.0",
+    "driver": "580.126.20",
+    "deepspeed": "0.14.2",
+    "accelerate": "0.29.3",
+    "numpy": "1.26.4",
+    "gpu": "2 x NVIDIA GB200"
+  },
+  "compatibility": "bootstrap.py restores two removed Torch elastic import names for DeepSpeed 0.14.2. No optimizer or training computation is patched.",
+  "capture": "Direct subprocess stdout/stderr file redirection; all records retained, with host paths normalized for publication. Each stream retains its original order; cross-stream ordering was not recorded. Distributed workers share each stream.",
+  "launches": [
+    {
+      "label": "overlap-on",
+      "command": [
+        "/opt/opguard/.venv_opguard/bin/python",
+        "-m",
+        "torch.distributed.run",
+        "--standalone",
+        "--nproc-per-node=2",
+        "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/bootstrap.py"
+      ],
+      "cwd": "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/overlap-on",
+      "started_utc": "2026-10-19T12:48:15.193915+00:00",
+      "environment_overrides": {
+        "PYTHONPATH": "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/deps",
+        "PYTHONUNBUFFERED": "1",
+        "CUDA_VISIBLE_DEVICES": "0,1",
+        "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+        "OMP_NUM_THREADS": "1",
+        "NCCL_DEBUG": "WARN",
+        "ACCELERATE_USE_DEEPSPEED": "true",
+        "ACCELERATE_MIXED_PRECISION": "fp16",
+        "ACCELERATE_GRADIENT_ACCUMULATION_STEPS": "1",
+        "ACCELERATE_DEEPSPEED_CONFIG_FILE": "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/deepspeed-overlap-true.json"
+      },
+      "removed_environment_variable_names": [],
+      "cuda_device_max_connections": "32",
+      "heattrace": "enabled by default",
+      "streams": "stdout and stderr redirected separately without filtering",
+      "opguard_instrumentation": false,
+      "cuda_stream_sanitizer": false,
+      "historical_demo_capture": false,
+      "finished_utc": "2026-10-19T12:48:25.773913+00:00",
+      "returncode": 0,
+      "logs": [
+        {
+          "path": "stdout.log",
+          "bytes": 22520,
+          "sha256": "c9d4e1157dbb91e70b73ac6671b44499a0e27565dccde22850001de700e0e031"
+        },
+        {
+          "path": "stderr.log",
+          "bytes": 4380,
+          "sha256": "ec784e5a04e800843c43772c244fc0c4e450b9e90b9c933cd540ac98a2b56dca"
+        }
+      ]
+    },
+    {
+      "label": "overlap-off",
+      "command": [
+        "/opt/opguard/.venv_opguard/bin/python",
+        "-m",
+        "torch.distributed.run",
+        "--standalone",
+        "--nproc-per-node=2",
+        "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/bootstrap.py"
+      ],
+      "cwd": "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/overlap-off",
+      "started_utc": "2026-10-19T12:48:25.775126+00:00",
+      "environment_overrides": {
+        "PYTHONPATH": "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/deps",
+        "PYTHONUNBUFFERED": "1",
+        "CUDA_VISIBLE_DEVICES": "0,1",
+        "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+        "OMP_NUM_THREADS": "1",
+        "NCCL_DEBUG": "WARN",
+        "ACCELERATE_USE_DEEPSPEED": "true",
+        "ACCELERATE_MIXED_PRECISION": "fp16",
+        "ACCELERATE_GRADIENT_ACCUMULATION_STEPS": "1",
+        "ACCELERATE_DEEPSPEED_CONFIG_FILE": "/opt/opguard/OpGuard-runs/demo-case5-stdout-20261019/deepspeed-overlap-false.json"
+      },
+      "removed_environment_variable_names": [],
+      "cuda_device_max_connections": "32",
+      "heattrace": "enabled by default",
+      "streams": "stdout and stderr redirected separately without filtering",
+      "opguard_instrumentation": false,
+      "cuda_stream_sanitizer": false,
+      "historical_demo_capture": false,
+      "finished_utc": "2026-10-19T12:48:35.002397+00:00",
+      "returncode": 0,
+      "logs": [
+        {
+          "path": "stdout.log",
+          "bytes": 22522,
+          "sha256": "3b358a4633b889bb0f60c39d9a40d019ff353fb7109e2152cbcf2caf67ae3a32"
+        },
+        {
+          "path": "stderr.log",
+          "bytes": 4380,
+          "sha256": "8a2efa9c95b08d07170ceb560ab26116e683ef1455b3c9aca46680275426de6c"
+        }
+      ]
+    }
+  ],
+  "native_metric_records_per_launch": 20,
+  "printed_metric_comparison": {
+    "compares": "Printed decimal values only, not full tensor snapshots",
+    "differences": [
+      {
+        "step": 16,
+        "overlap_on": {
+          "step": 16,
+          "loss": 0.0467894077,
+          "grad_norm": 0.00223425869
+        },
+        "overlap_off": {
+          "step": 16,
+          "loss": 0.0467894077,
+          "grad_norm": 0.00197029114
+        }
+      },
+      {
+        "step": 19,
+        "overlap_on": {
+          "step": 19,
+          "loss": 0.12844944,
+          "grad_norm": 0.00147819519
+        },
+        "overlap_off": {
+          "step": 19,
+          "loss": 0.12809968,
+          "grad_norm": 0.00147438049
+        }
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "overlap-on/stdout.log",
+      "bytes": 22520,
+      "sha256": "c9d4e1157dbb91e70b73ac6671b44499a0e27565dccde22850001de700e0e031"
+    },
+    {
+      "path": "overlap-on/stderr.log",
+      "bytes": 4380,
+      "sha256": "ec784e5a04e800843c43772c244fc0c4e450b9e90b9c933cd540ac98a2b56dca"
+    },
+    {
+      "path": "overlap-off/stdout.log",
+      "bytes": 22522,
+      "sha256": "3b358a4633b889bb0f60c39d9a40d019ff353fb7109e2152cbcf2caf67ae3a32"
+    },
+    {
+      "path": "overlap-off/stderr.log",
+      "bytes": 4380,
+      "sha256": "8a2efa9c95b08d07170ceb560ab26116e683ef1455b3c9aca46680275426de6c"
+    },
+    {
+      "path": "debug.py",
+      "bytes": 7149,
+      "sha256": "3e39b61048c32ed5ed047bbd0d1b5adae4b6a701b3fe54cd44cd64688527efcf"
+    },
+    {
+      "path": "bootstrap.py",
+      "bytes": 486,
+      "sha256": "9d85f62b7a226db1494c70712ce7bbccfd28948d60c90f403180f4753d533891"
+    },
+    {
+      "path": "deepspeed-overlap-true.json",
+      "bytes": 608,
+      "sha256": "832a91c39c6ae81e91fc81b1cbe7728c08f3ccda529a0b137ee7a1dcbdb19be0"
+    },
+    {
+      "path": "deepspeed-overlap-false.json",
+      "bytes": 609,
+      "sha256": "7d26e3a0062fb0f509c312cd91174c981939e87050a5a8730a306f6e4c77bd1e"
+    }
+  ],
+  "path_normalization": "Host-specific paths are normalized to /opt/opguard, including source keys and archive member names. File sizes, checksums and artifact-bound event references identify the normalized export. Capture IDs, numerical values and record order are unchanged."
+}

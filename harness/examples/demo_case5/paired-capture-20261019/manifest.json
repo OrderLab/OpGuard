@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "case": "demo_case5",
+  "experiment_id": "5dc7374b7a5949caae53ea82da8ee78d",
+  "same_launch_console_and_trace": true,
+  "trace_launches": 2,
+  "ranks_per_launch": 2,
+  "native_steps_per_launch": 20,
+  "raw_console_bytes": 55469,
+  "runtime": {
+    "python": "3.11.2",
+    "torch": "2.9.1+cu130",
+    "cuda_build": "13.0",
+    "driver": "580.126.20",
+    "deepspeed": "0.14.2",
+    "accelerate": "0.29.3",
+    "numpy": "1.26.4",
+    "gpu": "2 x NVIDIA GB200"
+  },
+  "instrumentation_scope": "discovered in-checkout Python callsites; tensor summaries; native kernel tracing disabled",
+  "comparison_verdict": "not_evaluated",
+  "whole_graph_first_diff_claimed": false,
+  "all_original_source_files_restored": true,
+  "replayed_query_count": 14,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4582,
+      "sha256": "34f5777d6dbe3b657ab25e740664dbefcef79358ecee7bfd0b1257e7084c66a5"
+    },
+    {
+      "path": "metrics.json",
+      "bytes": 3953,
+      "sha256": "9e32b1c1731137cce1c21dab1d75feaf6387110dc8266eb1ce100c2276d23706"
+    },
+    {
+      "path": "opguard/perfetto_gpu_000.json.gz",
+      "bytes": 2131219,
+      "sha256": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d"
+    },
+    {
+      "path": "opguard/perfetto_gpu_001.json.gz",
+      "bytes": 2007131,
+      "sha256": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562"
+    },
+    {
+      "path": "opguard-output.json",
+      "bytes": 11984,
+      "sha256": "70541d3c98aa6cccac6fec0002c61a44b3d548086405667da38a0eb0bd52dc9b"
+    },
+    {
+      "path": "provenance/capture_launcher.py",
+      "bytes": 1826,
+      "sha256": "f1fba278dadb170e595fa6b2d40b8d1bc876bfbaeb35158c262a33cf9f843d20"
+    },
+    {
+      "path": "provenance/overlap-off.json",
+      "bytes": 2505,
+      "sha256": "d84f321c3c2e20882d592dca4217a7328660b12d5f522d66ca600b2c527a3b81"
+    },
+    {
+      "path": "provenance/overlap-on.json",
+      "bytes": 2505,
+      "sha256": "45ed300c70300ea817ef83060bcb090104a27dd2b711a947c799ec674c377a43"
+    },
+    {
+      "path": "provenance/protocol.json",
+      "bytes": 1071,
+      "sha256": "fd83a72a4f5010e023eb4b36dbcda20f49fb2dece3b307b2a19a450e727f3bb2"
+    },
+    {
+      "path": "provenance/query-catalog.json",
+      "bytes": 6163,
+      "sha256": "f18c9b99a1c4317670466ab1f0593a1b2495f2f9f0ea2f411fab84b3a3bea8ea"
+    },
+    {
+      "path": "provenance/source-restoration.json",
+      "bytes": 2217,
+      "sha256": "63b31742438196dcf332fa2e4572134fe740e64200ed4a959eaa705d679aa0f0"
+    },
+    {
+      "path": "provenance/spec.json",
+      "bytes": 2665,
+      "sha256": "9e9fb3b26815983e5ac1fd79b0eeb7e3debc633f2e3a6666df3a15e6692be955"
+    },
+    {
+      "path": "queries/rank0-compare_events.json",
+      "bytes": 3987,
+      "sha256": "31df18debfb8c40d85fdbe7977654192b6a5c0b7766618b33d9a36fc1008c424"
+    },
+    {
+      "path": "queries/rank0-first_diff.json",
+      "bytes": 7705,
+      "sha256": "b40d4acb5b21473258fa1a822deef94b361e98d67eefb7266597b308a1b6f80e"
+    },
+    {
+      "path": "queries/rank0-run1-inspect_event.json",
+      "bytes": 10239,
+      "sha256": "1dfe4680677e4a95260a476e463277bbbd0f99d3b434dd110584a96cc4410781"
+    },
+    {
+      "path": "queries/rank0-run1-mapped-code_context.json",
+      "bytes": 5190,
+      "sha256": "9729538487d9d5c0ca5850772afc30be4177ce757e6533920d334686383fe98e"
+    },
+    {
+      "path": "queries/rank0-run2-inspect_event.json",
+      "bytes": 10263,
+      "sha256": "2370f0164e961c75d3cd376a9ff7eb1b69fe923525d57597babdb05fd1d3735d"
+    },
+    {
+      "path": "queries/rank0-run2-mapped-code_context.json",
+      "bytes": 5189,
+      "sha256": "cc814912a355e839af514d29672b630685d3f95ccdad7c8ba543ec44fe239b58"
+    },
+    {
+      "path": "queries/rank0-trace_summary.json",
+      "bytes": 4014,
+      "sha256": "652e86a7e5e90ae3e683b1ae27e103438e6498864c96e42ff104a47818bba1ee"
+    },
+    {
+      "path": "queries/rank1-compare_events.json",
+      "bytes": 3964,
+      "sha256": "7a23b4d7864ad6c0ac59ee436e553ba0cf8364fa9c67591f53937d78afacf968"
+    },
+    {
+      "path": "queries/rank1-first_diff.json",
+      "bytes": 7651,
+      "sha256": "5bd8b8a40334f583b42a89b710471c0bade2204a43cd35c598f04bbfa6ee75a1"
+    },
+    {
+      "path": "queries/rank1-run1-inspect_event.json",
+      "bytes": 10204,
+      "sha256": "4b8f3262f419fd649df551ad55e036c4c9c112267b1389435ca555a1c58de8a1"
+    },
+    {
+      "path": "queries/rank1-run1-mapped-code_context.json",
+      "bytes": 5190,
+      "sha256": "e26d978715b094e4def17316099e0f1405a9832e2a41ff98d6e1c86b4d0cc073"
+    },
+    {
+      "path": "queries/rank1-run2-inspect_event.json",
+      "bytes": 10228,
+      "sha256": "eb5b9f181c7b2f683599436ca8cb7ea70ac2f2be7cfb55fb86f3a26bf563d26c"
+    },
+    {
+      "path": "queries/rank1-run2-mapped-code_context.json",
+      "bytes": 5189,
+      "sha256": "ddc96eaab17a2b25a2904d02624538af5635929d37f38cbac68143e29a389aca"
+    },
+    {
+      "path": "queries/rank1-trace_summary.json",
+      "bytes": 4014,
+      "sha256": "c06acd7872f92c309d43202840a9156d69a60f9ed853f1d1879bb1356f1727d3"
+    },
+    {
+      "path": "raw-captures.tar.gz",
+      "bytes": 1289273,
+      "sha256": "bdfff0bc67e4f8c23f5fcfbc367668daef5a3f6222c5f208b07444826e5f83da"
+    },
+    {
+      "path": "standard-logs/overlap-off/stderr.log",
+      "bytes": 5214,
+      "sha256": "ea69ee64657d195a6efe97398cff963d99be90f98fd88461873c063c4f19a1e7"
+    },
+    {
+      "path": "standard-logs/overlap-off/stdout.log",
+      "bytes": 22522,
+      "sha256": "10cf48d87a039d2a98584e03e059c34ca117291c89a5b0a521058bdacf210c52"
+    },
+    {
+      "path": "standard-logs/overlap-on/stderr.log",
+      "bytes": 5214,
+      "sha256": "9f308dff3b4b0214d3b6afcd7653018f3cf124eda85569a830af290a89e598b7"
+    },
+    {
+      "path": "standard-logs/overlap-on/stdout.log",
+      "bytes": 22519,
+      "sha256": "7bcad107c5eec161067e2d93b9a0106c094ecac570ff203c4688ffb85317fae5"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 5414,
+      "sha256": "19619abd255344e3a3a94dc07fe125263a589d51a61721badd651d8a576ea36a"
+    }
+  ],
+  "path_normalization": "Host-specific paths are normalized to /opt/opguard, including source keys and archive member names. File sizes, checksums and artifact-bound event references identify the normalized export. Capture IDs, numerical values and record order are unchanged."
+}

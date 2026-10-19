@@ -1,0 +1,81 @@
+{
+  "label": "overlap-off",
+  "export_run": "run1",
+  "capture_id": "1dfec07bd2944f3b992cec2f6e898950",
+  "console_launch": {
+    "capture_id": "1dfec07bd2944f3b992cec2f6e898950",
+    "phase": "trace",
+    "started_utc": "2026-10-19T13:18:56.934280+00:00",
+    "cwd": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off",
+    "command": [
+      "/opt/opguard/.venv_opguard/bin/python",
+      "-m",
+      "torch.distributed.run",
+      "--standalone",
+      "--nproc-per-node=2",
+      "-m",
+      "opguard.tools.worker",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/baseline-trace-1/output/worker.json",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/bootstrap.py"
+    ],
+    "heattrace": "enabled by default",
+    "stdout": "stdout.log",
+    "stderr": "stderr.log",
+    "streams": "Complete separate streams; no filtering, tee, or postprocessing.",
+    "finished_utc": "2026-10-19T13:19:09.547675+00:00",
+    "returncode": 0,
+    "files": [
+      {
+        "path": "stdout.log",
+        "bytes": 22522,
+        "sha256": "10cf48d87a039d2a98584e03e059c34ca117291c89a5b0a521058bdacf210c52"
+      },
+      {
+        "path": "stderr.log",
+        "bytes": 5214,
+        "sha256": "ea69ee64657d195a6efe97398cff963d99be90f98fd88461873c063c4f19a1e7"
+      }
+    ]
+  },
+  "worker_request": {
+    "output": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/baseline-trace-1/output",
+    "phase": "trace",
+    "capture_id": "1dfec07bd2944f3b992cec2f6e898950"
+  },
+  "rank_receipts": [
+    {
+      "protocol_version": 1,
+      "capture_id": "1dfec07bd2944f3b992cec2f6e898950",
+      "phase": "trace",
+      "rank": 0,
+      "owner": "a2bd4a8e20ccf421-rank000000",
+      "checkpoint": {
+        "sequence": 1
+      }
+    },
+    {
+      "protocol_version": 1,
+      "capture_id": "1dfec07bd2944f3b992cec2f6e898950",
+      "phase": "trace",
+      "rank": 1,
+      "owner": "a2bd4a8e20ccf421-rank000001",
+      "checkpoint": {
+        "sequence": 1
+      }
+    }
+  ],
+  "backend_response": {
+    "protocol_version": 1,
+    "ok": true,
+    "result": {
+      "output": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/baseline-trace-1/output",
+      "capture_id": "1dfec07bd2944f3b992cec2f6e898950",
+      "phase": "trace",
+      "ranks": [
+        0,
+        1
+      ],
+      "receipts": 2
+    }
+  }
+}

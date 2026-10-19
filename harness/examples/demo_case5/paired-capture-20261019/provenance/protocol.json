@@ -1,0 +1,20 @@
+{
+  "purpose": "Collect native console output and OpGuard observations from the same instrumented launches.",
+  "prior_native_log_commit": "a6639dda851e977cb31e8d21ed02c7596458bdd5",
+  "training_steps": 20,
+  "ranks": [
+    0,
+    1
+  ],
+  "comparison": "overlap-off baseline versus overlap-on candidate",
+  "interventions": "No weighted gradient, artificial delay, optimizer patch, or CUDA Stream Sanitizer.",
+  "discovery_runs": "Additional discovery runs are retained separately from the trace runs.",
+  "observation_scope": "Python callsites within copied application and dependency sources; no claim of whole-graph or kernel coverage.",
+  "console_capture": "Separate direct stdout/stderr redirection in a blocking launcher, bound to the backend capture_id.",
+  "reproduction_check": "Compare all 20 native metric rows and report whether the original symptom survives instrumentation.",
+  "heattrace": "enabled",
+  "tool_revisions": {
+    "OpGuard": "f7e5759be3a2da1efb8b84db5659656870dc0701",
+    "OpGuard-harness": "979fd88f4fdf76e7139b1c1eeb654d2e31be674e"
+  }
+}

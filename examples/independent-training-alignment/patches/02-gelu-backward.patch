@@ -1,0 +1,11 @@
+--- stack_a/vendor/transformers/activations.py
++++ stack_a/vendor/transformers/activations.py
+@@ -65,7 +65,7 @@
+     @staticmethod
+     def backward(ctx, grad_output):
+         (input,) = ctx.saved_tensors
+-        return torch.ops.aten.gelu_backward.default(grad_output, input, approximate="tanh")
++        return torch.ops.aten.gelu_backward.default(grad_output, input, approximate="none")
+ 
+ 
+ class GELUActivation(nn.Module):

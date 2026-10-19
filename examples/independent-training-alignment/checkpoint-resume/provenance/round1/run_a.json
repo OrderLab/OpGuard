@@ -1,0 +1,15 @@
+{
+  "side": "a",
+  "command": [
+    "bash",
+    "stack_a/run_training.sh",
+    "/work/configs/run_a.json",
+    "/work/rerun/round1/run_a"
+  ],
+  "cwd": "/work",
+  "cuda_visible_devices": "GPU-326e367c-54b4-2fc9-2a34-6ce9839aba04,GPU-71b2e7d4-fa4b-5b3e-a95f-1c0362565322",
+  "dry_run": false,
+  "started_utc": "2026-10-19T00:14:46.979657+00:00",
+  "returncode": 0,
+  "finished_utc": "2026-10-19T00:15:33.859538+00:00"
+}

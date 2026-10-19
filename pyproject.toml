@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel", "packaging>=24.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opguard"
+version = "0.1.0"
+description = "PyTorch numerical diagnostics for humans and coding agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{name = "Ziming Zhou"}]
+dependencies = ["torch>=2.4", "numpy>=1.24", "pyyaml>=6", "astor>=0.8", "libcst>=1", "plotly>=5", "orjson>=3"]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.7"]
+test = ["pytest>=7"]
+
+[project.scripts]
+opguard = "opguard.cli:main"
+opguard-tools = "opguard.tools.__main__:main"
+
+[project.urls]
+Repository = "https://github.com/OrderLab/OpGuard"
+Documentation = "https://github.com/OrderLab/OpGuard/tree/main/docs"
+
+[tool.setuptools]
+py-modules = ["usercustomize"]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["opguard", "opguard.*"]
+exclude = ["*.__pycache__", "*.build", "*.build.*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+opguard = ["*.yaml"]
+"opguard.collections" = ["*.yaml"]
+"opguard.bitwise_xor" = ["*.cu", "*.cpp"]
+"opguard.callsite_tracer.native" = ["*.cpp"]
+"opguard.callsite_tracer.cupti_tracer" = ["*.cpp"]

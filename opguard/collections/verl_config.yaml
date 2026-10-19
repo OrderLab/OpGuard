@@ -1,0 +1,14 @@
+entry:
+  - original_module: "verl/trainer/main_ppo.py"
+    class: TaskRunner
+    method: __init__
+    inject: _opguard_entry_handler
+    import_module: opguard.tracer.entry_handler
+    import_name: _opguard_entry_handler
+
+callsite_tracer:
+  - file_path: "verl/trainer/ppo/ray_trainer.py"
+    function: fit
+    traced_functions:
+      - self.critic_wg.update_critic
+      - self.critic_wg.compute_values

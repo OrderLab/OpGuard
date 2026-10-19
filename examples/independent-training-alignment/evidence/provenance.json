@@ -1,0 +1,147 @@
+{
+  "source_experiment": "independent-stacks-20261019/revision3",
+  "candidate_manifest_sha256": "22adea5df65f22d8c450b02c38ab6baa37a5d9986c9ed60e07f8dce1eddc49bd",
+  "investigators_fork_turns": "none",
+  "source_artifacts": [
+    {
+      "export": "patches/01-training-semantics.patch",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round2-fixes.diff",
+      "bytes": 2309,
+      "sha256": "db48d134754833913b1ccdff77a03b76f77110fd4a20bef2775dc5ac50e8c6e7",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "export": "patches/02-gelu-backward.patch",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round3-fix.diff",
+      "bytes": 430,
+      "sha256": "4c52275402dd014dc37c23c1cc6872f63f6ed01276bbbfe3ce66f1d18adf0e42",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "export": "patches/03-adam-step.patch",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round3-restart-fix.diff",
+      "bytes": 442,
+      "sha256": "aa1be264c99ad62c929eb28905bdd09746fa0b464f4b077bfe1a9840dacd7f95",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "export": "patches/all-repairs.patch",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/final.patch",
+      "bytes": 3181,
+      "sha256": "19a733d5449c5a918a62afc3efbff5e7dbb42abcdd5e9aa1976942617ab56b27",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "export": "capture/instrumentation.patch",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round1-instrumentation.diff",
+      "bytes": 2839,
+      "sha256": "3175fe915ee8b117743a2a282af14a77d5b59e32b1f657e54ca2683c987b29f3",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "export": "capture/probes.py",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/probes.py",
+      "bytes": 3252,
+      "sha256": "ef617890354d568ae690f431fcd5d3decf64245a3f662ef582bd951f7042d5a0",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "export": "evidence/results.json:rounds",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round1-summary-v2.json",
+      "bytes": 6636,
+      "sha256": "0f835d5d055fd524960bf30ba1f3c0a1433a4b315aae53d6a05f5e92d387c4b3",
+      "transformation": "selected scalar fields; fingerprint counts from the sealed independent audit"
+    },
+    {
+      "export": "evidence/results.json:rounds",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round2-summary.json",
+      "bytes": 6655,
+      "sha256": "8e52180daf6f55e4848432df5e8fbcaf071de3dfc6bd32a61cb64cc15f238009",
+      "transformation": "selected scalar fields; fingerprint counts from the sealed independent audit"
+    },
+    {
+      "export": "evidence/results.json:rounds",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/round3-summary.json",
+      "bytes": 6659,
+      "sha256": "4bd159f6e1529a8621d2cee13a788f0c494e27f347b30564385287bb717d44ae",
+      "transformation": "selected scalar fields; fingerprint counts from the sealed independent audit"
+    },
+    {
+      "export": "evidence/results.json / evidence/diagnoses.json",
+      "path_in_experiment": "private/revision3/independent-ordinary-review.json",
+      "bytes": 28099,
+      "sha256": "ac56522b941361dbde8dc94906a62a126040771ef100b2ba85b74798979eb3b7",
+      "transformation": "selected audited fields; no new training or checkpoint comparison during export"
+    },
+    {
+      "export": "evidence/results.json / evidence/diagnoses.json",
+      "path_in_experiment": "private/revision3/independent-iterative-review-8e427fe3e933.json",
+      "bytes": 19302,
+      "sha256": "d0234f3e318d37f5aaca6d7c3fb2dba0f60ebeebc34720a50ad2613a666fa86c",
+      "transformation": "selected audited fields; no new training or checkpoint comparison during export"
+    },
+    {
+      "export": "evidence/results.json / evidence/diagnoses.json",
+      "path_in_experiment": "private/revision3/independent-iterative-review-b0e8d3b247de.json",
+      "bytes": 24557,
+      "sha256": "c5c38a41a029ea781c5e26e50f902104d72a1d52d864a107b85176840083032e",
+      "transformation": "selected audited fields; no new training or checkpoint comparison during export"
+    },
+    {
+      "export": "evidence/results.json / evidence/diagnoses.json",
+      "path_in_experiment": "private/revision3/iterative-b0e8d3b247de-model-comparison.json",
+      "bytes": 4582,
+      "sha256": "2a06f78b8f0bed198897ae430637a6d6943cb2139e68739d3ca43c59a2cb623f",
+      "transformation": "selected audited fields; no new training or checkpoint comparison during export"
+    },
+    {
+      "export": "evidence/results.json / evidence/diagnoses.json",
+      "path_in_experiment": "private/revision3/iterative-b0e8d3b247de-loss-comparison.json",
+      "bytes": 886,
+      "sha256": "73ecd9661f94993ec5ab8ab29c61dd8c6c106d7699cd0c7dc2a000f046bc3fa3",
+      "transformation": "selected audited fields; no new training or checkpoint comparison during export"
+    },
+    {
+      "export": "evidence/results.json / evidence/diagnoses.json",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/restart-check.json",
+      "bytes": 5876,
+      "sha256": "07e1052746c6ad028f818b92c64e848ed2698aa2eac4337f262a7734b98c55d2",
+      "transformation": "selected audited fields; no new training or checkpoint comparison during export"
+    },
+    {
+      "export": "capture/fingerprints.py",
+      "path_in_experiment": "private/revision3/durable/pinned-opguard-runtime.tar.gz:./opguard_harness/fingerprints.py",
+      "bytes": 3294,
+      "sha256": "8c32c6d15923d4d0228bef74f165ed137a7866a47e4b4a47c46d36aff94eb161",
+      "transformation": "byte-for-byte pinned runtime copy; used for standalone offline replay"
+    },
+    {
+      "export": "evidence/model-comparison.json",
+      "path_in_experiment": "private/revision3/iterative-b0e8d3b247de-model-comparison.json",
+      "bytes": 4582,
+      "sha256": "2a06f78b8f0bed198897ae430637a6d6943cb2139e68739d3ca43c59a2cb623f",
+      "transformation": "byte-for-byte recorded comparison output; checkpoint values themselves are not included"
+    },
+    {
+      "export": "evidence/loss-comparison.json",
+      "path_in_experiment": "private/revision3/iterative-b0e8d3b247de-loss-comparison.json",
+      "bytes": 886,
+      "sha256": "73ecd9661f94993ec5ab8ab29c61dd8c6c106d7699cd0c7dc2a000f046bc3fa3",
+      "transformation": "byte-for-byte recorded comparison output; checkpoint values themselves are not included"
+    },
+    {
+      "export": "evidence/restart-check.json",
+      "path_in_experiment": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/diagnostics/restart-check.json",
+      "bytes": 5876,
+      "sha256": "07e1052746c6ad028f818b92c64e848ed2698aa2eac4337f262a7734b98c55d2",
+      "transformation": "byte-for-byte recorded comparison output; checkpoint values themselves are not included"
+    }
+  ],
+  "capture_origin": "Byte-exact JSONL from the completed b0e8d3b247de investigation; all three rounds and all 36 native probe files retained.",
+  "disclosure": "This retrospective example contains answers and repairs; it is not the blind task package.",
+  "limits": [
+    "Saved assignments and command evidence were audited, but encrypted delivery plaintext was not independently attested.",
+    "Private controls and full trained checkpoints are not bundled in this compact export.",
+    "Checkpoint RMS values in results.json are recorded measurements; replay.py recomputes fingerprints and losses only."
+  ]
+}

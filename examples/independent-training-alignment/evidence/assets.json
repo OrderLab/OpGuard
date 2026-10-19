@@ -1,0 +1,35 @@
+{
+  "training_archive": {
+    "archive": "runnable-source-inputs.tar.gz",
+    "bytes": 326778170,
+    "sha256": "b57d868fa26bbdd0ff55bfbf042733c0a33166aaddde9158dc83afc69f4314f1",
+    "verified_members": 2961,
+    "source_manifest_sha256": "22adea5df65f22d8c450b02c38ab6baa37a5d9986c9ed60e07f8dce1eddc49bd",
+    "excluded_prefix": "observed/"
+  },
+  "tool_runtime_archive": {
+    "archive": "pinned-opguard-runtime.tar.gz",
+    "bytes": 4022818,
+    "sha256": "e363334fdb702dee741ee24cbc1a8ed145c561ac37ca6e143cb03e8b8cdfbfb4",
+    "verified_members": 111,
+    "source_manifest_sha256": "48e8d6b5a4e074b526734201beeda48190aecce34619551c29aca99e91a136a7",
+    "excluded_prefix": null
+  },
+  "original_workload_sources": {
+    "transformers": "4.49.0",
+    "accelerate": "1.4.0 (vendored)",
+    "megatron_commit": "81fee9b0047fb3ac6001b5e71e4df89fc01b2a1c"
+  },
+  "recorded_host_environment": {
+    "python": "3.11.2",
+    "torch": "2.9.1+cu130",
+    "numpy": "1.26.4",
+    "safetensors": "0.8.0",
+    "triton": "3.5.1",
+    "hardware": "4 NVIDIA GB200 GPUs",
+    "heattrace": "enabled"
+  },
+  "availability": "Not included in the public release; no public download URL is published. Only the bundled CPU evidence replay is self-contained.",
+  "scope": "Durable runnable source, fixed data, initial weights and tool runtime. Full observed checkpoints remain in tmpfs; the source archive is not the complete frozen evaluation bundle.",
+  "host_environment_archived": false
+}

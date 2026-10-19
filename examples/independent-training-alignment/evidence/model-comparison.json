@@ -1,0 +1,150 @@
+{
+  "scope": "Full repaired model states; not a complete cross-framework optimizer moment comparison.",
+  "conversion_metadata": {
+    "path": "/dev/shm/opguard-independent-20261019/stack_b/initial_native/conversion.json",
+    "bytes": 55805,
+    "sha256": "b92ffc80ec05cdc0fb990e49ac6eae6480279e67da90641e4efaf7d63ed4af4c"
+  },
+  "checkpoints": [
+    {
+      "path": "/dev/shm/opguard-independent-20261019/opguard-sessions/b0e8d3b247de/upper/rerun/round3/run_b/checkpoints/iter_0000032/mp_rank_00/model_optim_rng.pt",
+      "bytes": 85239477,
+      "sha256": "cee29dfa7d3b5773e8bc5e52e7d876cabd6ac392a0f88595ea81d0f46f2f6fa3"
+    },
+    {
+      "path": "/dev/shm/opguard-independent-20261019/opguard-sessions/b0e8d3b247de/upper/rerun/round3/run_b/checkpoints/iter_0000032/mp_rank_01/model_optim_rng.pt",
+      "bytes": 85239477,
+      "sha256": "fed995ac3eb6b5073741bff13e62dcf6ced549bbdae806c70423418240f71f6f"
+    },
+    {
+      "path": "/dev/shm/opguard-independent-20261019/opguard-sessions/b0e8d3b247de/upper/rerun/round3/run_a/checkpoint-32/model.safetensors",
+      "bytes": 169159320,
+      "sha256": "22ba1800ea42ea5a2a1508cb11b1f2cefc6a7874b6e53a59d34eddd95850cfe4"
+    },
+    {
+      "path": "/dev/shm/opguard-independent-20261019/opguard-sessions/b0e8d3b247de/upper/rerun/round3/run_b/checkpoints/iter_0000064/mp_rank_00/model_optim_rng.pt",
+      "bytes": 85239605,
+      "sha256": "1830d08cf860698af9b95c25b73dfd5d37db33997e989b83389f508aff498f1e"
+    },
+    {
+      "path": "/dev/shm/opguard-independent-20261019/opguard-sessions/b0e8d3b247de/upper/rerun/round3/run_b/checkpoints/iter_0000064/mp_rank_01/model_optim_rng.pt",
+      "bytes": 85239605,
+      "sha256": "9d9524aab0cdd2c7b0b6f0cbd4acffde55d93ca2468b6c005553356809c688b0"
+    },
+    {
+      "path": "/dev/shm/opguard-independent-20261019/opguard-sessions/b0e8d3b247de/upper/rerun/round3/run_a/checkpoint-64/model.safetensors",
+      "bytes": 169159320,
+      "sha256": "7fcd82b05e29ba34c23495bf61909488a15a37220615a74d1a8087f14b6c1ad2"
+    }
+  ],
+  "comparisons": {
+    "32": {
+      "models": {
+        "elements": 42286080,
+        "tensors": 149,
+        "exact_tensors": 0,
+        "rms": 1.2490823069281942e-08,
+        "relative_l2": 5.270032694601207e-07,
+        "max_abs": 2.6490772143006325e-05,
+        "worst_parameters": [
+          [
+            2.6490772143006325e-05,
+            "transformer.wte.weight"
+          ],
+          [
+            8.501713409714284e-06,
+            "transformer.h.0.attn.c_attn.bias"
+          ],
+          [
+            5.109078671239331e-07,
+            "transformer.h.1.attn.c_attn.bias"
+          ],
+          [
+            3.501772880554199e-07,
+            "transformer.wpe.weight"
+          ],
+          [
+            2.775341272354126e-07,
+            "transformer.h.0.attn.c_attn.weight"
+          ],
+          [
+            2.384185791015625e-07,
+            "transformer.h.6.ln_1.weight"
+          ],
+          [
+            2.384185791015625e-07,
+            "transformer.h.5.ln_1.weight"
+          ],
+          [
+            2.384185791015625e-07,
+            "transformer.h.4.ln_1.weight"
+          ]
+        ]
+      },
+      "b_saved_group_steps": [
+        [
+          32.0,
+          32.0
+        ],
+        [
+          32.0,
+          32.0
+        ]
+      ]
+    },
+    "64": {
+      "models": {
+        "elements": 42286080,
+        "tensors": 149,
+        "exact_tensors": 0,
+        "rms": 1.6745840397696046e-08,
+        "relative_l2": 7.063182873047097e-07,
+        "max_abs": 3.065820783376694e-05,
+        "worst_parameters": [
+          [
+            3.065820783376694e-05,
+            "transformer.wte.weight"
+          ],
+          [
+            9.051492042999598e-06,
+            "transformer.h.0.attn.c_attn.bias"
+          ],
+          [
+            5.708754713396047e-07,
+            "transformer.h.1.attn.c_attn.bias"
+          ],
+          [
+            4.973262548446655e-07,
+            "transformer.wpe.weight"
+          ],
+          [
+            3.650784492492676e-07,
+            "transformer.h.0.attn.c_attn.weight"
+          ],
+          [
+            3.5762786865234375e-07,
+            "transformer.h.0.ln_1.weight"
+          ],
+          [
+            2.658925950527191e-07,
+            "transformer.h.5.attn.c_attn.weight"
+          ],
+          [
+            2.5578370355106017e-07,
+            "transformer.h.2.attn.c_attn.bias"
+          ]
+        ]
+      },
+      "b_saved_group_steps": [
+        [
+          64.0,
+          64.0
+        ],
+        [
+          64.0,
+          64.0
+        ]
+      ]
+    }
+  }
+}

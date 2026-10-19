@@ -1,0 +1,26 @@
+{
+  "spec": {
+    "label": "baseline-vs-candidate",
+    "input_id": "fixed-seed-and-input-v1",
+    "backend": ["/path/to/opguard-env/bin/python", "-m", "opguard.tools"],
+    "local_root": "/local-ssd/opguard",
+    "timeout_seconds": 1800,
+    "max_stage_attempts": 2,
+    "baseline": {
+      "cwd": "/work/baseline",
+      "launcher": ["/path/to/opguard-env/bin/python"],
+      "script": "train.py",
+      "args": ["--seed", "123", "--steps", "12"],
+      "ranks": [0],
+      "env": {"OPGUARD_CALLSITE_CUPTI": "0", "OPGUARD_CALLSITE_CUDAAPI": "0"}
+    },
+    "candidate": {
+      "cwd": "/work/candidate",
+      "launcher": ["/path/to/opguard-env/bin/python"],
+      "script": "train.py",
+      "args": ["--seed", "123", "--steps", "12"],
+      "ranks": [0],
+      "env": {"OPGUARD_CALLSITE_CUPTI": "0", "OPGUARD_CALLSITE_CUDAAPI": "0"}
+    }
+  }
+}

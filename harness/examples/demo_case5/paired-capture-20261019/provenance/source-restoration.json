@@ -1,0 +1,29 @@
+{
+  "original_files_rehashed": 1730,
+  "changed_files": [],
+  "source_manifest_sha256": "683e613a7dc7c9f88d9970821c5ad90db6dcff5693cdbb1066c2021d102e7b24",
+  "selected_sources": {
+    "baseline": {
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/engine.py": "61335164eecf95df9b98527c1bb0ab5f129f1ab45b7c87fcd019c7c4e09cbc62",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/stage_1_and_2.py": "cea5ac1b4a19193b8ade7e9908750c87a58063cc5ec009a9290b334e676dbc37",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/utils/tensor_fragment.py": "2839a02ddf8df9326cf19f2f2542a73a68ddd0685f82a189326b5a96ebb335ee",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/fp16/loss_scaler.py": "dd28cf3ca49e4489ac299f9f2105aaa23dd697b84adcdcf626718b1a741a4512",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/debug.py": "3e39b61048c32ed5ed047bbd0d1b5adae4b6a701b3fe54cd44cd64688527efcf"
+    },
+    "candidate": {
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/engine.py": "61335164eecf95df9b98527c1bb0ab5f129f1ab45b7c87fcd019c7c4e09cbc62",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/stage_1_and_2.py": "cea5ac1b4a19193b8ade7e9908750c87a58063cc5ec009a9290b334e676dbc37",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/utils/tensor_fragment.py": "2839a02ddf8df9326cf19f2f2542a73a68ddd0685f82a189326b5a96ebb335ee",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/fp16/loss_scaler.py": "dd28cf3ca49e4489ac299f9f2105aaa23dd697b84adcdcf626718b1a741a4512",
+      "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/debug.py": "3e39b61048c32ed5ed047bbd0d1b5adae4b6a701b3fe54cd44cd64688527efcf"
+    }
+  },
+  "restoration_records": {
+    "baseline": {
+      "restored": true
+    },
+    "candidate": {
+      "restored": true
+    }
+  }
+}

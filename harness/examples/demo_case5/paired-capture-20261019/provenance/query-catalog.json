@@ -1,0 +1,130 @@
+[
+  {
+    "response": "queries/rank0-compare_events.json",
+    "tool": "compare_events",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz",
+      "left_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:19947",
+      "right_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:20177"
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank0-first_diff.json",
+    "tool": "first_diff",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz"
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank0-run1-inspect_event.json",
+    "tool": "inspect_event",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz",
+      "event_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:19947"
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank0-run1-mapped-code_context.json",
+    "tool": "code_context",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz",
+      "source": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+      "line": 1734
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank0-run2-inspect_event.json",
+    "tool": "inspect_event",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz",
+      "event_ref": "1602d201e4ff64ffffeb7a8bac288e87ca47c48b00d63956d74ef4fdc46e835d:20177"
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank0-run2-mapped-code_context.json",
+    "tool": "code_context",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz",
+      "source": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+      "line": 1736
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank0-trace_summary.json",
+    "tool": "trace_summary",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_000.json.gz"
+    },
+    "artifact": "opguard/perfetto_gpu_000.json.gz"
+  },
+  {
+    "response": "queries/rank1-compare_events.json",
+    "tool": "compare_events",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz",
+      "left_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:19857",
+      "right_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:20176"
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  },
+  {
+    "response": "queries/rank1-first_diff.json",
+    "tool": "first_diff",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz"
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  },
+  {
+    "response": "queries/rank1-run1-inspect_event.json",
+    "tool": "inspect_event",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz",
+      "event_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:19857"
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  },
+  {
+    "response": "queries/rank1-run1-mapped-code_context.json",
+    "tool": "code_context",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz",
+      "source": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-off/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+      "line": 1745
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  },
+  {
+    "response": "queries/rank1-run2-inspect_event.json",
+    "tool": "inspect_event",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz",
+      "event_ref": "a04508292a7f9048123ebff0b5e41a63c56fbfa7c5db2fd0dcb7f60588d60562:20176"
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  },
+  {
+    "response": "queries/rank1-run2-mapped-code_context.json",
+    "tool": "code_context",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz",
+      "source": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/workloads/overlap-on/deps/deepspeed/runtime/zero/stage_1_and_2.py",
+      "line": 1747
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  },
+  {
+    "response": "queries/rank1-trace_summary.json",
+    "tool": "trace_summary",
+    "arguments": {
+      "artifact": "/opt/opguard/OpGuard-runs/demo-case5-paired-20261019/experiments/5dc7374b7a5949caae53ea82da8ee78d/comparison-compare-1/output/perfetto_gpu_001.json.gz"
+    },
+    "artifact": "opguard/perfetto_gpu_001.json.gz"
+  }
+]

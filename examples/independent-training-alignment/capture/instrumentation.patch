@@ -1,0 +1,79 @@
+--- stack_a/vendor/transformers/trainer.py
++++ stack_a/vendor/transformers/trainer.py
+@@ -2593,6 +2593,8 @@
+                             else:
+                                 grad_norm = _grad_norm
+ 
++                        from probes import a_grad
++                        a_grad(self, model, grad_norm)
+                         self.control = self.callback_handler.on_pre_optimizer_step(args, self.state, self.control)
+ 
+                         self.optimizer.step()
+@@ -3790,6 +3792,8 @@
+         ):
+             loss *= self.accelerator.num_processes
+ 
++        from probes import a_loss
++        a_loss(self, inputs, outputs, loss, num_items_in_batch)
+         return (loss, outputs) if return_outputs else loss
+ 
+     def is_local_process_zero(self) -> bool:
+@@ -5193,6 +5197,8 @@
+         if torch.is_tensor(num_items_in_batch):
+             num_items_in_batch = num_items_in_batch.item()
+ 
++        from probes import a_batches
++        a_batches(self, batch_samples, num_items_in_batch)
+         return batch_samples, num_items_in_batch
+ 
+     def set_initial_training_values(
+--- stack_b/vendor/Megatron-LM/pretrain_gpt.py
++++ stack_b/vendor/Megatron-LM/pretrain_gpt.py
+@@ -171,6 +171,8 @@
+     reporting_loss = loss.clone().detach()
+     torch.distributed.all_reduce(reporting_loss, group=mpu.get_data_parallel_group())
+ 
++    from probes import b_loss
++    b_loss(loss, output_tensor)
+     local_num_tokens = loss[1].clone().detach().to(torch.int)
+     return (
+         loss[0] * args.context_parallel_size,
+@@ -196,6 +198,8 @@
+         tokens, labels, loss_mask, attention_mask, position_ids = get_batch(
+             data_iterator)
+     timers('batch-generator').stop()
++    from probes import b_batch
++    b_batch(tokens, loss_mask)
+ 
+     with stimer:
+         output_tensor = model(tokens, position_ids, attention_mask,
+--- stack_b/vendor/Megatron-LM/megatron/core/distributed/finalize_model_grads.py
++++ stack_b/vendor/Megatron-LM/megatron/core/distributed/finalize_model_grads.py
+@@ -276,6 +276,8 @@
+ 
+         # all-reduce across DP ranks.
+         torch.distributed.all_reduce(num_tokens, group=parallel_state.get_data_parallel_group())
++        from probes import b_tokens
++        b_tokens(num_tokens)
+         for model_chunk in model:
+             if num_tokens > 0:
+                 scaling = 1.0 / num_tokens
+--- stack_a/app/train_hf.py
++++ stack_a/app/train_hf.py
+@@ -1,5 +1,7 @@
+ """HuggingFace Trainer entry for an immutable token corpus and GPT-2 assets."""
+ 
++import sys
++sys.path.insert(0, "/work/diagnostics")
+ import argparse
+ import json
+ import os
+--- stack_b/native_entry.py
++++ stack_b/native_entry.py
+@@ -1,4 +1,6 @@
+ """Megatron pretraining entry for fixed, pre-tokenized sequence arrays."""
++import sys
++sys.path.insert(0, "/work/diagnostics")
+ from pathlib import Path
+ 
+ import numpy as np

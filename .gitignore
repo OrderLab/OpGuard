@@ -1,0 +1,99 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+opguard/_native_build.json
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/**
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Pyre type checker
+.pyre/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# PyCharm & VSCode IDE
+.idea/
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Mac & Unix
+.DS_Store
+*.swp
+*.swo
+
+# Logs and trace dumps
+*.log
+*.pt
+*.pth
+*.pkl
+*.jsonl
+rmsnorm_traces/
+trace_dumps/
+
+.venv
+# Local instrumentation state and generated traces
+.opguard/
+.opguard_state.yaml
+opguard-traces*/
+/trace_*/
+
+# Optional adjacent independent harness checkout
+/OpGuard-harness/
+
+# Private demo credentials and runtime state
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+*.sqlite*

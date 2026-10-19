@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "case": "checkpoint_resume_microbatch_skip",
+  "exported_utc": "2026-10-19T09:22:21.919779+00:00",
+  "source_experiment": "independent-stacks-20261019/revision3",
+  "source_session": "b0e8d3b247de",
+  "candidate_manifest_sha256": "22adea5df65f22d8c450b02c38ab6baa37a5d9986c9ed60e07f8dce1eddc49bd",
+  "training_rerun_performed": false,
+  "streams": "Original phase logs contain stdout and stderr merged by shell redirection > phase_N.log 2>&1. Separate streams were not retained.",
+  "order": "Host paths are normalized; retain all records in order. For each round, A phase 1 then phase 2, followed by B phase 1 then phase 2; launch timestamps are in provenance/. Distributed worker output is interleaved as originally captured.",
+  "capture_relationship": "The training runs had OpGuard probes installed; native console logs and probe JSONL were emitted separately during the same launches. This is not an independently executed no-OpGuard baseline.",
+  "rounds": [
+    {
+      "round": 1,
+      "stage": "supplied defects plus observation probes"
+    },
+    {
+      "round": 2,
+      "stage": "four primary repairs plus auxiliary target-count repair, with observation probes"
+    }
+  ],
+  "capture_archive": {
+    "path": "../evidence/captures.tar.gz",
+    "sha256": "5bbd6e9614038fb3d6815989aa76d5388ba64deb56549ec12f8b9261115248d1",
+    "all_36_members_matched_local_originals": true
+  },
+  "training_archive": {
+    "archive": "runnable-source-inputs.tar.gz",
+    "bytes": 326778170,
+    "sha256": "b57d868fa26bbdd0ff55bfbf042733c0a33166aaddde9158dc83afc69f4314f1",
+    "verified_members": 2961,
+    "source_manifest_sha256": "22adea5df65f22d8c450b02c38ab6baa37a5d9986c9ed60e07f8dce1eddc49bd",
+    "excluded_prefix": "observed/"
+  },
+  "files": [
+    {
+      "path": "standard-logs/round1/run_a/phase_1.log",
+      "bytes": 6650,
+      "sha256": "8b2b45af0324ae812e44b42b8c63b4b1183faf60e1fff13efe605411e2464295",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round1/run_a/phase_1.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "standard-logs/round1/run_a/phase_2.log",
+      "bytes": 8085,
+      "sha256": "076e063d33b26ad5b1f7e02fa89fe15db2205ddf17ac2af6ca38920082830ca8",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round1/run_a/phase_2.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "provenance/round1/run_a.json",
+      "bytes": 419,
+      "sha256": "5c8df47b65590e6923c425438fd9f483a399ac2cdc7d6550ffb039872894d48e",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/.attempts/round1/run_a.json",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "path": "standard-logs/round1/run_b/phase_1.log",
+      "bytes": 57396,
+      "sha256": "d4ec2640fb329238d7a301c710b1936f612512525f73af653834085a49c02368",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round1/run_b/phase_1.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "standard-logs/round1/run_b/phase_2.log",
+      "bytes": 60035,
+      "sha256": "61e5ec37b7d27cf0aa59225d711805a73448bfd0b14a0e6cd8c19d6e7736f3e7",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round1/run_b/phase_2.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "provenance/round1/run_b.json",
+      "bytes": 469,
+      "sha256": "d11c4248ed8d0b762ea2d0ffc91145936f77e4267938fbcb4dda166f8397e7e0",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/.attempts/round1/run_b.json",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "path": "standard-logs/round2/run_a/phase_1.log",
+      "bytes": 6660,
+      "sha256": "fac6154800437d0d23374ae2f644cd74d849b5b728d654bf934e55a8719fc9b7",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round2/run_a/phase_1.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "standard-logs/round2/run_a/phase_2.log",
+      "bytes": 8077,
+      "sha256": "197d9ec86c97b5ec7516773884114bca8270f1785f9d94abb0ef7260ce1b78cb",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round2/run_a/phase_2.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "provenance/round2/run_a.json",
+      "bytes": 419,
+      "sha256": "a8a164d7c02e97a23f8d63a8f9c4b4313d4f086cfea81b3c22d20a496b87a68d",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/.attempts/round2/run_a.json",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "path": "standard-logs/round2/run_b/phase_1.log",
+      "bytes": 57393,
+      "sha256": "509014af016e3f8dcf75b93ab1e3af13c4aae6b5d8d690f6139f993c9d1406dc",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round2/run_b/phase_1.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "standard-logs/round2/run_b/phase_2.log",
+      "bytes": 60035,
+      "sha256": "df82974a4e1961505bb23fa89284de123258be1ca41284dee0e641ffc10e54c3",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/rerun/round2/run_b/phase_2.log",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "provenance/round2/run_b.json",
+      "bytes": 469,
+      "sha256": "279cb96aec141ebbc9681f09d84834ba44b6b3536e5133c76edae8cb8fb122fd",
+      "source": "private/evaluation/opguard-sessions/b0e8d3b247de/artifacts/.attempts/round2/run_b.json",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "path": "provenance/stack_a-run_training.sh",
+      "bytes": 643,
+      "sha256": "ef3013dedfa8127495b657271242ab68b0c6dcd24eba1c157da811960ca32d31",
+      "source": "runnable-source-inputs.tar.gz:stack_a/run_training.sh",
+      "transformation": "byte-for-byte copy"
+    },
+    {
+      "path": "provenance/stack_b-run_training.sh",
+      "bytes": 523,
+      "sha256": "e5da3039f19fa3e1510979124f378cd890ed620acfcca616a766ac302fab187b",
+      "source": "runnable-source-inputs.tar.gz:stack_b/run_training.sh",
+      "transformation": "host-path normalization only; record order and numeric values retained"
+    },
+    {
+      "path": "row-catalog.json",
+      "bytes": 82577,
+      "sha256": "21ebdad3c5138802ced72830036dfbd1b9f954f5b069e28f14426fe561ab07b1",
+      "source": "runnable-source-inputs.tar.gz:assets/train.npy + assets/train_lengths.npy",
+      "transformation": "derived row-hash/target-count index; no token values"
+    },
+    {
+      "path": "input-boundary.json",
+      "bytes": 13994,
+      "sha256": "60bbc1e3319652c2b702896adbd8a86fdcfc7ccbe2e459baac91967da9d4c637",
+      "source": "../evidence/captures.tar.gz + row-catalog.json",
+      "transformation": "CPU reanalysis of original probe rows with source record/line references"
+    }
+  ],
+  "path_normalization": "Host-specific paths are normalized to /opt/opguard, including source keys and archive member names. File sizes, checksums and artifact-bound event references identify the normalized export. Capture IDs, numerical values and record order are unchanged."
+}
