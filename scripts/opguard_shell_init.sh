@@ -1,7 +1,7 @@
 #!/bin/bash
 # OpGuard Shell Integration
 # Source this file to add opguard shell functions to your current shell
-# Usage: source opguard_shell_init.sh
+# Usage: source scripts/opguard_shell_init.sh
 # Or add to your ~/.bashrc or ~/.zshrc
 
 # OpGuard wrapper function - automatically activates/deactivates monitoring mode

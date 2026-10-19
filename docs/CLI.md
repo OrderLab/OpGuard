@@ -29,6 +29,8 @@ opguard compare --help
 
 `replay` and `run` execute workload code. Include discovery and capture executions in the workload budget. Prefer the harness's explicit entrypoint specification when launch provenance and bounded retries matter.
 
+Optional repository helpers are documented in [scripts/README.md](../scripts/README.md).
+
 ## Shell discovery and replay
 
 Shell activation commands must be evaluated in the shell that launches the workload:
