@@ -49,6 +49,8 @@
 .rootcause__next p { color: var(--text-heading); font-size: 15px; }
 .rootcause__note { max-width: 85ch; line-height: 1.7; }
 .trace-section, .impact, .bitwise-section, .workflow { scroll-margin-top: 90px; }
+.impact__inner { grid-template-columns: minmax(0, 1fr); }
+.impact__inner > * { min-width: 0; }
 @media (max-width: 700px) {
   .quickstart__grid { grid-template-columns: 1fr; }
   .quickstart, .rootcause { padding: 40px 18px 48px; }
