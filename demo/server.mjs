@@ -31,7 +31,7 @@ const limiter = {
   reserve: budget => transaction(entries => reserve(entries, 'local-preview', budget, Date.now(), randomUUID())),
   settle: (id, usage) => transaction(entries => ({ entries: settle(entries, id, usage) })),
 };
-const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.txt': 'text/plain', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gz': 'application/gzip', '.woff2': 'font/woff2' };
+const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.txt': 'text/plain', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.gz': 'application/gzip', '.woff2': 'font/woff2' };
 http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, localOrigin);

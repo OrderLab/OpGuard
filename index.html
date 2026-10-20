@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OpGuard — OSDI ’26 Best Paper Award Nominee</title>
-  <meta name="description" content="OpGuard, an OSDI ’26 Best Paper Award nominee, pinpoints the first moment large-scale AI training runs go wrong — reducing debugging time from days to minutes.">
+  <meta name="description" content="Debug training differences with your AI agent. Install OpGuard, compare two runs, and follow tensor-level evidence into the source to investigate the root cause.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,6 +18,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/rootcause.css?v=reviewed-examples-20261019">
+  <link rel="stylesheet" href="css/product.css?v=agent-workflow-1">
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -31,12 +32,12 @@
         <span class="brand-wordmark">OpGuard</span>
       </a>
       <nav class="nav__links">
-        <a href="#bitwise-alignment">Bitwise Alignment</a>
-        <a href="#trace">Live Trace</a>
-        <a href="#workflow">Workflow</a>
-        <a href="#impact">Impact</a>
+        <a href="#get-started">Get started</a>
+        <a href="#rootcause">Diagnosis demo</a>
+        <a href="#impact">Results</a>
+        <a href="#trace">Trace explorer</a>
+        <a href="#bitwise-alignment">How it works</a>
         <a href="https://www.usenix.org/system/files/osdi26-zhou-ziming.pdf" target="_blank" rel="noopener noreferrer">Paper</a>
-        <a href="#cite">Cite</a>
       </nav>
       <div class="nav__actions">
         <a class="nav__source" href="https://github.com/OrderLab/OpGuard" target="_blank" rel="noopener noreferrer" aria-label="Source code on GitHub" title="Source code on GitHub"><svg class="source-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 0 0-3.558 21.923c.563.104.768-.244.768-.542 0-.267-.01-.975-.015-1.914-3.13.68-3.79-1.508-3.79-1.508-.512-1.3-1.25-1.646-1.25-1.646-1.023-.7.078-.686.078-.686 1.13.08 1.725 1.16 1.725 1.16 1.005 1.722 2.637 1.225 3.28.937.102-.728.393-1.225.715-1.507-2.499-.284-5.126-1.25-5.126-5.565 0-1.23.44-2.235 1.16-3.023-.117-.285-.503-1.43.11-2.98 0 0 .945-.303 3.094 1.155A10.78 10.78 0 0 1 12 6.176c.956.004 1.918.129 2.817.378 2.148-1.458 3.091-1.155 3.091-1.155.615 1.55.228 2.695.112 2.98.722.788 1.158 1.793 1.158 3.023 0 4.326-2.631 5.278-5.138 5.557.404.35.765 1.042.765 2.1 0 1.517-.014 2.741-.014 3.113 0 .3.203.65.774.54A11.252 11.252 0 0 0 12 .75Z"/></svg></a>
@@ -65,32 +66,20 @@
           >
           <p class="hero__brand">OpGuard</p>
         </div>
-        <div class="hero__badge hero__badge--award" role="status">
-          <span class="hero__badge-dot"></span>
-          <span class="hero__badge-label">OSDI ’26</span>
-          <span class="hero__badge-sep" aria-hidden="true"></span>
-          <span class="hero__badge-award">Best Paper Award Nominee</span>
-        </div>
-        <div class="hero__partners" aria-label="Research collaboration">
-          <img src="assets/images/partners/umich.png" alt="University of Michigan" class="hero__partner-logo">
-          <img src="assets/images/partners/orderlab.png" alt="OrderLab" class="hero__partner-logo">
-          <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" class="hero__partner-logo hero__partner-logo--bytedance">
-        </div>
         <h1 class="hero__title">
-          Catch LLM training bugs<br>
-          <span class="hero__title-accent">at the first divergent op</span>
+          Debug training differences<br>
+          <span class="hero__title-accent">with your AI agent.</span>
         </h1>
         <p class="hero__subtitle">
-          OpGuard uses bitwise alignment to compare training runs at tensor boundaries,
-          turning vague loss-curve anomalies into precise, actionable evidence.
-          <span class="hero__alignment-note">We’re expanding <strong>beyond bitwise</strong> toward more general, practical alignment.</span>
+          Give your coding agent two training runs. OpGuard finds where their computations
+          diverge and provides the tensor comparisons, call stacks and source
+          your agent needs to investigate why.
         </p>
         <div class="hero__actions">
-          <a href="#trace" class="btn btn--primary" data-open-tour>Explore Live Trace</a>
-          <a href="https://github.com/OrderLab/OpGuard" class="btn btn--ghost" target="_blank" rel="noopener noreferrer"><svg class="source-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 0 0-3.558 21.923c.563.104.768-.244.768-.542 0-.267-.01-.975-.015-1.914-3.13.68-3.79-1.508-3.79-1.508-.512-1.3-1.25-1.646-1.25-1.646-1.023-.7.078-.686.078-.686 1.13.08 1.725 1.16 1.725 1.16 1.005 1.722 2.637 1.225 3.28.937.102-.728.393-1.225.715-1.507-2.499-.284-5.126-1.25-5.126-5.565 0-1.23.44-2.235 1.16-3.023-.117-.285-.503-1.43.11-2.98 0 0 .945-.303 3.094 1.155A10.78 10.78 0 0 1 12 6.176c.956.004 1.918.129 2.817.378 2.148-1.458 3.091-1.155 3.091-1.155.615 1.55.228 2.695.112 2.98.722.788 1.158 1.793 1.158 3.023 0 4.326-2.631 5.278-5.138 5.557.404.35.765 1.042.765 2.1 0 1.517-.014 2.741-.014 3.113 0 .3.203.65.774.54A11.252 11.252 0 0 0 12 .75Z"/></svg>Source Code</a>
-          <a href="#workflow" class="btn btn--ghost">How It Works</a>
+          <a href="#get-started" class="btn btn--primary">Get started</a>
+          <a href="#rootcause" class="btn btn--ghost">Try the diagnosis demo</a>
         </div>
-        <p class="hero__open-source">Open source · Apache-2.0</p>
+        <p class="hero__open-source">Works with coding agents that can run shell commands · Open source · Apache-2.0</p>
         <div class="hero__stats">
           <div class="stat">
             <span class="stat__value">5 min</span>
@@ -103,33 +92,119 @@
           </div>
           <div class="stat__divider"></div>
           <div class="stat">
-            <span class="stat__value">bit-exact</span>
-            <span class="stat__label">tensor fingerprint alignment</span>
+            <span class="stat__value">Source + trace</span>
+            <span class="stat__label">evidence your agent can inspect</span>
+          </div>
+        </div>
+        <div class="hero__proof">
+          <div class="hero__badge hero__badge--award" role="status">
+            <span class="hero__badge-dot"></span>
+            <span class="hero__badge-label">OSDI ’26</span>
+            <span class="hero__badge-sep" aria-hidden="true"></span>
+            <span class="hero__badge-award">Best Paper Award Nominee</span>
+          </div>
+          <div class="hero__partners" aria-label="Research collaboration">
+            <img src="assets/images/partners/umich.png" alt="University of Michigan" class="hero__partner-logo">
+            <img src="assets/images/partners/orderlab.png" alt="OrderLab" class="hero__partner-logo">
+            <img src="assets/images/partners/bytedance-seed.png" alt="ByteDance Seed" class="hero__partner-logo hero__partner-logo--bytedance">
           </div>
         </div>
       </div>
     </section>
 
+    <section class="quickstart" id="get-started" aria-labelledby="quickstart-title">
+      <div class="section-header">
+        <span class="section-tag">Get started</span>
+        <h2 id="quickstart-title">Two runs. One prompt.</h2>
+        <p>Install OpGuard where you train and its harness where your agent runs.
+          Then describe the two runs you want to compare.</p>
+      </div>
+      <figure class="quickstart__preview">
+        <a class="quickstart__preview-light" href="assets/images/quickstart.gif" target="_blank" rel="noopener" aria-label="Open the illustrated agent workflow at full size">
+          <img src="assets/images/quickstart.gif" width="1920" height="880" loading="lazy" decoding="async" alt="Illustrated workflow: install OpGuard, ask your coding agent to investigate two runs, and read a source-supported root-cause report.">
+        </a>
+        <a class="quickstart__preview-dark" href="assets/images/quickstart-dark.gif" target="_blank" rel="noopener" aria-label="Open the illustrated agent workflow at full size">
+          <img src="assets/images/quickstart-dark.gif" width="1920" height="880" loading="lazy" decoding="async" alt="Illustrated workflow: install OpGuard, ask your coding agent to investigate two runs, and read a source-supported root-cause report.">
+        </a>
+        <figcaption>Install → ask your agent → follow the evidence. Click to view at full size.</figcaption>
+      </figure>
+      <details class="quickstart__setup">
+        <summary>Copy installation commands and agent prompt</summary>
+        <div class="quickstart__grid">
+          <article class="quickstart__step">
+            <div class="quickstart__heading"><span class="quickstart__number" aria-hidden="true">01</span><h3>Install</h3></div>
+            <div class="quickstart__code">
+              <div class="quickstart__code-header">
+                <span>Training environment · Linux</span>
+                <button type="button" data-copy-code="install-training" aria-label="Copy training installation commands">Copy</button>
+              </div>
+              <pre id="install-training"><code>python -m pip install "setuptools&gt;=77.0.3" "packaging&gt;=24.2" wheel ninja
+python -m pip install --no-build-isolation --no-binary=opguard opguard</code></pre>
+            </div>
+            <div class="quickstart__code">
+              <div class="quickstart__code-header">
+                <span>Agent environment</span>
+                <button type="button" data-copy-code="install-agent" aria-label="Copy agent installation command">Copy</button>
+              </div>
+              <pre id="install-agent"><code>python -m pip install opguard-harness</code></pre>
+            </div>
+            <p class="quickstart__hint">Python 3.10+. The training environment needs CUDA-enabled PyTorch and CUDA/CUPTI development tools.</p>
+            <a class="quickstart__link" href="https://github.com/OrderLab/OpGuard/blob/main/docs/Installation.md" target="_blank" rel="noopener">Installation guide ↗</a>
+          </article>
+          <article class="quickstart__step">
+            <div class="quickstart__heading"><span class="quickstart__number" aria-hidden="true">02</span><h3>Ask your agent</h3></div>
+            <div class="quickstart__code quickstart__code--prompt">
+              <div class="quickstart__code-header">
+                <span>A prompt to start with</span>
+                <button type="button" data-copy-code="agent-prompt" aria-label="Copy investigation prompt">Copy</button>
+              </div>
+              <pre id="agent-prompt"><code>Use OpGuard to investigate why these two training runs differ: ./run-a/train.py and ./run-b/train.py.
+
+My training Python is /path/to/train-env/bin/python.
+
+Read `opguard-harness tools` for the available tools, and explain your findings with evidence.</code></pre>
+            </div>
+            <p class="quickstart__hint">Replace the paths with your own. Include the launcher arguments and configuration each run needs. Your agent can use its existing shell tools.</p>
+            <a class="quickstart__link" href="https://github.com/OrderLab/OpGuard/blob/main/harness/doc/Usage.md#agent-integration" target="_blank" rel="noopener">Agent integration guide ↗</a>
+          </article>
+        </div>
+        <div class="quickstart__result">
+          <div class="quickstart__heading"><span class="quickstart__number" aria-hidden="true">03</span><h3>Follow the evidence to the cause</h3></div>
+          <p>Your agent can inspect the first observed difference, follow its inputs through the source,
+            and test a candidate cause. The result is an explanation tied to evidence,
+            or a specific next observation when the cause is still unresolved.</p>
+          <a href="#rootcause" class="quickstart__link">See a diagnosis example ↓</a>
+        </div>
+        <p class="quickstart__copy-status" role="status" aria-live="polite"></p>
+      </details>
+    </section>
+
     <section class="rootcause" id="rootcause" aria-labelledby="rootcause-title">
-      <h2 id="rootcause-title">Find the root cause.</h2>
+      <div class="section-header">
+        <span class="section-tag">Diagnosis demo</span>
+        <h2 id="rootcause-title">From a symptom to a source-level explanation.</h2>
+        <p>In this recorded case, the loss still matches when the gradient norm starts to differ.
+          Compare the log clues with the operation-level evidence and source used to investigate the cause.</p>
+      </div>
       <div class="rootcause__grid">
         <article class="rootcause__card">
           <header><h3>Standard logs</h3><a href="demo/inputs/trace.txt" target="_blank" rel="noopener">Expand ↗</a></header>
-          <pre>The Zen of Python, by Tim Peters
+          <p class="rootcause__card-intro">The symptom and a configuration clue.</p>
+          <pre>Step 16 · rank 0
+run1: loss 0.0467894077
+      grad_norm 0.00197029114
+run2: loss 0.0467894077
+      grad_norm 0.00204745238
 
-Beautiful is better than ugly.
-Explicit is better than implicit.
-Simple is better than complex.
-Complex is better than complicated.
-Flat is better than nested.
-Sparse is better than dense.
-Readability counts.
+overlap_comm: False / True
+ZeRO stage: 1 / 1
 …</pre>
           <footer><button type="button" data-rootcause="trace" aria-label="Get rootcause from standard logs">Get rootcause</button></footer>
           <div class="rootcause__answer" id="trace-answer" role="status" aria-live="polite" hidden></div>
         </article>
         <article class="rootcause__card rootcause__card--opguard">
           <header><h3>OpGuard output</h3><a href="demo/inputs/opguard.txt" target="_blank" rel="noopener">Expand ↗</a></header>
+          <p class="rootcause__card-intro">A specific difference to trace back through code.</p>
           <pre>First observed difference · rank 0
 get_grad_norm_direct · None.append#2246
 scalar input signatures:
@@ -147,337 +222,12 @@ Unaligned operations before boundary:
         <summary>Actual root cause</summary>
         <p>A gradient buffer is overwritten on the default stream before its reduction on another stream finishes. <a href="https://github.com/OrderLab/OpGuard/blob/main/harness/examples/demo_case5/README.md#3-hypothesis-validation-and-known-answer-cross-check">Details ↗</a></p>
       </details>
-      <p class="rootcause__note">Reviewed example diagnoses for this fixed case. Each click randomly selects a cached variation, with no live model call or inference charge. The OpGuard explanations use the trace, recorded logs and linked full source.</p>
-      <p class="rootcause__note">These are curated explanations, not unedited model responses or an accuracy benchmark. Expand opens the recorded evidence; source links open the captured code at the cited line.</p>
-    </section>
-
-    <section class="bitwise-section" id="bitwise-alignment">
-      <div class="section-header section-header--center">
-        <span class="section-tag">Key Abstraction</span>
-        <h2>Our key abstraction: bitwise alignment</h2>
+      <div class="rootcause__next">
+        <p>Explore how OpGuard exposes the evidence.</p>
+        <a href="#trace" class="btn btn--ghost" data-open-tour>Open the trace explorer →</a>
+        <a href="#impact" class="quickstart__link">See production results ↓</a>
       </div>
-
-      <div class="ba-deck" id="ba-deck" data-step="1" aria-live="polite">
-        <div class="ba-deck__headings">
-          <h3 class="ba-heading is-on" data-step="1">
-            Given the two training runs, view them as a sequence of “points”
-          </h3>
-          <h3 class="ba-heading" data-step="2">
-            Compare the tensors at each point. Must match bit by bit.
-          </h3>
-          <h3 class="ba-heading" data-step="3">
-            First mismatch point becomes a very clean pivot for debugging.
-          </h3>
-        </div>
-
-        <div class="ba" aria-label="Bitwise alignment of buggy and reference runs">
-          <div class="ba__side">
-            <span class="ba__run-label">Buggy run</span>
-            <span class="ba__run-label ba__run-label--ref">Reference run</span>
-          </div>
-
-          <div class="ba__stages">
-            <!-- Stage 1: match fp32 -->
-            <div class="ba-stage">
-              <div class="ba-tensor ba-tensor--pink ba-tensor--col" data-layer="tensor">
-                <i></i><i></i><i></i>
-              </div>
-              <div class="ba-status ba-status--ok" data-layer="diff" aria-label="Match">
-                <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2L36 8v12c0 12-7.5 20-16 22C11.5 40 4 32 4 20V8l16-6z" fill="#2ca02c"/><path d="M12 21l5 5 11-12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="ba-tensor ba-tensor--pink ba-tensor--col" data-layer="tensor">
-                <i></i><i></i><i></i>
-                <span class="ba-dtype">fp32</span>
-              </div>
-            </div>
-
-            <!-- Stage 2: match fp16 -->
-            <div class="ba-stage">
-              <div class="ba-tensor ba-tensor--pink" data-layer="tensor">
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-              </div>
-              <div class="ba-status ba-status--ok" data-layer="diff" aria-label="Match">
-                <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2L36 8v12c0 12-7.5 20-16 22C11.5 40 4 32 4 20V8l16-6z" fill="#2ca02c"/><path d="M12 21l5 5 11-12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="ba-tensor ba-tensor--pink" data-layer="tensor">
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <span class="ba-dtype">fp16</span>
-              </div>
-            </div>
-
-            <!-- Stage 3: first diverge fp8 -->
-            <div class="ba-stage ba-stage--hot">
-              <div class="ba-callout" data-layer="pivot" aria-hidden="true">first mismatch · pivot</div>
-              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
-                <i></i><i></i><i></i>
-                <i></i><i data-bad></i><i></i>
-                <i></i><i></i><i></i>
-              </div>
-              <div class="ba-status ba-status--bug" data-layer="diff" aria-label="Bug">
-                <svg viewBox="0 0 48 48" aria-hidden="true">
-                  <circle cx="24" cy="24" r="22" fill="#dc2626"/>
-                  <path d="M16 18c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
-                  <ellipse cx="24" cy="28" rx="9" ry="10" fill="#fff"/>
-                  <path d="M15 22h-5M33 22h5M14 30h-5M34 30h5M16 36l-4 4M32 36l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-                  <circle cx="20.5" cy="26" r="1.6" fill="#dc2626"/>
-                  <circle cx="27.5" cy="26" r="1.6" fill="#dc2626"/>
-                  <path d="M24 18v20M20 32h8" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <span class="ba-dtype">fp8</span>
-              </div>
-            </div>
-
-            <!-- Stage 4: propagated diverge -->
-            <div class="ba-stage">
-              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
-                <i data-bad></i><i></i><i data-bad></i>
-                <i></i><i data-bad></i><i></i>
-                <i data-bad></i><i></i><i data-bad></i>
-              </div>
-              <div class="ba-status ba-status--bug" data-layer="diff" aria-label="Bug">
-                <svg viewBox="0 0 48 48" aria-hidden="true">
-                  <circle cx="24" cy="24" r="22" fill="#dc2626"/>
-                  <path d="M16 18c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
-                  <ellipse cx="24" cy="28" rx="9" ry="10" fill="#fff"/>
-                  <path d="M15 22h-5M33 22h5M14 30h-5M34 30h5M16 36l-4 4M32 36l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-                  <circle cx="20.5" cy="26" r="1.6" fill="#dc2626"/>
-                  <circle cx="27.5" cy="26" r="1.6" fill="#dc2626"/>
-                  <path d="M24 18v20M20 32h8" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <i></i><i></i><i></i>
-                <span class="ba-dtype">fp16</span>
-              </div>
-            </div>
-
-            <div class="ba__timeline" data-layer="tensor" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <div class="ba-deck__controls">
-          <button class="ba-deck__btn" id="ba-prev" type="button" aria-label="Previous step">←</button>
-          <div class="ba-deck__dots" role="tablist" aria-label="Bitwise alignment steps">
-            <button class="ba-deck__dot is-active" type="button" data-step="1" aria-label="Step 1"></button>
-            <button class="ba-deck__dot" type="button" data-step="2" aria-label="Step 2"></button>
-            <button class="ba-deck__dot" type="button" data-step="3" aria-label="Step 3"></button>
-          </div>
-          <button class="ba-deck__btn" id="ba-next" type="button" aria-label="Next step">→</button>
-          <button class="ba-deck__play" id="ba-play" type="button" aria-pressed="true">Pause</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="trace-section" id="trace">
-      <div class="section-header section-header--center">
-        <span class="section-tag">Interactive Demo</span>
-        <h2>Global Alignment Trace</h2>
-        <p>
-          Inspect a real production debugging session. The first divergent operation marks
-          where the bug begins — click any op to inspect tensor-level diffs and jump to source.
-        </p>
-      </div>
-
-      <div class="trace-panel" id="trace-panel" data-trace-tour="panel">
-        <div class="trace-panel__toolbar" data-trace-tour="toolbar">
-          <div class="trace-panel__status" id="trace-status">
-            <span class="trace-panel__spinner"></span>
-            <span>Loading trace…</span>
-          </div>
-          <div class="trace-panel__toolbar-end">
-            <div class="trace-panel__meta" data-trace-tour="meta">
-              <span class="trace-chip">demo_case5</span>
-              <span class="trace-chip trace-chip--muted">Open-source issue</span>
-            </div>
-            <button class="trace-tour-launch" id="trace-tour-launch" type="button" hidden>Guided tour</button>
-          </div>
-        </div>
-        <div class="trace-panel__viewer" data-trace-tour="viewer">
-          <!-- Keep the July 2026 viewer layout used by the guided tour.
-               The rolling release can open Trace Doctor and shift its targets.
-               Recheck all six tour steps before upgrading this pinned build. -->
-          <iframe
-            id="perfetto"
-            title="OpGuard Perfetto Trace Viewer"
-            src="https://ui.perfetto.dev/v57.2-da1d152cf/#!/?mode=embedded"
-            allow="clipboard-read; clipboard-write"
-          ></iframe>
-          <div class="trace-panel__overlay" id="trace-overlay">
-            <div class="trace-panel__overlay-inner">
-              <div class="trace-panel__overlay-ring"></div>
-              <p>Initializing trace viewer…</p>
-              <div class="trace-panel__progress">
-                <div class="trace-panel__progress-bar" id="trace-progress"></div>
-              </div>
-            </div>
-          </div>
-          <aside class="trace-source" id="trace-source" hidden aria-hidden="true">
-            <div class="trace-source__header">
-              <div class="trace-source__heading">
-                <span class="trace-source__label">Source</span>
-                <strong class="trace-source__title" id="trace-source-title"></strong>
-              </div>
-              <span class="trace-source__path" id="trace-source-path"></span>
-            </div>
-            <pre class="trace-source__code" id="trace-source-code" tabindex="0"></pre>
-          </aside>
-          <aside class="trace-source trace-source--diff" id="trace-diff" hidden aria-hidden="true">
-            <div class="trace-source__header">
-              <div class="trace-source__heading">
-                <span class="trace-source__label">Diff</span>
-                <strong class="trace-source__title" id="trace-diff-title"></strong>
-              </div>
-              <span class="trace-source__path" id="trace-diff-path"></span>
-            </div>
-            <div class="trace-diff__body" id="trace-diff-body"></div>
-          </aside>
-        </div>
-
-        <div class="trace-tour" id="trace-tour" hidden aria-hidden="true">
-          <div class="trace-tour__backdrop" id="trace-tour-backdrop"></div>
-          <div class="trace-tour__spotlight" id="trace-tour-spotlight" aria-hidden="true"></div>
-          <div
-            class="trace-tour__card"
-            id="trace-tour-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="trace-tour-title"
-            aria-describedby="trace-tour-body"
-          >
-            <span class="trace-tour__progress" id="trace-tour-progress">1 / 6</span>
-            <h3 class="trace-tour__title" id="trace-tour-title"></h3>
-            <p class="trace-tour__body" id="trace-tour-body"></p>
-            <div class="trace-tour__actions">
-              <button class="trace-tour__btn trace-tour__btn--ghost" id="trace-tour-back" type="button">Back</button>
-              <button class="trace-tour__btn trace-tour__btn--primary" id="trace-tour-next" type="button">Next</button>
-              <button class="trace-tour__btn trace-tour__btn--ghost trace-tour__btn--skip" id="trace-tour-skip" type="button">Skip tour</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="workflow" id="workflow">
-      <div class="section-header section-header--center">
-        <span class="section-tag">How It Works</span>
-        <h2>OpGuard Workflow</h2>
-        <p>
-          Determinism control → preflight → guarded replay → offline alignment.
-          Watch the build-up one step at a time.
-        </p>
-      </div>
-
-      <div class="wf" id="workflow-deck" data-step="1" aria-live="polite">
-        <div class="wf__canvas">
-          <div class="wf__headings">
-            <h3 class="wf-heading is-on" data-step="1">
-              <span class="wf-heading__n">1</span>
-              Determinism Control
-              <img class="wf-heading__icon" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
-            </h3>
-            <h3 class="wf-heading" data-step="2">
-              <span class="wf-heading__n">2</span>
-              Preflight: (~ 5 iters) Discover Stable Op
-            </h3>
-            <h3 class="wf-heading" data-step="3">
-              <span class="wf-heading__n">3</span>
-              Guarded Replay: Fingerprint at Op boundary
-            </h3>
-            <h3 class="wf-heading" data-step="4">
-              <span class="wf-heading__n">4</span>
-              Offline Alignment
-            </h3>
-          </div>
-
-          <div class="wf__diagram" id="wf-diagram">
-            <!-- Suspect Run -->
-            <div class="wf-run wf-run--suspect">
-              <div class="wf-run__row">
-                <img class="wf-run__shield" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
-                <div class="wf-run__ops">
-                  <div class="wf-op wf-op--v" data-guard>
-                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
-                    <span>V</span>
-                  </div>
-                  <div class="wf-op wf-op--other"><span>Other Compute</span></div>
-                  <div class="wf-op wf-op--k" data-guard>
-                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
-                    <span>K</span>
-                  </div>
-                  <div class="wf-op wf-op--attn" data-guard>
-                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
-                    <span>Attention</span>
-                  </div>
-                </div>
-              </div>
-              <div class="wf-run__label">Suspect Run</div>
-              <div class="wf-fps wf-fps--suspect" data-appear="3">
-                <div class="wf-fp wf-fp--v" data-fp="v" title="V"></div>
-                <div class="wf-fp wf-fp--k" data-fp="k" title="K"></div>
-                <div class="wf-fp wf-fp--attn" data-fp="attn" title="Attention"></div>
-              </div>
-            </div>
-
-            <svg class="wf-align" id="wf-align" data-appear="4" aria-hidden="true"></svg>
-
-            <!-- Reference Run -->
-            <div class="wf-run wf-run--ref">
-              <div class="wf-fps wf-fps--ref" data-appear="3">
-                <div class="wf-fp wf-fp--k" data-fp="k" title="K"></div>
-                <div class="wf-fp wf-fp--v" data-fp="v" title="V"></div>
-                <div class="wf-fp wf-fp--attn" data-fp="attn" title="Attention"></div>
-              </div>
-              <div class="wf-run__label">Reference Run</div>
-              <div class="wf-run__row">
-                <img class="wf-run__shield" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
-                <div class="wf-run__ops">
-                  <div class="wf-op wf-op--other"><span>Other Compute</span></div>
-                  <div class="wf-op wf-op--k" data-guard>
-                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
-                    <span>K</span>
-                  </div>
-                  <div class="wf-op wf-op--v" data-guard>
-                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
-                    <span>V</span>
-                  </div>
-                  <div class="wf-op wf-op--attn" data-guard>
-                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
-                    <span>Attention</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="wf__banner" data-appear="4">
-            <img src="assets/images/workflow/native/check-badge.png" alt="" aria-hidden="true">
-            <span><strong>OpGuard</strong> Aligns Diverse Runtime Executions</span>
-          </div>
-        </div>
-
-        <div class="wf__controls">
-          <button class="wf__btn" id="workflow-prev" type="button" aria-label="Previous step">←</button>
-          <div class="wf__dots" role="tablist" aria-label="Workflow steps">
-            <button class="wf__dot is-active" type="button" data-step="1" aria-label="Step 1"></button>
-            <button class="wf__dot" type="button" data-step="2" aria-label="Step 2"></button>
-            <button class="wf__dot" type="button" data-step="3" aria-label="Step 3"></button>
-            <button class="wf__dot" type="button" data-step="4" aria-label="Step 4"></button>
-          </div>
-          <button class="wf__btn" id="workflow-next" type="button" aria-label="Next step">→</button>
-          <button class="wf__play" id="workflow-play" type="button" aria-pressed="true">Pause</button>
-        </div>
-      </div>
+      <p class="rootcause__note">This recorded example uses precomputed, reviewed explanations from the logs, trace and captured source. It illustrates an investigation; it is not a live agent run or an accuracy benchmark.</p>
     </section>
 
     <section class="impact" id="impact">
@@ -756,6 +506,339 @@ Unaligned operations before boundary:
       </div>
     </section>
 
+    <section class="trace-section" id="trace">
+      <div class="section-header section-header--center">
+        <span class="section-tag">Explore the evidence</span>
+        <h2>Go deeper in the trace explorer.</h2>
+        <p>
+          Explore the original demo_case5 capture, a separate recording of the same DeepSpeed case.
+          Start at an observed difference,
+          compare tensor fingerprints, and open its call stack and source.
+          This is the evidence your agent can query during an investigation.
+        </p>
+      </div>
+
+      <div class="trace-panel" id="trace-panel" data-trace-tour="panel">
+        <div class="trace-panel__toolbar" data-trace-tour="toolbar">
+          <div class="trace-panel__status" id="trace-status">
+            <span class="trace-panel__spinner"></span>
+            <span>Loading trace…</span>
+          </div>
+          <div class="trace-panel__toolbar-end">
+            <div class="trace-panel__meta" data-trace-tour="meta">
+              <span class="trace-chip">demo_case5</span>
+              <span class="trace-chip trace-chip--muted">Open-source issue</span>
+            </div>
+            <button class="trace-tour-launch" id="trace-tour-launch" type="button" hidden>Guided tour</button>
+          </div>
+        </div>
+        <div class="trace-panel__viewer" data-trace-tour="viewer">
+          <!-- Keep the July 2026 viewer layout used by the guided tour.
+               The rolling release can open Trace Doctor and shift its targets.
+               Recheck all six tour steps before upgrading this pinned build. -->
+          <iframe
+            id="perfetto"
+            title="OpGuard Perfetto Trace Viewer"
+            src="https://ui.perfetto.dev/v57.2-da1d152cf/#!/?mode=embedded"
+            allow="clipboard-read; clipboard-write"
+          ></iframe>
+          <div class="trace-panel__overlay" id="trace-overlay">
+            <div class="trace-panel__overlay-inner">
+              <div class="trace-panel__overlay-ring"></div>
+              <p>Initializing trace viewer…</p>
+              <div class="trace-panel__progress">
+                <div class="trace-panel__progress-bar" id="trace-progress"></div>
+              </div>
+            </div>
+          </div>
+          <aside class="trace-source" id="trace-source" hidden aria-hidden="true">
+            <div class="trace-source__header">
+              <div class="trace-source__heading">
+                <span class="trace-source__label">Source</span>
+                <strong class="trace-source__title" id="trace-source-title"></strong>
+              </div>
+              <span class="trace-source__path" id="trace-source-path"></span>
+            </div>
+            <pre class="trace-source__code" id="trace-source-code" tabindex="0"></pre>
+          </aside>
+          <aside class="trace-source trace-source--diff" id="trace-diff" hidden aria-hidden="true">
+            <div class="trace-source__header">
+              <div class="trace-source__heading">
+                <span class="trace-source__label">Diff</span>
+                <strong class="trace-source__title" id="trace-diff-title"></strong>
+              </div>
+              <span class="trace-source__path" id="trace-diff-path"></span>
+            </div>
+            <div class="trace-diff__body" id="trace-diff-body"></div>
+          </aside>
+        </div>
+
+        <div class="trace-tour" id="trace-tour" hidden aria-hidden="true">
+          <div class="trace-tour__backdrop" id="trace-tour-backdrop"></div>
+          <div class="trace-tour__spotlight" id="trace-tour-spotlight" aria-hidden="true"></div>
+          <div
+            class="trace-tour__card"
+            id="trace-tour-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trace-tour-title"
+            aria-describedby="trace-tour-body"
+          >
+            <span class="trace-tour__progress" id="trace-tour-progress">1 / 6</span>
+            <h3 class="trace-tour__title" id="trace-tour-title"></h3>
+            <p class="trace-tour__body" id="trace-tour-body"></p>
+            <div class="trace-tour__actions">
+              <button class="trace-tour__btn trace-tour__btn--ghost" id="trace-tour-back" type="button">Back</button>
+              <button class="trace-tour__btn trace-tour__btn--primary" id="trace-tour-next" type="button">Next</button>
+              <button class="trace-tour__btn trace-tour__btn--ghost trace-tour__btn--skip" id="trace-tour-skip" type="button">Skip tour</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bitwise-section" id="bitwise-alignment">
+      <div class="section-header section-header--center">
+        <span class="section-tag">Key Abstraction</span>
+        <h2>Our key abstraction: bitwise alignment</h2>
+        <p>Compare computations at tensor boundaries, then investigate where they first differ.
+          We’re also expanding beyond bitwise toward more general, practical alignment.</p>
+      </div>
+
+      <div class="ba-deck" id="ba-deck" data-step="1" aria-live="polite">
+        <div class="ba-deck__headings">
+          <h3 class="ba-heading is-on" data-step="1">
+            Given the two training runs, view them as a sequence of “points”
+          </h3>
+          <h3 class="ba-heading" data-step="2">
+            Compare the tensors at each point. Must match bit by bit.
+          </h3>
+          <h3 class="ba-heading" data-step="3">
+            First mismatch point becomes a very clean pivot for debugging.
+          </h3>
+        </div>
+
+        <div class="ba" aria-label="Bitwise alignment of buggy and reference runs">
+          <div class="ba__side">
+            <span class="ba__run-label">Buggy run</span>
+            <span class="ba__run-label ba__run-label--ref">Reference run</span>
+          </div>
+
+          <div class="ba__stages">
+            <!-- Stage 1: match fp32 -->
+            <div class="ba-stage">
+              <div class="ba-tensor ba-tensor--pink ba-tensor--col" data-layer="tensor">
+                <i></i><i></i><i></i>
+              </div>
+              <div class="ba-status ba-status--ok" data-layer="diff" aria-label="Match">
+                <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2L36 8v12c0 12-7.5 20-16 22C11.5 40 4 32 4 20V8l16-6z" fill="#2ca02c"/><path d="M12 21l5 5 11-12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="ba-tensor ba-tensor--pink ba-tensor--col" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp32</span>
+              </div>
+            </div>
+
+            <!-- Stage 2: match fp16 -->
+            <div class="ba-stage">
+              <div class="ba-tensor ba-tensor--pink" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+              </div>
+              <div class="ba-status ba-status--ok" data-layer="diff" aria-label="Match">
+                <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2L36 8v12c0 12-7.5 20-16 22C11.5 40 4 32 4 20V8l16-6z" fill="#2ca02c"/><path d="M12 21l5 5 11-12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="ba-tensor ba-tensor--pink" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp16</span>
+              </div>
+            </div>
+
+            <!-- Stage 3: first diverge fp8 -->
+            <div class="ba-stage ba-stage--hot">
+              <div class="ba-callout" data-layer="pivot" aria-hidden="true">first mismatch · pivot</div>
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i data-bad></i><i></i>
+                <i></i><i></i><i></i>
+              </div>
+              <div class="ba-status ba-status--bug" data-layer="diff" aria-label="Bug">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <circle cx="24" cy="24" r="22" fill="#dc2626"/>
+                  <path d="M16 18c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+                  <ellipse cx="24" cy="28" rx="9" ry="10" fill="#fff"/>
+                  <path d="M15 22h-5M33 22h5M14 30h-5M34 30h5M16 36l-4 4M32 36l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="20.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <circle cx="27.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <path d="M24 18v20M20 32h8" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp8</span>
+              </div>
+            </div>
+
+            <!-- Stage 4: propagated diverge -->
+            <div class="ba-stage">
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i data-bad></i><i></i><i data-bad></i>
+                <i></i><i data-bad></i><i></i>
+                <i data-bad></i><i></i><i data-bad></i>
+              </div>
+              <div class="ba-status ba-status--bug" data-layer="diff" aria-label="Bug">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <circle cx="24" cy="24" r="22" fill="#dc2626"/>
+                  <path d="M16 18c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+                  <ellipse cx="24" cy="28" rx="9" ry="10" fill="#fff"/>
+                  <path d="M15 22h-5M33 22h5M14 30h-5M34 30h5M16 36l-4 4M32 36l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="20.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <circle cx="27.5" cy="26" r="1.6" fill="#dc2626"/>
+                  <path d="M24 18v20M20 32h8" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="ba-tensor ba-tensor--blue" data-layer="tensor">
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <i></i><i></i><i></i>
+                <span class="ba-dtype">fp16</span>
+              </div>
+            </div>
+
+            <div class="ba__timeline" data-layer="tensor" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="ba-deck__controls">
+          <button class="ba-deck__btn" id="ba-prev" type="button" aria-label="Previous step">←</button>
+          <div class="ba-deck__dots" role="tablist" aria-label="Bitwise alignment steps">
+            <button class="ba-deck__dot is-active" type="button" data-step="1" aria-label="Step 1"></button>
+            <button class="ba-deck__dot" type="button" data-step="2" aria-label="Step 2"></button>
+            <button class="ba-deck__dot" type="button" data-step="3" aria-label="Step 3"></button>
+          </div>
+          <button class="ba-deck__btn" id="ba-next" type="button" aria-label="Next step">→</button>
+          <button class="ba-deck__play" id="ba-play" type="button" aria-pressed="true">Pause</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="workflow" id="workflow">
+      <div class="section-header section-header--center">
+        <span class="section-tag">How It Works</span>
+        <h2>OpGuard Workflow</h2>
+        <p>
+          Determinism control → preflight → guarded replay → offline alignment.
+          Watch the build-up one step at a time.
+        </p>
+      </div>
+
+      <div class="wf" id="workflow-deck" data-step="1" aria-live="polite">
+        <div class="wf__canvas">
+          <div class="wf__headings">
+            <h3 class="wf-heading is-on" data-step="1">
+              <span class="wf-heading__n">1</span>
+              Determinism Control
+              <img class="wf-heading__icon" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
+            </h3>
+            <h3 class="wf-heading" data-step="2">
+              <span class="wf-heading__n">2</span>
+              Preflight: (~ 5 iters) Discover Stable Op
+            </h3>
+            <h3 class="wf-heading" data-step="3">
+              <span class="wf-heading__n">3</span>
+              Guarded Replay: Fingerprint at Op boundary
+            </h3>
+            <h3 class="wf-heading" data-step="4">
+              <span class="wf-heading__n">4</span>
+              Offline Alignment
+            </h3>
+          </div>
+
+          <div class="wf__diagram" id="wf-diagram">
+            <!-- Suspect Run -->
+            <div class="wf-run wf-run--suspect">
+              <div class="wf-run__row">
+                <img class="wf-run__shield" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
+                <div class="wf-run__ops">
+                  <div class="wf-op wf-op--v" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>V</span>
+                  </div>
+                  <div class="wf-op wf-op--other"><span>Other Compute</span></div>
+                  <div class="wf-op wf-op--k" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>K</span>
+                  </div>
+                  <div class="wf-op wf-op--attn" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>Attention</span>
+                  </div>
+                </div>
+              </div>
+              <div class="wf-run__label">Suspect Run</div>
+              <div class="wf-fps wf-fps--suspect" data-appear="3">
+                <div class="wf-fp wf-fp--v" data-fp="v" title="V"></div>
+                <div class="wf-fp wf-fp--k" data-fp="k" title="K"></div>
+                <div class="wf-fp wf-fp--attn" data-fp="attn" title="Attention"></div>
+              </div>
+            </div>
+
+            <svg class="wf-align" id="wf-align" data-appear="4" aria-hidden="true"></svg>
+
+            <!-- Reference Run -->
+            <div class="wf-run wf-run--ref">
+              <div class="wf-fps wf-fps--ref" data-appear="3">
+                <div class="wf-fp wf-fp--k" data-fp="k" title="K"></div>
+                <div class="wf-fp wf-fp--v" data-fp="v" title="V"></div>
+                <div class="wf-fp wf-fp--attn" data-fp="attn" title="Attention"></div>
+              </div>
+              <div class="wf-run__label">Reference Run</div>
+              <div class="wf-run__row">
+                <img class="wf-run__shield" src="assets/images/workflow/native/shield-gear.png" alt="" aria-hidden="true">
+                <div class="wf-run__ops">
+                  <div class="wf-op wf-op--other"><span>Other Compute</span></div>
+                  <div class="wf-op wf-op--k" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>K</span>
+                  </div>
+                  <div class="wf-op wf-op--v" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>V</span>
+                  </div>
+                  <div class="wf-op wf-op--attn" data-guard>
+                    <img class="wf-op__badge" src="assets/images/workflow/native/op-shield.svg" alt="" aria-hidden="true">
+                    <span>Attention</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wf__banner" data-appear="4">
+            <img src="assets/images/workflow/native/check-badge.png" alt="" aria-hidden="true">
+            <span><strong>OpGuard</strong> Aligns Diverse Runtime Executions</span>
+          </div>
+        </div>
+
+        <div class="wf__controls">
+          <button class="wf__btn" id="workflow-prev" type="button" aria-label="Previous step">←</button>
+          <div class="wf__dots" role="tablist" aria-label="Workflow steps">
+            <button class="wf__dot is-active" type="button" data-step="1" aria-label="Step 1"></button>
+            <button class="wf__dot" type="button" data-step="2" aria-label="Step 2"></button>
+            <button class="wf__dot" type="button" data-step="3" aria-label="Step 3"></button>
+            <button class="wf__dot" type="button" data-step="4" aria-label="Step 4"></button>
+          </div>
+          <button class="wf__btn" id="workflow-next" type="button" aria-label="Next step">→</button>
+          <button class="wf__play" id="workflow-play" type="button" aria-pressed="true">Pause</button>
+        </div>
+      </div>
+    </section>
+
     <section class="cite" id="cite">
       <div class="cite__inner">
         <div class="section-header section-header--center">
@@ -854,6 +937,7 @@ Unaligned operations before boundary:
   </footer>
 
   <script src="js/app.js"></script>
+  <script src="js/quickstart.js?v=agent-workflow-1"></script>
   <script src="js/rootcause-answers.js?v=reviewed-examples-20261019"></script>
   <script src="js/rootcause.js?v=reviewed-examples-20261019-2"></script>
 </body>
