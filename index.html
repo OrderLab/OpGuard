@@ -18,7 +18,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/rootcause.css?v=reviewed-examples-20261019">
-  <link rel="stylesheet" href="css/product.css?v=native-quickstart-1">
+  <link rel="stylesheet" href="css/product.css?v=native-quickstart-2">
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -127,23 +127,17 @@
               <h3>Set up once. Use your own agent.</h3>
               <p>Install two packages, each in the environment where it runs.</p>
             </div>
-            <div class="quickstart__install-grid">
-              <div class="quickstart__code">
-                <div class="quickstart__code-header">
-                  <span>Training environment · Linux</span>
-                  <button type="button" data-copy-code="install-training" aria-label="Copy training installation commands">Copy</button>
-                </div>
-                <pre id="install-training"><code>python -m pip install "setuptools&gt;=77.0.3" "packaging&gt;=24.2" wheel ninja
-python -m pip install --no-build-isolation --no-binary=opguard opguard</code></pre>
+            <div class="quickstart__code">
+              <div class="quickstart__code-header">
+                <span>Install OpGuard + harness</span>
+                <button type="button" data-copy-code="install-commands" aria-label="Copy installation commands">Copy</button>
               </div>
-              <div class="quickstart__code">
-                <div class="quickstart__code-header">
-                  <span>Agent environment</span>
-                  <button type="button" data-copy-code="install-agent" aria-label="Copy agent installation command">Copy</button>
-                </div>
-                <pre id="install-agent"><code>python -m pip install opguard-harness</code></pre>
-                <p class="quickstart__code-note">Works with coding agents that can run shell commands.</p>
-              </div>
+              <pre id="install-commands"><code># Training environment · Linux
+python -m pip install "setuptools&gt;=77.0.3" "packaging&gt;=24.2" wheel ninja
+python -m pip install --no-build-isolation --no-binary=opguard opguard
+
+# Agent environment
+python -m pip install opguard-harness</code></pre>
             </div>
             <p class="quickstart__hint">Python 3.10+. The training environment needs CUDA-enabled PyTorch and CUDA/CUPTI development tools.</p>
             <a class="quickstart__link" href="https://github.com/OrderLab/OpGuard/blob/main/docs/Installation.md" target="_blank" rel="noopener">Installation guide ↗</a>
@@ -206,6 +200,7 @@ Read `opguard-harness tools` for the available tools, and explain your findings 
             <button id="quickstart-tab-ask" type="button" role="tab" aria-controls="quickstart-ask" aria-selected="false" tabindex="-1"><span>02</span> Ask your agent</button>
             <button id="quickstart-tab-report" type="button" role="tab" aria-controls="quickstart-report" aria-selected="false" tabindex="-1"><span>03</span> Root-cause report</button>
           </div>
+          <button id="quickstart-play" type="button" aria-label="Pause automatic walkthrough" aria-pressed="true">Pause</button>
           <button class="quickstart__arrow" id="quickstart-next" type="button" aria-label="Next quickstart step"><span>Next</span> →</button>
         </div>
         <p class="quickstart__sr" id="quickstart-step-status" role="status" aria-live="polite"></p>
@@ -971,7 +966,7 @@ Unaligned operations before boundary:
   </footer>
 
   <script src="js/app.js"></script>
-  <script src="js/quickstart.js?v=native-quickstart-1"></script>
+  <script src="js/quickstart.js?v=native-quickstart-2"></script>
   <script src="js/rootcause-answers.js?v=reviewed-examples-20261019"></script>
   <script src="js/rootcause.js?v=reviewed-examples-20261019-2"></script>
 </body>
