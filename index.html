@@ -18,7 +18,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/rootcause.css?v=reviewed-examples-20261019">
-  <link rel="stylesheet" href="css/product.css?v=agent-workflow-2">
+  <link rel="stylesheet" href="css/product.css?v=native-quickstart-1">
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -119,44 +119,46 @@
         <p>Install OpGuard where you train and its harness where your agent runs.
           Then describe the two runs you want to compare.</p>
       </div>
-      <figure class="quickstart__preview">
-        <a class="quickstart__preview-light" href="assets/images/quickstart.gif" target="_blank" rel="noopener" aria-label="Open the illustrated agent workflow at full size">
-          <img src="assets/images/quickstart.gif" width="1920" height="880" loading="lazy" decoding="async" alt="Illustrated workflow: install OpGuard, ask your coding agent to investigate two runs, and read a source-supported root-cause report.">
-        </a>
-        <a class="quickstart__preview-dark" href="assets/images/quickstart-dark.gif" target="_blank" rel="noopener" aria-label="Open the illustrated agent workflow at full size">
-          <img src="assets/images/quickstart-dark.gif" width="1920" height="880" loading="lazy" decoding="async" alt="Illustrated workflow: install OpGuard, ask your coding agent to investigate two runs, and read a source-supported root-cause report.">
-        </a>
-        <figcaption>Install → ask your agent → follow the evidence. Click to view at full size.</figcaption>
-      </figure>
-      <details class="quickstart__setup">
-        <summary>Copy installation commands and agent prompt</summary>
-        <div class="quickstart__grid">
-          <article class="quickstart__step">
-            <div class="quickstart__heading"><span class="quickstart__number" aria-hidden="true">01</span><h3>Install</h3></div>
-            <div class="quickstart__code">
-              <div class="quickstart__code-header">
-                <span>Training environment · Linux</span>
-                <button type="button" data-copy-code="install-training" aria-label="Copy training installation commands">Copy</button>
-              </div>
-              <pre id="install-training"><code>python -m pip install "setuptools&gt;=77.0.3" "packaging&gt;=24.2" wheel ninja
-python -m pip install --no-build-isolation --no-binary=opguard opguard</code></pre>
+      <div class="quickstart__deck" id="quickstart-deck">
+        <div class="quickstart__panels">
+          <section class="quickstart__panel" id="quickstart-install" role="tabpanel" aria-labelledby="quickstart-tab-install" tabindex="0">
+            <div class="quickstart__panel-heading">
+              <span class="quickstart__eyebrow">01 / Install</span>
+              <h3>Set up once. Use your own agent.</h3>
+              <p>Install two packages, each in the environment where it runs.</p>
             </div>
-            <div class="quickstart__code">
-              <div class="quickstart__code-header">
-                <span>Agent environment</span>
-                <button type="button" data-copy-code="install-agent" aria-label="Copy agent installation command">Copy</button>
+            <div class="quickstart__install-grid">
+              <div class="quickstart__code">
+                <div class="quickstart__code-header">
+                  <span>Training environment · Linux</span>
+                  <button type="button" data-copy-code="install-training" aria-label="Copy training installation commands">Copy</button>
+                </div>
+                <pre id="install-training"><code>python -m pip install "setuptools&gt;=77.0.3" "packaging&gt;=24.2" wheel ninja
+python -m pip install --no-build-isolation --no-binary=opguard opguard</code></pre>
               </div>
-              <pre id="install-agent"><code>python -m pip install opguard-harness</code></pre>
+              <div class="quickstart__code">
+                <div class="quickstart__code-header">
+                  <span>Agent environment</span>
+                  <button type="button" data-copy-code="install-agent" aria-label="Copy agent installation command">Copy</button>
+                </div>
+                <pre id="install-agent"><code>python -m pip install opguard-harness</code></pre>
+                <p class="quickstart__code-note">Works with coding agents that can run shell commands.</p>
+              </div>
             </div>
             <p class="quickstart__hint">Python 3.10+. The training environment needs CUDA-enabled PyTorch and CUDA/CUPTI development tools.</p>
             <a class="quickstart__link" href="https://github.com/OrderLab/OpGuard/blob/main/docs/Installation.md" target="_blank" rel="noopener">Installation guide ↗</a>
-          </article>
-          <article class="quickstart__step">
-            <div class="quickstart__heading"><span class="quickstart__number" aria-hidden="true">02</span><h3>Ask your agent</h3></div>
+          </section>
+
+          <section class="quickstart__panel" id="quickstart-ask" role="tabpanel" aria-labelledby="quickstart-tab-ask" tabindex="0" hidden>
+            <div class="quickstart__panel-heading">
+              <span class="quickstart__eyebrow">02 / Ask your agent</span>
+              <h3>Two runs and a question.</h3>
+              <p>Use natural language in your coding agent, such as Codex or Claude Code.</p>
+            </div>
             <div class="quickstart__code quickstart__code--prompt">
               <div class="quickstart__code-header">
-                <span>A prompt to start with</span>
-                <button type="button" data-copy-code="agent-prompt" aria-label="Copy investigation prompt">Copy</button>
+                <span>You → your coding agent</span>
+                <button type="button" data-copy-code="agent-prompt" aria-label="Copy investigation prompt">Copy prompt</button>
               </div>
               <pre id="agent-prompt"><code>Use OpGuard to investigate why these two training runs differ: ./run-a/train.py and ./run-b/train.py.
 
@@ -164,19 +166,51 @@ My training Python is /path/to/train-env/bin/python.
 
 Read `opguard-harness tools` for the available tools, and explain your findings with evidence.</code></pre>
             </div>
-            <p class="quickstart__hint">Replace the paths with your own. Include the launcher arguments and configuration each run needs. Your agent can use its existing shell tools.</p>
+            <p class="quickstart__hint">Replace the paths with your own. Include the launcher arguments and configuration each run needs.</p>
             <a class="quickstart__link" href="https://github.com/OrderLab/OpGuard/blob/main/harness/doc/Usage.md#agent-integration" target="_blank" rel="noopener">Agent integration guide ↗</a>
-          </article>
+          </section>
+
+          <section class="quickstart__panel" id="quickstart-report" role="tabpanel" aria-labelledby="quickstart-tab-report" tabindex="0" hidden>
+            <div class="quickstart__panel-heading">
+              <span class="quickstart__eyebrow">03 / Example report</span>
+              <h3>Follow the evidence to the cause.</h3>
+              <p>A useful report connects the observed difference, a causal mechanism and a test.</p>
+            </div>
+            <div class="quickstart__report-grid">
+              <div class="quickstart__finding">
+                <span class="quickstart__finding-label">Likely root cause</span>
+                <h4>Gradient buffer reused before reduction completes.</h4>
+                <p>A later write can reuse storage while the reduction stream is still reading an earlier bucket.</p>
+                <div class="quickstart__validation">
+                  <strong>How to validate</strong>
+                  <p>Check stream completion before buffer reuse, or add a completion dependency and compare the runs again.</p>
+                </div>
+              </div>
+              <div class="quickstart__evidence">
+                <h4>Follow the source</h4>
+                <ol>
+                  <li><a href="demo/sources/run2-stage_1_and_2.html#L1737" target="_blank" rel="noopener">Observed norm append <span>L1737 ↗</span></a><code>all_norms.append</code></li>
+                  <li><a href="demo/sources/run2-stage_1_and_2.html#L997" target="_blank" rel="noopener">Shared storage <span>L997 ↗</span></a><code>self.ipg_buffer[self.ipg_index]</code></li>
+                  <li><a href="demo/sources/run2-stage_1_and_2.html#L998" target="_blank" rel="noopener">Reusing write <span>L998 ↗</span></a><code><mark>new_grad_tensor.copy_</mark></code></li>
+                </ol>
+                <p>Expressions from the captured DeepSpeed source. Open a line to see its full context.</p>
+              </div>
+            </div>
+            <a href="#rootcause" class="quickstart__link">Explore the full diagnosis example ↓</a>
+          </section>
         </div>
-        <div class="quickstart__result">
-          <div class="quickstart__heading"><span class="quickstart__number" aria-hidden="true">03</span><h3>Follow the evidence to the cause</h3></div>
-          <p>Your agent can inspect the first observed difference, follow its inputs through the source,
-            and test a candidate cause. The result is an explanation tied to evidence,
-            or a specific next observation when the cause is still unresolved.</p>
-          <a href="#rootcause" class="quickstart__link">See a diagnosis example ↓</a>
+        <div class="quickstart__controls">
+          <button class="quickstart__arrow" id="quickstart-prev" type="button" aria-label="Previous quickstart step">← <span>Previous</span></button>
+          <div class="quickstart__tabs" role="tablist" aria-label="Getting started steps">
+            <button id="quickstart-tab-install" type="button" role="tab" aria-controls="quickstart-install" aria-selected="true" tabindex="0"><span>01</span> Install</button>
+            <button id="quickstart-tab-ask" type="button" role="tab" aria-controls="quickstart-ask" aria-selected="false" tabindex="-1"><span>02</span> Ask your agent</button>
+            <button id="quickstart-tab-report" type="button" role="tab" aria-controls="quickstart-report" aria-selected="false" tabindex="-1"><span>03</span> Root-cause report</button>
+          </div>
+          <button class="quickstart__arrow" id="quickstart-next" type="button" aria-label="Next quickstart step"><span>Next</span> →</button>
         </div>
-        <p class="quickstart__copy-status" role="status" aria-live="polite"></p>
-      </details>
+        <p class="quickstart__sr" id="quickstart-step-status" role="status" aria-live="polite"></p>
+      </div>
+      <p class="quickstart__copy-status" data-copy-status role="status" aria-live="polite"></p>
     </section>
 
     <section class="rootcause" id="rootcause" aria-labelledby="rootcause-title">
@@ -937,7 +971,7 @@ Unaligned operations before boundary:
   </footer>
 
   <script src="js/app.js"></script>
-  <script src="js/quickstart.js?v=agent-workflow-1"></script>
+  <script src="js/quickstart.js?v=native-quickstart-1"></script>
   <script src="js/rootcause-answers.js?v=reviewed-examples-20261019"></script>
   <script src="js/rootcause.js?v=reviewed-examples-20261019-2"></script>
 </body>
