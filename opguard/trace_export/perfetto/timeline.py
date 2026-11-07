@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -14,16 +15,26 @@ def sort_records(seq: List[dict]) -> List[dict]:
     keyed.sort(key=lambda x: (x[0], x[1], x[2]))
     return [r for *_, r in keyed]
 
+def _trace_files(base: Path):
+    for root, dirs, files in os.walk(base):
+        # ops/full contains tensor dumps, not operator event records.
+        if Path(root).name == "ops":
+            dirs[:] = [name for name in dirs if name != "full"]
+        for name in files:
+            path = Path(root) / name
+            if path.is_file():
+                yield path
+
+
 def list_pairs(base1: Path, base2: Path):
     base1, base2 = base1.resolve(), base2.resolve()
     pairs: List[FilePair] = []; only1: List[Path] = []; only2: List[Path] = []
     b2map: Dict[str, Path] = {}
     n2 = len(str(base2)) + 1
-    for q in base2.rglob("*"):
-        if q.is_file(): b2map[str(q.resolve())[n2:]] = q.resolve()
+    for q in _trace_files(base2):
+        b2map[str(q.resolve())[n2:]] = q.resolve()
     n1 = len(str(base1)) + 1; matched = set()
-    for p in base1.rglob("*"):
-        if not p.is_file(): continue
+    for p in _trace_files(base1):
         rel = str(p.resolve())[n1:]
         q = b2map.get(rel)
         if q:
