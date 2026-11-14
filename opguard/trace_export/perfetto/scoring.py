@@ -77,26 +77,26 @@ def _match_pattern(pattern: str, function_name: str) -> bool:
     - Exact match: "forward_gpu_no_cpy"
     - Substring match: "no_cpy" (if pattern in function_name)
     - Wildcard match: "*_no_cpy" (converts to fnmatch pattern)
-    
+
     Function names may have angle brackets around them (e.g., "<module.function>"),
     which are stripped before matching.
     """
     if not function_name:
         return False
-    
+
     # Strip angle brackets if present (e.g., "<module.function>" -> "module.function")
     cleaned_name = function_name.strip("<>")
-    
+
     # Exact match
     if pattern == function_name or pattern == cleaned_name:
         return True
-    
+
     # Wildcard pattern (contains *)
     if "*" in pattern:
         import fnmatch
         # Try matching against both original and cleaned name
         return fnmatch.fnmatch(function_name, pattern) or fnmatch.fnmatch(cleaned_name, pattern)
-    
+
     # Substring match (default behavior for backward compatibility)
     return pattern in function_name or pattern in cleaned_name
 
@@ -128,23 +128,23 @@ def _match_file_path_pattern(pattern: str, file_path: str) -> bool:
     Supports:
     - Exact match: "/path/to/file.py"
     - Directory segment match: "ndtimeline" matches ".../ndtimeline/..." (complete directory name)
-    
+
     Note: Wildcard patterns (containing *) are ignored for file paths - they only work for function names.
     """
     if not file_path:
         return False
-    
+
     # Exact match
     if pattern == file_path:
         return True
-    
+
     # Wildcard patterns are NOT supported for file paths - skip them
     if "*" in pattern:
         return False
-    
+
     # For non-wildcard patterns, check if pattern appears as a complete directory segment
     # This ensures "ndtimeline" matches "/path/ndtimeline/file.py" but not "/path/ndtimeline_backup/file.py"
-        path_parts = file_path.replace(os.sep, '/').split('/')
+    path_parts = file_path.replace(os.sep, '/').split('/')
     return pattern in path_parts
 
 def _build_ignore_keys(ignore_fields: Optional[Dict[str, List[str]]], function_name: str, file_path: str = "") -> set[str]:
@@ -199,12 +199,12 @@ def compare_simple(a: dict, b: dict, ignore_output_only: bool = False, ignore_fi
     fname1 = a.get("fname", "") or ""
     fname2 = b.get("fname", "") or ""
     file_path = file_path_from_stack or fname1 or fname2
-    
+
     # Build ignore keys for this function and file path
     ignore_keys = _build_ignore_keys(ignore_fields, function_name, file_path)
-    
+
     ac, bc = strip_top(a), strip_top(b)
-    
+
     tl_changes: List[Tuple[str, Any, Any]] = []
     diff_fields: List[str] = []
     details: Dict[str, Any] = {}
@@ -227,12 +227,12 @@ def compare_simple(a: dict, b: dict, ignore_output_only: bool = False, ignore_fi
     args_diffs = _compare_io(a_args, b_args, "args")
     kwargs_diffs = _compare_io(a_kwargs, b_kwargs, "kwargs")
     outputs_diffs = _compare_io(a_outs, b_outs, "outputs")
-    
+
     # Filter out ignored paths
     args_diffs = _filter_io_diffs(args_diffs, "inputs.args", ignore_keys)
     kwargs_diffs = _filter_io_diffs(kwargs_diffs, "inputs.kwargs", ignore_keys)
     outputs_diffs = _filter_io_diffs(outputs_diffs, "outputs", ignore_keys)
-    
+
     # Check if entire sections should be ignored
     if not _is_ignored_path("args", ignore_keys) and args_diffs:
         diff_fields.append("args")
